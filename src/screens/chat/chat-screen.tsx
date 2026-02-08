@@ -61,6 +61,8 @@ import { TerminalPanel } from '@/components/terminal-panel'
 import { AgentViewPanel } from '@/components/agent-view/agent-view-panel'
 import { useAgentViewStore } from '@/hooks/use-agent-view'
 import { useTerminalPanelStore } from '@/stores/terminal-panel-store'
+import { useModelSuggestions } from '@/hooks/use-model-suggestions'
+import { ModelSuggestionToast } from '@/components/model-suggestion-toast'
 
 type ChatScreenProps = {
   activeFriendlyId: string
@@ -187,6 +189,81 @@ export function ChatScreen({
     messageCount,
     enabled: !isNewChat && Boolean(resolvedSessionKey) && historyQuery.isSuccess,
   })
+
+  // Phase 4.1: Smart Model Suggestions
+  const modelsQuery = useQuery({
+    queryKey: ['models'],
+    queryFn: async () => {
+      const res = await fetch('/api/models')
+      if (!res.ok) return { models: [] }
+      const data = await res.json()
+      return data
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  })
+
+  const currentModelQuery = useQuery({
+    queryKey: ['gateway', 'session-status-model'],
+    queryFn: async () => {
+      try {
+        const res = await fetch('/api/session-status')
+        if (!res.ok) return ''
+        const data = await res.json()
+        const payload = data.payload ?? data
+        // Same logic as chat-composer: read model from status payload
+        if (payload.model) return String(payload.model)
+        if (payload.currentModel) return String(payload.currentModel)
+        if (payload.modelAlias) return String(payload.modelAlias)
+        if (payload.resolved?.modelProvider && payload.resolved?.model) {
+          return `${payload.resolved.modelProvider}/${payload.resolved.model}`
+        }
+        return ''
+      } catch {
+        return ''
+      }
+    },
+    refetchInterval: 30_000,
+    retry: false,
+  })
+
+  const availableModelIds = useMemo(() => {
+    const models = modelsQuery.data?.models || []
+    return models.map((m: any) => m.id).filter((id: string) => id)
+  }, [modelsQuery.data])
+
+  const currentModel = currentModelQuery.data || ''
+
+  const { suggestion, dismiss, dismissForSession } = useModelSuggestions({
+    currentModel, // Real model from session-status (fail closed if empty)
+    sessionKey: resolvedSessionKey || 'main',
+    messages: historyMessages.map(m => ({
+      role: m.role,
+      content: textFromMessage(m),
+    })),
+    availableModels: availableModelIds,
+  })
+
+  const handleSwitchModel = useCallback(async () => {
+    if (!suggestion) return
+    
+    try {
+      const res = await fetch('/api/model-switch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionKey: resolvedSessionKey || 'main',
+          model: suggestion.suggestedModel,
+        }),
+      })
+      
+      if (res.ok) {
+        dismiss()
+        // Optionally show success toast or update UI
+      }
+    } catch (error) {
+      console.error('Failed to switch model:', error)
+    }
+  }, [suggestion, resolvedSessionKey, dismiss])
 
   const clearActiveStream = useCallback(function clearActiveStream(
     streamId?: string,
@@ -1086,6 +1163,17 @@ export function ChatScreen({
         <AgentViewPanel />
       </div>
       {hideUi || isMobile ? null : <TerminalPanel />}
+      
+      {suggestion && (
+        <ModelSuggestionToast
+          suggestedModel={suggestion.suggestedModel}
+          reason={suggestion.reason}
+          costImpact={suggestion.costImpact}
+          onSwitch={handleSwitchModel}
+          onDismiss={dismiss}
+          onDismissForSession={dismissForSession}
+        />
+      )}
     </div>
   )
 }
