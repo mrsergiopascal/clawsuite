@@ -74,6 +74,7 @@ export type GatewayModelCatalogEntry =
 export type GatewayModelsResponse = {
   ok?: boolean
   models?: Array<GatewayModelCatalogEntry>
+  configuredProviders?: Array<string>
   error?: string
 }
 

@@ -73,6 +73,7 @@ type ChatComposerHandle = {
 type ModelOption = {
   value: string
   label: string
+  provider: string
 }
 
 type SessionStatusApiResponse = {
@@ -162,7 +163,7 @@ function toModelOption(entry: GatewayModelCatalogEntry): ModelOption | null {
   if (typeof entry === 'string') {
     const value = entry.trim()
     if (!value) return null
-    return { value, label: value }
+    return { value, label: value, provider: 'unknown' }
   }
 
   const alias = readText(entry.alias)
@@ -183,8 +184,8 @@ function toModelOption(entry: GatewayModelCatalogEntry): ModelOption | null {
     (provider && model ? `${provider}/${model}` : '') ||
     model ||
     id
-  if (!value) return null
-  return { value, label: display || value }
+  if (!value || !provider) return null
+  return { value, label: display || value, provider }
 }
 
 function isSameModel(option: ModelOption, currentModel: string): boolean {
@@ -297,6 +298,16 @@ function ChatComposerComponent({
     }
     return options
   }, [modelsQuery.data?.models])
+
+  const groupedModels = useMemo(function groupModelsByProvider() {
+    const groups = new Map<string, Array<ModelOption>>()
+    for (const option of modelOptions) {
+      const existing = groups.get(option.provider) ?? []
+      existing.push(option)
+      groups.set(option.provider, existing)
+    }
+    return Array.from(groups.entries()).sort((a, b) => a[0].localeCompare(b[0]))
+  }, [modelOptions])
 
   const modelSwitchMutation = useMutation({
     mutationFn: async function switchGatewayModel(payload: {
@@ -765,29 +776,57 @@ function ChatComposerComponent({
                 </span>
               ) : null}
               {!isModelSwitcherDisabled && isModelMenuOpen ? (
-                <div className="absolute bottom-[calc(100%+0.5rem)] left-0 z-40 min-w-[12rem] rounded-xl border border-primary-200 bg-surface p-1 shadow-lg">
-                  {modelOptions.map((option) => {
-                    const optionActive = isSameModel(option, currentModel)
-                    return (
-                      <button
-                        key={option.value}
-                        type="button"
-                        onClick={(event) => {
-                          event.stopPropagation()
-                          setIsModelMenuOpen(false)
-                          handleModelSelect(option.value)
-                        }}
-                        className={cn(
-                          'flex w-full items-center rounded-lg px-2 py-1.5 text-left text-sm text-primary-700 transition-colors hover:bg-primary-100',
-                          optionActive && 'bg-primary-100 text-primary-900',
-                        )}
-                        role="option"
-                        aria-selected={optionActive}
+                <div className="absolute bottom-[calc(100%+0.5rem)] left-0 z-40 min-w-[16rem] max-w-[24rem] rounded-xl border border-primary-200 bg-surface shadow-lg">
+                  {groupedModels.length === 0 ? (
+                    <div className="p-4 text-center text-sm text-primary-500">
+                      No models available.{' '}
+                      <a
+                        href="https://docs.openclaw.ai/configuration"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary-700 underline hover:text-primary-900"
                       >
-                        {option.label}
-                      </button>
-                    )
-                  })}
+                        Configure providers
+                      </a>
+                    </div>
+                  ) : (
+                    <div className="max-h-[20rem] overflow-y-auto p-1">
+                      {groupedModels.map(([provider, models]) => (
+                        <div key={provider} className="mb-2 last:mb-0">
+                          <div className="px-2 py-1 text-xs font-medium uppercase tracking-wide text-primary-500">
+                            {provider}
+                          </div>
+                          {models.map((option) => {
+                            const optionActive = isSameModel(option, currentModel)
+                            return (
+                              <button
+                                key={option.value}
+                                type="button"
+                                onClick={(event) => {
+                                  event.stopPropagation()
+                                  setIsModelMenuOpen(false)
+                                  handleModelSelect(option.value)
+                                }}
+                                className={cn(
+                                  'flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-sm text-primary-700 transition-colors hover:bg-primary-100',
+                                  optionActive && 'bg-primary-100 text-primary-900',
+                                )}
+                                role="option"
+                                aria-selected={optionActive}
+                              >
+                                <span className="flex-1 truncate">{option.label}</span>
+                                {optionActive ? (
+                                  <span className="text-primary-900" aria-label="Active">
+                                    ✓
+                                  </span>
+                                ) : null}
+                              </button>
+                            )
+                          })}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ) : null}
             </div>

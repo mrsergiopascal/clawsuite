@@ -1,9 +1,15 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { json } from '@tanstack/react-start'
 import { gatewayRpc } from '../../server/gateway'
+import { getConfiguredProviders } from '../../server/providers'
 
 type ModelsListGatewayResponse = {
   models?: Array<unknown>
+}
+
+type ModelEntry = {
+  provider?: string
+  [key: string]: unknown
 }
 
 export const Route = createFileRoute('/api/models')({
@@ -15,8 +21,23 @@ export const Route = createFileRoute('/api/models')({
             'models.list',
             {},
           )
-          const models = Array.isArray(payload.models) ? payload.models : []
-          return json({ ok: true, models })
+          const allModels = Array.isArray(payload.models) ? payload.models : []
+          
+          // Filter to only configured providers
+          const configuredProviders = getConfiguredProviders()
+          const configuredSet = new Set(configuredProviders)
+          
+          const filteredModels = allModels.filter((model) => {
+            if (typeof model === 'string') return false
+            const entry = model as ModelEntry
+            return entry.provider && configuredSet.has(entry.provider)
+          })
+          
+          return json({ 
+            ok: true, 
+            models: filteredModels,
+            configuredProviders,
+          })
         } catch (err) {
           return json(
             {
