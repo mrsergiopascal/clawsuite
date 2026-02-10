@@ -2,7 +2,6 @@ import { Activity01Icon } from '@hugeicons/core-free-icons'
 import { useNavigate } from '@tanstack/react-router'
 import { DashboardGlassCard } from './dashboard-glass-card'
 import type { SystemStatus } from './dashboard-types'
-import { Button } from '@/components/ui/button'
 
 type SystemStatusWidgetProps = {
   status: SystemStatus
@@ -42,54 +41,53 @@ export function SystemStatusWidget({
   return (
     <DashboardGlassCard
       title="System Status"
-      description="Live gateway health and workspace runtime details."
+      description="Authoritative gateway health and runtime."
       icon={Activity01Icon}
       draggable={draggable}
-      className="h-full"
+      className="h-full border-primary-300 dark:border-primary-300"
     >
-      <div className="space-y-2.5 text-sm">
-        <div className="flex items-center justify-between rounded-xl border border-primary-200 bg-primary-100/50 px-3 py-2.5">
-          <span className="text-primary-700 text-pretty">Gateway connection</span>
-          <span className="inline-flex items-center gap-2 tabular-nums">
+      <div className="space-y-2 text-sm">
+        <div className="flex items-center justify-between rounded-xl border border-primary-200 bg-primary-100/50 px-3 py-2">
+          <span className="text-xs font-medium uppercase tracking-wide text-primary-500">Gateway</span>
+          <span className="inline-flex items-center gap-2">
             <span
-              className={status.gateway.connected ? 'size-2 rounded-full bg-emerald-500' : 'size-2 rounded-full bg-red-500'}
+              className={status.gateway.connected ? 'size-2.5 rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.4)]' : 'size-2.5 rounded-full bg-red-500 shadow-[0_0_6px_rgba(239,68,68,0.4)]'}
               aria-hidden="true"
             />
-            <span className="font-medium text-ink">
+            <span className="font-semibold text-ink">
               {status.gateway.connected ? 'Connected' : 'Disconnected'}
             </span>
           </span>
         </div>
-        <div className="flex items-center justify-between rounded-xl border border-primary-200 bg-primary-100/50 px-3 py-2.5">
-          <span className="text-primary-700 text-pretty">Uptime</span>
-          <span className="font-medium text-ink tabular-nums">
+        <div className="flex items-center justify-between rounded-xl border border-primary-200 bg-primary-100/50 px-3 py-2">
+          <span className="text-xs font-medium uppercase tracking-wide text-primary-500">Model</span>
+          <span className="font-semibold text-ink tabular-nums">
+            {status.currentModel === 'sonnet' ? 'Sonnet (default)' : status.currentModel || '—'}
+          </span>
+        </div>
+        <div className="flex items-center justify-between rounded-xl border border-primary-200 bg-primary-100/50 px-3 py-2">
+          <span className="text-xs font-medium uppercase tracking-wide text-primary-500">Uptime</span>
+          <span className="font-semibold text-ink tabular-nums">
             {status.uptimeSeconds > 0 ? formatUptime(status.uptimeSeconds) : '—'}
           </span>
         </div>
-        <div className="flex items-center justify-between rounded-xl border border-primary-200 bg-primary-100/50 px-3 py-2.5">
-          <span className="text-primary-700 text-pretty">Current model</span>
-          <span className="font-medium text-ink tabular-nums">
-            {status.currentModel === 'sonnet' ? 'Default (Sonnet)' : status.currentModel || '—'}
-          </span>
-        </div>
-        <div className="flex items-center justify-between rounded-xl border border-primary-200 bg-primary-100/50 px-3 py-2.5">
-          <span className="text-primary-700 text-pretty">Session count</span>
-          <span className="font-medium text-ink tabular-nums">{status.sessionCount}</span>
+        <div className="flex items-center justify-between rounded-xl border border-primary-200 bg-primary-100/50 px-3 py-2">
+          <span className="text-xs font-medium uppercase tracking-wide text-primary-500">Sessions</span>
+          <span className="font-semibold text-ink tabular-nums">{status.sessionCount}</span>
         </div>
       </div>
-      <p className="mt-3 text-xs text-primary-500 tabular-nums">
-        Last check {formatCheckedAt(status.gateway.checkedAtIso)}
-      </p>
-      <div className="mt-3">
-        <Button
-          variant="outline"
-          size="sm"
+      <div className="mt-3 flex items-center justify-between">
+        <p className="text-[11px] text-primary-400 tabular-nums">
+          Checked {formatCheckedAt(status.gateway.checkedAtIso)}
+        </p>
+        <button
+          type="button"
           onClick={handleOpenDebugConsole}
-          className="h-8 px-3 text-xs tabular-nums focus:ring-2 focus:ring-primary-400 focus:ring-offset-1"
+          className="text-[11px] font-medium text-primary-400 underline-offset-2 hover:text-primary-600 hover:underline"
           aria-label="Open Debug Console"
         >
-          Open Debug Console
-        </Button>
+          Debug →
+        </button>
       </div>
     </DashboardGlassCard>
   )
