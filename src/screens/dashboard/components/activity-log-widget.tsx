@@ -3,7 +3,6 @@ import { HugeiconsIcon } from '@hugeicons/react'
 import { useNavigate } from '@tanstack/react-router'
 import { useEffect, useMemo, useRef } from 'react'
 import { DashboardGlassCard } from './dashboard-glass-card'
-import { Button } from '@/components/ui/button'
 import { ActivityEventRow } from '@/screens/activity/components/activity-event-row'
 import { useActivityEvents } from '@/screens/activity/use-activity-events'
 import { cn } from '@/lib/utils'
@@ -60,18 +59,15 @@ export function ActivityLogWidget({ draggable = false }: ActivityLogWidgetProps)
       draggable={draggable}
       className="h-full"
     >
-      <div className="mb-2 flex justify-end">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-7 px-2 text-xs"
-          onClick={function onOpenFullActivity() {
-            void navigate({ to: '/activity' })
-          }}
+      <div className="mb-1.5 flex justify-end">
+        <button
+          type="button"
+          onClick={() => void navigate({ to: '/activity' })}
+          className="inline-flex items-center gap-1 text-[11px] font-medium text-primary-400 hover:text-primary-600"
         >
-          <span>View all</span>
-          <HugeiconsIcon icon={ArrowRight01Icon} size={20} strokeWidth={1.5} />
-        </Button>
+          View all
+          <HugeiconsIcon icon={ArrowRight01Icon} size={12} strokeWidth={1.5} />
+        </button>
       </div>
 
       {!isConnected ? (
@@ -90,17 +86,17 @@ export function ActivityLogWidget({ draggable = false }: ActivityLogWidgetProps)
       ) : null}
 
       {isLoading && latestEvents.length === 0 ? (
-        <div className="flex h-[220px] items-center justify-center rounded-xl border border-primary-200 bg-primary-100/50 text-sm text-primary-600 text-pretty">
+        <div className="flex h-32 items-center justify-center rounded-lg border border-primary-200 bg-primary-100/40 text-xs text-primary-500">
           Loading activity…
         </div>
       ) : latestEvents.length === 0 ? (
-        <div className="flex h-[220px] items-center justify-center rounded-xl border border-primary-200 bg-primary-100/50 text-sm text-primary-600 text-pretty">
+        <div className="flex h-32 items-center justify-center rounded-lg border border-primary-200 bg-primary-100/40 text-xs text-primary-500">
           No recent events
         </div>
       ) : (
         <div
           ref={viewportRef}
-          className="max-h-[260px] space-y-1.5 overflow-y-auto pr-1"
+          className="max-h-[260px] space-y-px overflow-y-auto"
         >
           {latestEvents.map(function mapEvent(event) {
             return <ActivityEventRow key={event.id} event={event} />

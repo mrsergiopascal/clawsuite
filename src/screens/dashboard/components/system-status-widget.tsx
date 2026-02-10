@@ -47,7 +47,7 @@ export function SystemStatusWidget({
       className="h-full border-primary-300 dark:border-primary-300"
     >
       <div className="space-y-2 text-sm">
-        <div className="flex items-center justify-between rounded-xl border border-primary-200 bg-primary-100/50 px-3 py-2">
+        <div className="flex items-center justify-between rounded-lg border border-primary-200 bg-primary-100/40 px-2.5 py-1.5">
           <span className="text-xs font-medium uppercase tracking-wide text-primary-500">Gateway</span>
           <span className="inline-flex items-center gap-2">
             <span
@@ -59,19 +59,19 @@ export function SystemStatusWidget({
             </span>
           </span>
         </div>
-        <div className="flex items-center justify-between rounded-xl border border-primary-200 bg-primary-100/50 px-3 py-2">
+        <div className="flex items-center justify-between rounded-lg border border-primary-200 bg-primary-100/40 px-2.5 py-1.5">
           <span className="text-xs font-medium uppercase tracking-wide text-primary-500">Model</span>
           <span className="font-semibold text-ink tabular-nums">
             {status.currentModel === 'sonnet' ? 'Sonnet (default)' : status.currentModel || '—'}
           </span>
         </div>
-        <div className="flex items-center justify-between rounded-xl border border-primary-200 bg-primary-100/50 px-3 py-2">
+        <div className="flex items-center justify-between rounded-lg border border-primary-200 bg-primary-100/40 px-2.5 py-1.5">
           <span className="text-xs font-medium uppercase tracking-wide text-primary-500">Uptime</span>
           <span className="font-semibold text-ink tabular-nums">
             {status.uptimeSeconds > 0 ? formatUptime(status.uptimeSeconds) : '—'}
           </span>
         </div>
-        <div className="flex items-center justify-between rounded-xl border border-primary-200 bg-primary-100/50 px-3 py-2">
+        <div className="flex items-center justify-between rounded-lg border border-primary-200 bg-primary-100/40 px-2.5 py-1.5">
           <span className="text-xs font-medium uppercase tracking-wide text-primary-500">Sessions</span>
           <span className="font-semibold text-ink tabular-nums">{status.sessionCount}</span>
         </div>

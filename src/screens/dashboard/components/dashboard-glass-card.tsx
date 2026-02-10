@@ -30,33 +30,33 @@ export function DashboardGlassCard({
       role="region"
       aria-label={title}
       className={cn(
-        'group flex h-full flex-col overflow-hidden rounded-2xl border border-primary-200 bg-primary-50/85 p-4 shadow-sm backdrop-blur-xl transition-all duration-200 hover:border-primary-300 dark:bg-primary-50/95 md:p-5',
+        'group flex h-full flex-col overflow-hidden rounded-2xl border border-primary-200 bg-primary-50/85 px-3.5 py-3 shadow-sm backdrop-blur-xl transition-all duration-200 hover:border-primary-300 dark:bg-primary-50/95 md:px-4 md:py-3.5',
         className,
       )}
     >
-      <header className="mb-3 flex shrink-0 items-start justify-between gap-3">
-        <div className="flex min-w-0 items-start gap-3">
-          <span className="inline-flex size-8 shrink-0 items-center justify-center rounded-lg border border-primary-200 bg-primary-100/70 text-primary-700">
-            <HugeiconsIcon icon={icon} size={18} strokeWidth={1.5} />
+      <header className="mb-2.5 flex shrink-0 items-start justify-between gap-2">
+        <div className="flex min-w-0 items-start gap-2.5">
+          <span className="inline-flex size-7 shrink-0 items-center justify-center rounded-md border border-primary-200 bg-primary-100/70 text-primary-600">
+            <HugeiconsIcon icon={icon} size={16} strokeWidth={1.5} />
           </span>
           <div className="min-w-0">
-            <h2 className="text-sm font-medium leading-tight text-ink text-balance">
+            <h2 className="text-[13px] font-medium leading-tight text-ink">
               {title}
               {titleAccessory ? (
-                <span className="ml-2 inline-flex align-middle">{titleAccessory}</span>
+                <span className="ml-1.5 inline-flex align-middle">{titleAccessory}</span>
               ) : null}
               {badge ? (
-                <span className="ml-2 rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-medium text-amber-700 dark:bg-amber-900/50 dark:text-amber-400">
+                <span className="ml-1.5 rounded-full bg-amber-100 px-1.5 py-px text-[10px] font-medium text-amber-700 dark:bg-amber-900/50 dark:text-amber-400">
                   {badge}
                 </span>
               ) : null}
             </h2>
-            <p className="mt-0.5 text-xs text-primary-600 text-pretty">{description}</p>
+            <p className="mt-px text-[11px] leading-tight text-primary-500">{description}</p>
           </div>
         </div>
         {draggable ? (
           <span
-            className="widget-drag-handle inline-flex shrink-0 cursor-grab items-center justify-center rounded-md border border-primary-200 bg-primary-100/70 p-1 text-primary-500 hover:border-primary-300 hover:text-primary-700 active:cursor-grabbing"
+            className="widget-drag-handle inline-flex shrink-0 cursor-grab items-center justify-center rounded p-0.5 text-primary-400 hover:text-primary-600 active:cursor-grabbing"
             title="Drag to reorder"
             aria-label="Drag to reorder"
           >

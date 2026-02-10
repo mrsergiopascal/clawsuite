@@ -217,38 +217,37 @@ export function AgentStatusWidget({ draggable = false }: AgentStatusWidgetProps)
       className="h-full"
     >
       {agents.length === 0 ? (
-        <div className="flex h-40 items-center justify-center rounded-xl border border-primary-200 bg-primary-100/45 text-sm text-primary-600 text-pretty">
+        <div className="flex h-32 items-center justify-center rounded-lg border border-primary-200 bg-primary-100/40 text-xs text-primary-500">
           No active agent sessions
         </div>
       ) : (
-        <div className="max-h-80 space-y-2 overflow-y-auto pr-1">
+        <div className="max-h-80 space-y-1.5 overflow-y-auto">
           {agents.map(function renderAgent(agent) {
             return (
               <article
                 key={agent.id}
-                className="rounded-xl border border-primary-200 bg-primary-100/45 px-3 py-2.5"
+                className="rounded-lg border border-primary-200 bg-primary-100/40 px-3 py-2"
               >
-                <div className="flex items-start justify-between gap-2">
-                  <p className="min-w-0 flex-1 line-clamp-1 text-sm font-medium text-ink text-pretty">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="min-w-0 flex-1 truncate text-xs font-medium text-ink">
                     {agent.name}
-                    <span className="text-primary-500"> / </span>
-                    <span className="text-primary-700">{agent.task}</span>
+                    <span className="ml-1 font-normal text-primary-500">{agent.task}</span>
                   </p>
                   <div className="flex shrink-0 items-center gap-1.5 tabular-nums">
-                    <span className="rounded-md border border-primary-200 bg-primary-50/80 px-2 py-0.5 text-xs text-primary-700">
+                    <span className="rounded border border-primary-200 bg-primary-50/80 px-1.5 py-px text-[10px] text-primary-600">
                       {agent.model}
                     </span>
-                    <span className="text-xs text-primary-600">
+                    <span className="text-[10px] text-primary-400">
                       {formatElapsed(agent.elapsedSeconds)}
                     </span>
                   </div>
                 </div>
 
-                <div className="mt-2">
-                  <div className="mb-1 flex items-center justify-between gap-2">
+                <div className="mt-1.5">
+                  <div className="mb-0.5 flex items-center justify-between gap-2">
                     <span
                       className={cn(
-                        'rounded-md px-1.5 py-0.5 text-xs text-pretty',
+                        'rounded px-1 py-px text-[10px]',
                         agent.status === 'validating' && 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-400',
                         agent.status === 'running' && 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400',
                         agent.status === 'indexing' && 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
@@ -260,12 +259,12 @@ export function AgentStatusWidget({ draggable = false }: AgentStatusWidgetProps)
                     >
                       {agent.status}
                     </span>
-                    <span className="text-xs text-primary-600 tabular-nums">
+                    <span className="text-[10px] text-primary-400 tabular-nums">
                       {agent.progress}%
                     </span>
                   </div>
                   <div
-                    className="h-1.5 w-full overflow-hidden rounded-full bg-primary-200/70"
+                    className="h-1 w-full overflow-hidden rounded-full bg-primary-200/50"
                     role="progressbar"
                     aria-label={`${agent.name} progress`}
                     aria-valuemin={0}
