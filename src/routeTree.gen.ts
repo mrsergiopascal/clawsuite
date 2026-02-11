@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TerminalRouteImport } from './routes/terminal'
+import { Route as TasksRouteImport } from './routes/tasks'
 import { Route as SkillsRouteImport } from './routes/skills'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as NewRouteImport } from './routes/new'
@@ -65,6 +66,11 @@ import { Route as ApiCronRunsJobIdRouteImport } from './routes/api/cron/runs/$jo
 const TerminalRoute = TerminalRouteImport.update({
   id: '/terminal',
   path: '/terminal',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SkillsRoute = SkillsRouteImport.update({
@@ -339,6 +345,7 @@ export interface FileRoutesByFullPath {
   '/new': typeof NewRoute
   '/settings': typeof SettingsRouteWithChildren
   '/skills': typeof SkillsRoute
+  '/tasks': typeof TasksRoute
   '/terminal': typeof TerminalRoute
   '/api/cost': typeof ApiCostRoute
   '/api/events': typeof ApiEventsRouteWithChildren
@@ -392,6 +399,7 @@ export interface FileRoutesByTo {
   '/memory': typeof MemoryRoute
   '/new': typeof NewRoute
   '/skills': typeof SkillsRoute
+  '/tasks': typeof TasksRoute
   '/terminal': typeof TerminalRoute
   '/api/cost': typeof ApiCostRoute
   '/api/events': typeof ApiEventsRouteWithChildren
@@ -447,6 +455,7 @@ export interface FileRoutesById {
   '/new': typeof NewRoute
   '/settings': typeof SettingsRouteWithChildren
   '/skills': typeof SkillsRoute
+  '/tasks': typeof TasksRoute
   '/terminal': typeof TerminalRoute
   '/api/cost': typeof ApiCostRoute
   '/api/events': typeof ApiEventsRouteWithChildren
@@ -503,6 +512,7 @@ export interface FileRouteTypes {
     | '/new'
     | '/settings'
     | '/skills'
+    | '/tasks'
     | '/terminal'
     | '/api/cost'
     | '/api/events'
@@ -556,6 +566,7 @@ export interface FileRouteTypes {
     | '/memory'
     | '/new'
     | '/skills'
+    | '/tasks'
     | '/terminal'
     | '/api/cost'
     | '/api/events'
@@ -610,6 +621,7 @@ export interface FileRouteTypes {
     | '/new'
     | '/settings'
     | '/skills'
+    | '/tasks'
     | '/terminal'
     | '/api/cost'
     | '/api/events'
@@ -665,6 +677,7 @@ export interface RootRouteChildren {
   NewRoute: typeof NewRoute
   SettingsRoute: typeof SettingsRouteWithChildren
   SkillsRoute: typeof SkillsRoute
+  TasksRoute: typeof TasksRoute
   TerminalRoute: typeof TerminalRoute
   ApiCostRoute: typeof ApiCostRoute
   ApiEventsRoute: typeof ApiEventsRouteWithChildren
@@ -707,6 +720,13 @@ declare module '@tanstack/react-router' {
       path: '/terminal'
       fullPath: '/terminal'
       preLoaderRoute: typeof TerminalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/skills': {
@@ -1123,6 +1143,7 @@ const rootRouteChildren: RootRouteChildren = {
   NewRoute: NewRoute,
   SettingsRoute: SettingsRouteWithChildren,
   SkillsRoute: SkillsRoute,
+  TasksRoute: TasksRoute,
   TerminalRoute: TerminalRoute,
   ApiCostRoute: ApiCostRoute,
   ApiEventsRoute: ApiEventsRouteWithChildren,
