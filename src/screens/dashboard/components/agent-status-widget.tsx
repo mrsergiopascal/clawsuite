@@ -208,6 +208,7 @@ export function AgentStatusWidget({ draggable = false, onRemove }: AgentStatusWi
   return (
     <DashboardGlassCard
       title="Active Agents"
+      tier="primary"
       description=""
       icon={UserGroupIcon}
       draggable={draggable}
@@ -215,8 +216,9 @@ export function AgentStatusWidget({ draggable = false, onRemove }: AgentStatusWi
       className="h-full"
     >
       {agents.length === 0 ? (
-        <div className="flex h-32 items-center justify-center rounded-lg border border-primary-200 bg-primary-100/40 text-[13px] text-primary-500">
-          No active sessions
+        <div className="flex h-32 flex-col items-center justify-center gap-1 rounded-lg border border-primary-200 bg-primary-100/40">
+          <span className="text-[13px] text-primary-500">No active sessions</span>
+          <span className="text-[11px] text-primary-400">Sessions will appear here when running</span>
         </div>
       ) : (
         <div className="max-h-80 space-y-1 overflow-y-auto">

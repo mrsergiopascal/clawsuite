@@ -5,11 +5,14 @@ import type * as React from 'react'
 import type { DashboardIcon } from './dashboard-types'
 import { cn } from '@/lib/utils'
 
+export type WidgetTier = 'primary' | 'secondary' | 'tertiary'
+
 type DashboardGlassCardProps = {
   title: string
   description?: string
   icon: DashboardIcon
   badge?: string
+  tier?: WidgetTier
   titleAccessory?: React.ReactNode
   draggable?: boolean
   onRemove?: () => void
@@ -21,6 +24,7 @@ export function DashboardGlassCard({
   title,
   icon,
   badge,
+  tier = 'secondary',
   titleAccessory,
   draggable = false,
   onRemove,
@@ -46,7 +50,10 @@ export function DashboardGlassCard({
       role="region"
       aria-label={title}
       className={cn(
-        'group flex h-full flex-col overflow-hidden rounded-xl border border-primary-200 bg-primary-50/90 px-3.5 py-3 transition-colors hover:border-primary-300 dark:bg-primary-50/95 md:px-4 md:py-3',
+        'group flex h-full flex-col overflow-hidden rounded-xl border transition-colors',
+        tier === 'primary' && 'border-primary-200 bg-primary-50 px-4 py-3.5 hover:border-primary-300 dark:bg-primary-50/95 md:px-5 md:py-4',
+        tier === 'secondary' && 'border-primary-200 bg-primary-50/90 px-3.5 py-3 hover:border-primary-300 dark:bg-primary-50/95 md:px-4 md:py-3',
+        tier === 'tertiary' && 'border-primary-200/80 bg-primary-50/70 px-3 py-2.5 hover:border-primary-200 dark:bg-primary-50/80 md:px-3.5 md:py-2.5',
         className,
       )}
     >

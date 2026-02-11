@@ -32,8 +32,8 @@ function MiniColumn({ status, tasks }: { status: TaskStatus; tasks: Task[] }) {
     <div className="min-w-0 flex-1">
       <div className="mb-2 flex items-center gap-1.5">
         <span className={cn('size-1.5 rounded-full', statusDotColor(status))} />
-        <span className="text-[11px] font-medium text-primary-500">{STATUS_LABELS[status]}</span>
-        <span className="text-[11px] text-primary-400 tabular-nums">{tasks.length}</span>
+        <span className="text-[10px] font-medium text-primary-500">{STATUS_LABELS[status]}</span>
+        <span className="text-[10px] text-primary-400 tabular-nums">{tasks.length}</span>
       </div>
       {visible.length === 0 ? (
         <div className="rounded border border-dashed border-primary-200 py-3 text-center text-[10px] text-primary-300">
@@ -44,9 +44,9 @@ function MiniColumn({ status, tasks }: { status: TaskStatus; tasks: Task[] }) {
           {visible.map((task) => (
             <div
               key={task.id}
-              className="rounded-md border border-primary-200 bg-primary-50/90 px-2 py-1.5"
+              className="rounded-md border border-primary-200/80 bg-primary-50/70 px-1.5 py-1"
             >
-              <p className="line-clamp-1 text-[11px] font-medium text-ink">{task.title}</p>
+              <p className="line-clamp-1 text-[10px] text-ink">{task.title}</p>
               <span className={cn('mt-0.5 inline-block rounded px-1 py-px text-[9px] font-medium', priorityColor(task.priority))}>
                 {task.priority}
               </span>
@@ -89,6 +89,7 @@ export function TasksWidget({ draggable = false, onRemove }: TasksWidgetProps) {
           {activeCount} active · {doneCount} done
         </span>
       }
+      tier="tertiary"
       description=""
       icon={Task01Icon}
       draggable={draggable}
