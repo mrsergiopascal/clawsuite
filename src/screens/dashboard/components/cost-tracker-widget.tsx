@@ -267,6 +267,7 @@ export function CostTrackerWidget({ draggable = false, onRemove }: CostTrackerWi
   return (
     <DashboardGlassCard
       title="Cost Tracker"
+      tier="primary"
       description=""
       icon={MoneyBag02Icon}
       draggable={draggable}

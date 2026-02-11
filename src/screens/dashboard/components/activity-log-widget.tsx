@@ -55,6 +55,7 @@ export function ActivityLogWidget({ draggable = false, onRemove }: ActivityLogWi
           {isConnected ? 'Live' : 'Disconnected'}
         </span>
       }
+      tier="tertiary"
       description=""
       icon={Activity01Icon}
       draggable={draggable}
