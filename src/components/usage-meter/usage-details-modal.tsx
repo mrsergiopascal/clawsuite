@@ -1,7 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useQueryClient } from '@tanstack/react-query'
+import { useState } from 'react'
 import { DialogClose, DialogDescription, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 
@@ -59,6 +58,8 @@ type UsageDetailsModalProps = {
   providerError: string | null
   providerUpdatedAt: number | null
   onRefreshProviders?: () => Promise<void>
+  preferredProvider?: string | null
+  onSetPreferredProvider?: (provider: string) => void
 }
 
 function formatCurrency(value: number): string {
@@ -224,13 +225,6 @@ function buildCsv(usage: UsageSummary): string {
 }
 
 // Map provider IDs to their model strings
-const PROVIDER_TO_MODEL: Record<string, string> = {
-  'claude': 'anthropic/claude-sonnet-4-5',
-  'codex': 'openai/gpt-5.2-codex',
-  'openai': 'openai/gpt-4o',
-  'openrouter': 'openrouter/auto',
-}
-
 export function UsageDetailsModal({
   usage,
   error,
@@ -238,66 +232,14 @@ export function UsageDetailsModal({
   providerError,
   providerUpdatedAt,
   onRefreshProviders,
+  preferredProvider,
+  onSetPreferredProvider,
 }: UsageDetailsModalProps) {
-  const queryClient = useQueryClient()
   const [activeTab, setActiveTab] = useState<'session' | 'providers'>('providers')
-  const [defaultModel, setDefaultModel] = useState<string | null>(null)
-  const [isSettingDefault, setIsSettingDefault] = useState(false)
   const [isRefreshing, setIsRefreshing] = useState(false)
 
-  // Fetch current default model on mount
-  useEffect(() => {
-    fetch('/api/config-get')
-      .then(res => res.json())
-      .then(data => {
-        const cfg = data?.payload?.parsed ?? data?.payload?.config ?? data?.payload
-        const primary = cfg?.agents?.defaults?.model?.primary
-          ?? cfg?.defaultModel
-          ?? data?.payload?.defaultModel
-        if (primary) {
-          setDefaultModel(primary)
-        }
-      })
-      .catch(() => {
-        // Ignore errors
-      })
-  }, [])
-
-  const handleSetDefault = async (provider: string) => {
-    const modelString = PROVIDER_TO_MODEL[provider]
-    if (!modelString) return
-
-    setIsSettingDefault(true)
-    try {
-      const patch = { agents: { defaults: { model: { primary: modelString } } } }
-      const res = await fetch('/api/config-patch', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          raw: JSON.stringify(patch, null, 2),
-          reason: 'Set default model from Usage Details',
-        }),
-      })
-
-      if (res.ok) {
-        // Optimistic update
-        setDefaultModel(modelString)
-        // Also switch the active session's model
-        try {
-          await fetch('/api/model-switch', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ model: modelString }),
-          })
-          // Invalidate session-status queries to refresh UI
-          queryClient.invalidateQueries({ queryKey: ['gateway'] })
-        } catch { /* best effort — session switch is secondary */ }
-      }
-    } catch (error) {
-      console.error('Failed to set default model:', error)
-    } finally {
-      setIsSettingDefault(false)
-    }
+  const handleSetDefault = (provider: string) => {
+    onSetPreferredProvider?.(provider)
   }
 
   const handleRefreshProvider = async () => {
@@ -457,8 +399,7 @@ export function UsageDetailsModal({
               </div>
             ) : (
               providerUsage.map((provider) => {
-                const providerModel = PROVIDER_TO_MODEL[provider.provider]
-                const isDefault = defaultModel === providerModel
+                const isDefault = preferredProvider === provider.provider
 
                 return (
                   <div
@@ -508,14 +449,13 @@ export function UsageDetailsModal({
                       <>
                         <div className="mt-3 flex items-center justify-between gap-2">
                           <div className="flex-1"></div>
-                          {!isDefault && providerModel ? (
+                          {!isDefault ? (
                             <button
                               type="button"
                               onClick={() => handleSetDefault(provider.provider)}
-                              disabled={isSettingDefault}
-                              className="rounded-lg border border-primary-200 bg-white px-3 py-1.5 text-xs font-medium text-primary-700 transition hover:bg-primary-50 disabled:opacity-50"
+                              className="rounded-lg border border-primary-200 bg-white px-3 py-1.5 text-xs font-medium text-primary-700 transition hover:bg-primary-50"
                             >
-                              {isSettingDefault ? 'Setting...' : 'Set as Default'}
+                              Set as Default
                             </button>
                           ) : null}
                         </div>

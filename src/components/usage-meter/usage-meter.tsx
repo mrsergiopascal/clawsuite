@@ -24,6 +24,22 @@ const STATS_VIEW_LABELS: Record<StatsView, string> = {
   agents: 'Agent Activity',
 }
 
+const PREFERRED_PROVIDER_KEY = 'clawsuite-preferred-provider'
+
+function getStoredPreferredProvider(): string | null {
+  if (typeof window === 'undefined') return null
+  try {
+    return window.localStorage.getItem(PREFERRED_PROVIDER_KEY)
+  } catch { return null }
+}
+
+function savePreferredProvider(provider: string) {
+  if (typeof window === 'undefined') return
+  try {
+    window.localStorage.setItem(PREFERRED_PROVIDER_KEY, provider)
+  } catch { /* ignore */ }
+}
+
 function getStoredStatsView(): StatsView {
   if (typeof window === 'undefined') return 'session'
   try {
@@ -554,8 +570,15 @@ export function UsageMeter() {
     }
   }, [])
 
-  // Find the most relevant provider line for the pill (first progress line from first ok provider)
-  const primaryProvider = providerUsage.find(p => p.status === 'ok' && p.lines.length > 0)
+  // Find the preferred provider for the status bar display
+  const [preferredProvider, setPreferredProvider] = useState<string | null>(getStoredPreferredProvider)
+  const primaryProvider = useMemo(() => {
+    if (preferredProvider) {
+      const preferred = providerUsage.find(p => p.provider === preferredProvider && p.status === 'ok' && p.lines.length > 0)
+      if (preferred) return preferred
+    }
+    return providerUsage.find(p => p.status === 'ok' && p.lines.length > 0)
+  }, [providerUsage, preferredProvider])
   const providerProgressLines = primaryProvider?.lines.filter(l => l.type === 'progress') ?? []
 
   // Aggregate provider tokens
@@ -592,6 +615,11 @@ export function UsageMeter() {
     return 'text-amber-600 bg-amber-100 border-amber-200'
   })()
 
+  const handleSetPreferredProvider = useCallback((provider: string) => {
+    setPreferredProvider(provider)
+    savePreferredProvider(provider)
+  }, [])
+
   const detailProps = useMemo(
     () => ({
       usage,
@@ -600,8 +628,10 @@ export function UsageMeter() {
       providerError,
       providerUpdatedAt,
       onRefreshProviders: refreshProviders,
+      preferredProvider,
+      onSetPreferredProvider: handleSetPreferredProvider,
     }),
-    [error, providerError, providerUpdatedAt, providerUsage, usage, refreshProviders],
+    [error, providerError, providerUpdatedAt, providerUsage, usage, refreshProviders, preferredProvider, handleSetPreferredProvider],
   )
 
   const handleStatsViewChange = (view: StatsView) => {
