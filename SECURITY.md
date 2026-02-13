@@ -1,33 +1,38 @@
 # Security Policy
 
-## Reporting Vulnerabilities
+## Reporting a Vulnerability
 
-If you discover a security issue, please email eric@buildingthefuture.io.
-Do NOT open a public GitHub issue for security vulnerabilities.
+If you discover a security vulnerability in ClawSuite, please report it responsibly.
 
-## Architecture
+**Do NOT open a public GitHub issue for security vulnerabilities.**
 
-ClawSuite runs as a local desktop application. All communication with the OpenClaw Gateway happens through a server-side WebSocket proxy (`src/server/gateway.ts`). No secrets are exposed to the browser.
+Instead, email: **security@clawsuite.io**
 
-```
-Browser UI → /api/* routes → Server-side Gateway Client → OpenClaw Gateway (loopback only)
-```
-
-## Secrets
-
-- Gateway tokens are read from environment variables (`CLAWDBOT_GATEWAY_TOKEN`) or auto-discovered from `~/.openclaw/openclaw.json`
-- No secrets are hardcoded in source code
-- `.env` files are gitignored and never committed
+We will acknowledge your report within 48 hours and aim to provide a fix within 7 days for critical issues.
 
 ## Scope
 
-- **Terminal** provides full shell access — only run Studio on trusted machines
-- **File Explorer** is scoped to `~/.openclaw/workspace/` with path traversal protection
-- **Skills** from ClawdHub registry should be reviewed before enabling — some may request filesystem, network, or browser access
-- **Gateway** binds to loopback (127.0.0.1) by default — not accessible from the network
+- ClawSuite web application code
+- API routes and gateway communication
+- Client-side data handling
+- Authentication and authorization (when implemented)
+
+## Out of Scope
+
+- OpenClaw gateway itself (report to [OpenClaw](https://github.com/openclaw/openclaw))
+- Third-party dependencies (report to the respective maintainer)
+- Social engineering attacks
+
+## Security Measures
+
+- API keys and tokens are never bundled in client-side code
+- Gateway tokens are server-side only
+- Diagnostic output is scrubbed of sensitive data
+- Environment files are gitignored
 
 ## Supported Versions
 
 | Version | Supported |
-| ------- | --------- |
-| 1.x     | ✅        |
+|---------|-----------|
+| main    | ✅        |
+| < main  | ❌        |
