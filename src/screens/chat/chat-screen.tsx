@@ -873,12 +873,17 @@ export function ChatScreen({
   }, [gatewayError, handleGatewayRefetch, showErrorNotice])
 
   return (
-    <div className="relative h-full min-w-0 flex flex-col overflow-hidden">
+    <div
+      className={cn(
+        'relative min-w-0 flex flex-col overflow-hidden',
+        compact ? 'flex-1 min-h-0' : 'h-full',
+      )}
+    >
       <div
         className={cn(
           'flex-1 min-h-0 overflow-hidden',
           compact
-            ? 'w-full'
+            ? 'flex flex-col w-full'
             : isMobile
               ? 'relative'
               : 'grid grid-cols-[auto_1fr] grid-rows-[minmax(0,1fr)]',
@@ -894,7 +899,7 @@ export function ChatScreen({
 
         <main
           className={cn(
-            'flex min-h-0 min-w-0 flex-col overflow-hidden transition-[margin-right,margin-bottom] duration-200',
+            'flex flex-1 min-h-0 min-w-0 flex-col overflow-hidden transition-[margin-right,margin-bottom] duration-200',
             !compact && isAgentViewOpen ? 'min-[1024px]:mr-80' : 'mr-0',
           )}
           style={{

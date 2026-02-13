@@ -130,14 +130,7 @@ export function WorkspaceShell() {
 
   return (
     <div className="relative h-dvh bg-surface text-primary-900">
-      <div
-        className={cn(
-          'h-full overflow-hidden',
-          isOnChatRoute
-            ? 'grid grid-cols-[auto_1fr] grid-rows-[minmax(0,1fr)]'
-            : 'grid grid-cols-[auto_1fr] grid-rows-[minmax(0,1fr)] min-[1200px]:grid-cols-[auto_1fr_auto]',
-        )}
-      >
+      <div className="h-full overflow-hidden grid grid-cols-[auto_1fr] grid-rows-[minmax(0,1fr)]">
         {/* Activity ticker bar */}
         {/* Persistent sidebar */}
         <ChatSidebar

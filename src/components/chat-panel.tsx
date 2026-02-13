@@ -138,11 +138,11 @@ export function ChatPanel() {
             aria-hidden
           />
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-            className="absolute right-0 top-0 h-full w-[420px] max-w-[100vw] border-l border-primary-200 bg-surface overflow-hidden flex flex-col z-20 shadow-xl min-[1200px]:relative min-[1200px]:shadow-none"
+            initial={{ x: '100%', opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: '100%', opacity: 0 }}
+            transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+            className="fixed right-0 top-0 h-full w-[420px] max-w-[100vw] border-l border-primary-200 bg-surface overflow-hidden flex flex-col z-20 shadow-xl"
           >
             {/* Panel header */}
             <div className="flex items-center justify-between h-10 px-3 border-b border-primary-200 shrink-0">
