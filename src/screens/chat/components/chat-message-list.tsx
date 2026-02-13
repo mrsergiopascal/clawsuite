@@ -146,8 +146,7 @@ function ChatMessageListComponent({
       const cleanedText = textFromMessage(msg).trim()
 
       if (msg.role === 'assistant') {
-        if (cleanedText === 'HEARTBEAT_OK' || cleanedText === 'NO_REPLY') return false
-        return true
+        return cleanedText !== 'HEARTBEAT_OK'
       }
 
       if (msg.role === 'user') {
@@ -743,12 +742,6 @@ function ChatMessageListComponent({
         </div>
       )}
       <ChatContainerContent className="pt-6" style={contentStyle}>
-        {loading && displayMessages.length === 0 && (
-          <div className="flex flex-col items-center justify-center gap-3 py-12">
-            <LoadingIndicator />
-            <p className="text-sm text-primary-400 animate-pulse">Loading history…</p>
-          </div>
-        )}
         {notice && noticePosition === 'start' ? notice : null}
         {showToolOnlyNotice ? (
           <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
