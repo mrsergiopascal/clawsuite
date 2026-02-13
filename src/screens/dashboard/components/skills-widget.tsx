@@ -52,14 +52,14 @@ function normalizeSkill(
 
 async function fetchInstalledSkills(): Promise<Array<InstalledSkill>> {
   try {
-    const response = await fetch('/api/skills?tab=installed&limit=12&summary=search')
+    const response = await fetch(
+      '/api/skills?tab=installed&limit=12&summary=search',
+    )
     if (!response.ok) return []
 
-    const payload = (await response
-      .json()
-      .catch(function onInvalidJson() {
-        return {}
-      })) as SkillsResponse
+    const payload = (await response.json().catch(function onInvalidJson() {
+      return {}
+    })) as SkillsResponse
 
     const rows = Array.isArray(payload.skills) ? payload.skills : []
 
@@ -106,12 +106,20 @@ export function SkillsWidget({
       className="h-full rounded-xl border-primary-200 p-4 shadow-sm [&_h2]:text-sm [&_h2]:font-medium [&_h2]:normal-case [&_h2]:text-ink [&_h2]:text-balance"
     >
       {skillsQuery.isLoading && skills.length === 0 ? (
-        <div className="flex h-28 items-center justify-center rounded-lg border border-primary-200 bg-primary-100/50 text-sm text-primary-600">
-          Loading skills...
+        <div className="flex h-28 items-center justify-center gap-3 rounded-lg border border-primary-200 bg-primary-100/50">
+          <span
+            className="size-4 animate-spin rounded-full border-2 border-primary-300 border-t-accent-600"
+            role="status"
+            aria-label="Loading"
+          />
+          <span className="text-sm text-primary-600">Loading skills…</span>
         </div>
       ) : skills.length === 0 ? (
-        <div className="flex h-28 items-center justify-center rounded-lg border border-primary-200 bg-primary-100/50 text-sm text-primary-600 text-pretty">
-          No installed skills found.
+        <div className="flex h-28 flex-col items-center justify-center gap-1 rounded-lg border border-primary-200 bg-primary-100/50">
+          <p className="text-sm font-semibold text-ink">No skills installed</p>
+          <p className="text-xs text-primary-500 text-pretty">
+            Install skills to extend Claude's capabilities
+          </p>
         </div>
       ) : (
         <div className="space-y-2.5">
@@ -121,7 +129,7 @@ export function SkillsWidget({
                 key={skill.id}
                 className={cn(
                   'rounded-lg border border-primary-200 px-3 py-2.5',
-                  index % 2 === 0 ? 'bg-primary-50/90' : 'bg-primary-100/60',
+                  index % 2 === 0 ? 'bg-primary-50/90' : 'bg-primary-100/55',
                 )}
               >
                 <div className="flex items-start justify-between gap-3">

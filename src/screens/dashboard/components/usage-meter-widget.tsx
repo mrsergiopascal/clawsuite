@@ -336,12 +336,20 @@ export function UsageMeterWidget({
       {view === 'providers' ? (
         <div className="space-y-3">
           {activeProviders.length === 0 ? (
-            <div className="rounded-xl border border-primary-200 bg-primary-100/45 p-4 text-center">
+            <div className="rounded-xl border border-primary-200 bg-primary-100/45 p-4">
               <p className="text-sm font-semibold text-ink">
-                No providers connected
+                No provider usage data available
               </p>
-              <p className="mt-1 text-sm text-primary-600">
-                Run `claude` to authenticate or set API keys.
+              <p className="mt-1 text-sm text-primary-600 text-pretty">
+                Provider usage limits and quotas will appear here once
+                authenticated.
+              </p>
+              <p className="mt-2 font-mono text-xs text-primary-500">
+                Tip: Run{' '}
+                <code className="rounded bg-primary-200/70 px-1 py-0.5">
+                  claude
+                </code>{' '}
+                in your terminal to authenticate
               </p>
             </div>
           ) : (
@@ -478,35 +486,45 @@ export function UsageMeterWidget({
           {queryResult.message}
         </div>
       ) : !usageData ? (
-        <div className="flex items-center gap-3 rounded-xl border border-primary-200 bg-primary-100/45 p-4">
+        <div className="flex flex-col gap-2 rounded-xl border border-primary-200 bg-primary-100/45 p-4">
           {loadingTimedOut ? (
             <>
-              <span className="text-sm text-primary-600">
-                No usage data available
-              </span>
+              <p className="text-sm font-semibold text-ink">
+                Loading timed out
+              </p>
+              <p className="text-sm text-primary-600">
+                Usage data is taking longer than expected to load.
+              </p>
               <button
                 type="button"
                 onClick={() => {
                   setLoadingTimedOut(false)
                   usageQuery.refetch()
                 }}
-                className="text-sm font-medium text-accent-600 underline underline-offset-2 hover:text-accent-700"
+                className="mt-1 self-start rounded-lg border border-accent-200 bg-accent-100/70 px-3 py-1.5 text-sm font-medium text-accent-700 transition-colors hover:bg-accent-100"
               >
                 Retry
               </button>
             </>
           ) : (
-            <>
-              <span className="size-4 animate-spin rounded-full border-2 border-primary-300 border-t-accent-600" />
+            <div className="flex items-center gap-3">
+              <span
+                className="size-4 animate-spin rounded-full border-2 border-primary-300 border-t-accent-600"
+                role="status"
+                aria-label="Loading"
+              />
               <span className="text-sm text-primary-600">
                 Loading usage data…
               </span>
-            </>
+            </div>
           )}
         </div>
       ) : usageData.providers.length === 0 ? (
-        <div className="rounded-xl border border-primary-200 bg-primary-100/45 p-4 text-sm text-primary-600 text-pretty">
-          No usage data reported by the Gateway yet.
+        <div className="rounded-xl border border-primary-200 bg-primary-100/45 p-4">
+          <p className="text-sm font-semibold text-ink">No usage data yet</p>
+          <p className="mt-1 text-sm text-primary-600 text-pretty">
+            Start a conversation to see token usage and costs appear here.
+          </p>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-5 md:grid-cols-[220px_minmax(0,1fr)]">

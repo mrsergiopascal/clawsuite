@@ -69,7 +69,8 @@ function buildProviderSummaries(payload: {
       id: providerId,
       name: getProviderDisplayName(providerId),
       description:
-        metadata?.description || 'Configured provider in your local OpenClaw setup.',
+        metadata?.description ||
+        'Configured provider in your local OpenClaw setup.',
       modelCount,
       status: modelCount > 0 ? 'active' : 'configured',
     })
@@ -87,8 +88,10 @@ function ProviderStatusBadge({ status }: { status: ProviderStatus }) {
     <span
       className={cn(
         'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium',
-        status === 'active' && 'border-green-500/35 bg-green-500/10 text-green-600',
-        status === 'configured' && 'border-primary-300 bg-primary-100 text-primary-700',
+        status === 'active' &&
+          'border-green-500/35 bg-green-500/10 text-green-600',
+        status === 'configured' &&
+          'border-primary-300 bg-primary-100 text-primary-700',
       )}
     >
       <HugeiconsIcon icon={CheckmarkCircle02Icon} size={20} strokeWidth={1.5} />
@@ -107,14 +110,21 @@ export function ProvidersScreen({ embedded = false }: ProvidersScreenProps) {
     retry: false,
   })
 
-  const providerSummaries = useMemo(function resolveProviderSummaries() {
-    return buildProviderSummaries({
-      models: Array.isArray(modelsQuery.data?.models) ? modelsQuery.data.models : [],
-      configuredProviders: Array.isArray(modelsQuery.data?.configuredProviders)
-        ? modelsQuery.data.configuredProviders
-        : [],
-    })
-  }, [modelsQuery.data?.configuredProviders, modelsQuery.data?.models])
+  const providerSummaries = useMemo(
+    function resolveProviderSummaries() {
+      return buildProviderSummaries({
+        models: Array.isArray(modelsQuery.data?.models)
+          ? modelsQuery.data.models
+          : [],
+        configuredProviders: Array.isArray(
+          modelsQuery.data?.configuredProviders,
+        )
+          ? modelsQuery.data.configuredProviders
+          : [],
+      })
+    },
+    [modelsQuery.data?.configuredProviders, modelsQuery.data?.models],
+  )
 
   return (
     <div
@@ -136,7 +146,8 @@ export function ProvidersScreen({ embedded = false }: ProvidersScreenProps) {
                 Provider Setup
               </h1>
               <p className="text-sm text-primary-600 text-pretty">
-                View configured providers and walk through safe setup instructions for new providers.
+                View configured providers and walk through safe setup
+                instructions for new providers.
               </p>
             </div>
             <Button
@@ -152,7 +163,8 @@ export function ProvidersScreen({ embedded = false }: ProvidersScreenProps) {
 
           <div className="mt-3 rounded-xl border border-primary-200 bg-primary-100/70 px-3 py-2">
             <p className="text-xs text-primary-700 text-pretty">
-              API keys are stored locally in your OpenClaw config file, never sent to Studio.
+              API keys are stored locally in your OpenClaw config file, never
+              sent to Studio.
             </p>
           </div>
         </header>
@@ -163,7 +175,8 @@ export function ProvidersScreen({ embedded = false }: ProvidersScreenProps) {
               Configured Providers
             </h2>
             <p className="text-xs text-primary-600 tabular-nums">
-              {providerSummaries.length} provider{providerSummaries.length === 1 ? '' : 's'}
+              {providerSummaries.length} provider
+              {providerSummaries.length === 1 ? '' : 's'}
             </p>
           </div>
 
@@ -174,15 +187,29 @@ export function ProvidersScreen({ embedded = false }: ProvidersScreenProps) {
           ) : null}
 
           {modelsQuery.error ? (
-            <p className="rounded-xl border border-primary-200 bg-primary-100/60 px-3 py-2 text-sm text-primary-700 text-pretty">
-              Unable to load providers right now.
-            </p>
+            <div className="rounded-xl border border-red-200 bg-red-50/60 px-4 py-3">
+              <p className="mb-2 text-sm text-red-700 text-pretty">
+                Unable to load providers right now. Check your gateway
+                connection.
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => modelsQuery.refetch()}
+                className="border-red-300 text-red-700 hover:bg-red-100"
+              >
+                Retry
+              </Button>
+            </div>
           ) : null}
 
-          {!modelsQuery.isPending && !modelsQuery.error && providerSummaries.length === 0 ? (
+          {!modelsQuery.isPending &&
+          !modelsQuery.error &&
+          providerSummaries.length === 0 ? (
             <div className="rounded-xl border border-primary-200 bg-primary-100/60 px-4 py-4">
               <p className="text-sm text-primary-700 text-pretty">
-                No providers are configured yet. Use Add Provider to open setup instructions.
+                No providers are configured yet. Use Add Provider to open setup
+                instructions.
               </p>
             </div>
           ) : null}
@@ -213,7 +240,9 @@ export function ProvidersScreen({ embedded = false }: ProvidersScreenProps) {
                     </div>
 
                     <div className="mt-3 flex items-center justify-between rounded-xl border border-primary-200 bg-primary-100/60 px-2.5 py-2">
-                      <span className="text-xs text-primary-600">Available models</span>
+                      <span className="text-xs text-primary-600">
+                        Available models
+                      </span>
                       <span className="text-sm font-medium text-primary-900 tabular-nums">
                         {provider.modelCount}
                       </span>

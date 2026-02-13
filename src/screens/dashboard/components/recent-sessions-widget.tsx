@@ -116,12 +116,20 @@ export function RecentSessionsWidget({
       className="h-full rounded-xl border-primary-200 p-4 shadow-sm [&_h2]:text-sm [&_h2]:font-semibold [&_h2]:normal-case [&_h2]:text-ink"
     >
       {isLoading ? (
-        <div className="flex h-32 items-center justify-center rounded-lg border border-primary-200 bg-primary-100/45 text-sm text-primary-600">
-          Loading sessions...
+        <div className="flex h-32 items-center justify-center gap-3 rounded-lg border border-primary-200 bg-primary-100/45">
+          <span
+            className="size-4 animate-spin rounded-full border-2 border-primary-300 border-t-accent-600"
+            role="status"
+            aria-label="Loading"
+          />
+          <span className="text-sm text-primary-600">Loading sessions…</span>
         </div>
       ) : sessions.length === 0 ? (
-        <div className="flex h-32 items-center justify-center rounded-lg border border-primary-200 bg-primary-100/45 text-sm text-primary-600">
-          No sessions yet
+        <div className="flex h-32 flex-col items-center justify-center gap-1 rounded-lg border border-primary-200 bg-primary-100/45">
+          <p className="text-sm font-semibold text-ink">No sessions yet</p>
+          <p className="text-xs text-primary-500">
+            Start a conversation to see recent sessions here
+          </p>
         </div>
       ) : (
         <div className="space-y-2.5">

@@ -113,27 +113,39 @@ export function ActivityLogWidget({
       </div>
 
       {!isConnected ? (
-        <div className="mb-2 rounded-lg border border-primary-200 bg-primary-100/60 px-3 py-2.5 text-sm text-primary-600">
-          <p className="font-semibold text-ink">Gateway disconnected</p>
-          <p className="mt-0.5">Reconnect to see live events.</p>
+        <div className="mb-2 rounded-lg border border-red-200 bg-red-50/80 px-3 py-2.5">
+          <p className="text-sm font-semibold text-red-900">
+            Gateway disconnected
+          </p>
+          <p className="mt-0.5 text-sm text-red-700 text-pretty">
+            Live event stream is unavailable. Reconnect to continue.
+          </p>
           <button
             type="button"
             onClick={() => window.location.reload()}
-            className="mt-1.5 rounded text-xs font-medium text-accent-600 underline underline-offset-2 hover:text-accent-700 focus:outline-none focus:ring-2 focus:ring-accent-300 focus:ring-offset-1"
+            className="mt-2 rounded-lg border border-red-200 bg-red-100/70 px-3 py-1 text-xs font-medium text-red-700 transition-colors hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-300 focus:ring-offset-1"
             aria-label="Retry connection"
           >
-            Retry
+            Reconnect
           </button>
         </div>
       ) : null}
 
       {isLoading && latestEvents.length === 0 ? (
-        <div className="flex h-32 items-center justify-center rounded-lg border border-primary-200 bg-primary-100/45 text-sm text-primary-600">
-          Loading activity…
+        <div className="flex h-32 items-center justify-center gap-3 rounded-lg border border-primary-200 bg-primary-100/45">
+          <span
+            className="size-4 animate-spin rounded-full border-2 border-primary-300 border-t-accent-600"
+            role="status"
+            aria-label="Loading"
+          />
+          <span className="text-sm text-primary-600">Loading activity…</span>
         </div>
       ) : latestEvents.length === 0 ? (
-        <div className="flex h-32 items-center justify-center rounded-lg border border-primary-200 bg-primary-100/45 text-sm text-primary-600">
-          No recent events
+        <div className="flex h-32 flex-col items-center justify-center gap-1 rounded-lg border border-primary-200 bg-primary-100/45">
+          <p className="text-sm font-semibold text-ink">No events yet</p>
+          <p className="text-xs text-primary-500">
+            Activity will appear as you use the system
+          </p>
         </div>
       ) : (
         <div

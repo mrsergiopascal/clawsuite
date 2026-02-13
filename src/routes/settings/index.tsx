@@ -15,17 +15,12 @@ import {
 import { createFileRoute } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import type * as React from 'react'
-import type {AccentColor, SettingsThemeMode} from '@/hooks/use-settings';
+import type { AccentColor, SettingsThemeMode } from '@/hooks/use-settings'
 import { usePageTitle } from '@/hooks/use-page-title'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsList, TabsTab } from '@/components/ui/tabs'
-import {
-  
-  
-  applyTheme,
-  useSettings
-} from '@/hooks/use-settings'
+import { applyTheme, useSettings } from '@/hooks/use-settings'
 import { cn } from '@/lib/utils'
 import {
   getChatProfileDisplayName,
@@ -58,7 +53,9 @@ function SettingsSection({ title, description, icon, children }: SectionProps) {
           <HugeiconsIcon icon={icon} size={20} strokeWidth={1.5} />
         </span>
         <div className="min-w-0">
-          <h2 className="text-base font-medium text-primary-900 text-balance">{title}</h2>
+          <h2 className="text-base font-medium text-primary-900 text-balance">
+            {title}
+          </h2>
           <p className="text-sm text-primary-600 text-pretty">{description}</p>
         </div>
       </div>
@@ -77,7 +74,9 @@ function SettingsRow({ label, description, children }: RowProps) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-3">
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-medium text-primary-900 text-balance">{label}</p>
+        <p className="text-sm font-medium text-primary-900 text-balance">
+          {label}
+        </p>
         {description ? (
           <p className="text-xs text-primary-600 text-pretty">{description}</p>
         ) : null}
@@ -117,29 +116,38 @@ function SettingsRoute() {
   >('idle')
 
   // Phase 4.2: Fetch models for preferred model dropdowns
-  const [availableModels, setAvailableModels] = useState<Array<{ id: string; label: string }>>([])
-  
+  const [availableModels, setAvailableModels] = useState<
+    Array<{ id: string; label: string }>
+  >([])
+  const [modelsError, setModelsError] = useState(false)
+  const [urlError, setUrlError] = useState<string | null>(null)
+
   useEffect(() => {
     async function fetchModels() {
+      setModelsError(false)
       try {
         const res = await fetch('/api/models')
-        if (!res.ok) return
+        if (!res.ok) {
+          setModelsError(true)
+          return
+        }
         const data = await res.json()
         const models = Array.isArray(data.models) ? data.models : []
         setAvailableModels(
           models.map((m: any) => ({
             id: m.id || '',
             label: m.id?.split('/').pop() || m.id || '',
-          }))
+          })),
         )
       } catch {
-        // Ignore fetch errors
+        setModelsError(true)
       }
     }
     void fetchModels()
   }, [])
 
   async function handleTestConnection() {
+    if (urlError) return
     setConnectionStatus('testing')
 
     try {
@@ -148,6 +156,20 @@ function SettingsRoute() {
     } catch {
       setConnectionStatus('failed')
     }
+  }
+
+  function validateAndUpdateUrl(value: string) {
+    if (value && value.length > 0) {
+      try {
+        new URL(value)
+        setUrlError(null)
+      } catch {
+        setUrlError('Invalid URL format')
+      }
+    } else {
+      setUrlError(null)
+    }
+    updateSettings({ gatewayUrl: value })
   }
 
   function handleThemeChange(value: string) {
@@ -170,7 +192,8 @@ function SettingsRoute() {
     return 'bg-primary-500'
   }
 
-  const [activeSection, setActiveSection] = useState<SettingsSectionId>('profile')
+  const [activeSection, setActiveSection] =
+    useState<SettingsSectionId>('profile')
 
   return (
     <div className="min-h-screen bg-surface text-primary-900">
@@ -181,7 +204,9 @@ function SettingsRoute() {
         {/* Sidebar nav */}
         <nav className="hidden w-48 shrink-0 md:block">
           <div className="sticky top-8">
-            <h1 className="mb-4 text-lg font-semibold text-primary-900 px-3">Settings</h1>
+            <h1 className="mb-4 text-lg font-semibold text-primary-900 px-3">
+              Settings
+            </h1>
             <div className="flex flex-col gap-0.5">
               {SETTINGS_NAV_ITEMS.map((item) => (
                 <button
@@ -223,232 +248,372 @@ function SettingsRoute() {
 
         {/* Content area */}
         <div className="flex-1 min-w-0 flex flex-col gap-4">
+          {/* ── Profile ─────────────────────────────────────────── */}
+          {activeSection === 'profile' && <ProfileSection />}
 
-        {/* ── Profile ─────────────────────────────────────────── */}
-        {activeSection === 'profile' && <ProfileSection />}
+          {/* ── Appearance ──────────────────────────────────────── */}
+          {activeSection === 'appearance' && (
+            <>
+              <SettingsSection
+                title="Appearance"
+                description="Choose app theme and accent color."
+                icon={PaintBoardIcon}
+              >
+                <SettingsRow
+                  label="Theme"
+                  description="Apply light, dark, or follow system preference."
+                >
+                  <Tabs
+                    value={settings.theme}
+                    onValueChange={handleThemeChange}
+                  >
+                    <TabsList variant="default" className="gap-1">
+                      <TabsTab value="system">
+                        <HugeiconsIcon
+                          icon={ComputerIcon}
+                          size={20}
+                          strokeWidth={1.5}
+                        />
+                        <span>System</span>
+                      </TabsTab>
+                      <TabsTab value="light">
+                        <HugeiconsIcon
+                          icon={Sun01Icon}
+                          size={20}
+                          strokeWidth={1.5}
+                        />
+                        <span>Light</span>
+                      </TabsTab>
+                      <TabsTab value="dark">
+                        <HugeiconsIcon
+                          icon={Moon01Icon}
+                          size={20}
+                          strokeWidth={1.5}
+                        />
+                        <span>Dark</span>
+                      </TabsTab>
+                    </TabsList>
+                  </Tabs>
+                </SettingsRow>
 
-        {/* ── Appearance ──────────────────────────────────────── */}
-        {activeSection === 'appearance' && (
-          <>
+                <SettingsRow
+                  label="Accent color"
+                  description="Select the primary accent for controls and highlights."
+                >
+                  <div className="flex flex-wrap gap-2">
+                    {(['orange', 'purple', 'blue', 'green'] as const).map(
+                      function mapAccent(color) {
+                        const active = settings.accentColor === color
+                        return (
+                          <Button
+                            key={color}
+                            variant="ghost"
+                            size="sm"
+                            onClick={() =>
+                              updateSettings({ accentColor: color })
+                            }
+                            className={cn(
+                              'border border-primary-200 bg-primary-100/70 text-primary-900 hover:bg-primary-200',
+                              active && 'border-primary-500 bg-primary-200',
+                            )}
+                          >
+                            <span
+                              className={cn(
+                                'size-2.5 rounded-full',
+                                getAccentBadgeClass(color),
+                              )}
+                            />
+                            <span className="capitalize">{color}</span>
+                          </Button>
+                        )
+                      },
+                    )}
+                  </div>
+                </SettingsRow>
+              </SettingsSection>
+              <LoaderStyleSection />
+            </>
+          )}
+
+          {/* ── Chat ────────────────────────────────────────────── */}
+          {activeSection === 'chat' && <ChatDisplaySection />}
+
+          {/* ── Editor ──────────────────────────────────────────── */}
+          {activeSection === 'editor' && (
             <SettingsSection
-              title="Appearance"
-              description="Choose app theme and accent color."
-              icon={PaintBoardIcon}
+              title="Editor"
+              description="Configure Monaco defaults for the files workspace."
+              icon={SourceCodeSquareIcon}
             >
-              <SettingsRow label="Theme" description="Apply light, dark, or follow system preference.">
-                <Tabs value={settings.theme} onValueChange={handleThemeChange}>
-                  <TabsList variant="default" className="gap-1">
-                    <TabsTab value="system">
-                      <HugeiconsIcon icon={ComputerIcon} size={20} strokeWidth={1.5} />
-                      <span>System</span>
-                    </TabsTab>
-                    <TabsTab value="light">
-                      <HugeiconsIcon icon={Sun01Icon} size={20} strokeWidth={1.5} />
-                      <span>Light</span>
-                    </TabsTab>
-                    <TabsTab value="dark">
-                      <HugeiconsIcon icon={Moon01Icon} size={20} strokeWidth={1.5} />
-                      <span>Dark</span>
-                    </TabsTab>
-                  </TabsList>
-                </Tabs>
+              <SettingsRow
+                label="Font size"
+                description="Adjust editor font size between 12 and 20."
+              >
+                <div className="flex w-full max-w-xs items-center gap-2">
+                  <input
+                    type="range"
+                    min={12}
+                    max={20}
+                    value={settings.editorFontSize}
+                    onChange={(e) =>
+                      updateSettings({ editorFontSize: Number(e.target.value) })
+                    }
+                    className="w-full accent-primary-900 dark:accent-primary-400"
+                    aria-label={`Editor font size: ${settings.editorFontSize} pixels`}
+                    aria-valuemin={12}
+                    aria-valuemax={20}
+                    aria-valuenow={settings.editorFontSize}
+                  />
+                  <span className="w-12 text-right text-sm tabular-nums text-primary-700">
+                    {settings.editorFontSize}px
+                  </span>
+                </div>
               </SettingsRow>
+              <SettingsRow
+                label="Word wrap"
+                description="Wrap long lines in the editor by default."
+              >
+                <Switch
+                  checked={settings.editorWordWrap}
+                  onCheckedChange={(checked) =>
+                    updateSettings({ editorWordWrap: checked })
+                  }
+                  aria-label="Word wrap"
+                />
+              </SettingsRow>
+              <SettingsRow
+                label="Minimap"
+                description="Show minimap preview in Monaco editor."
+              >
+                <Switch
+                  checked={settings.editorMinimap}
+                  onCheckedChange={(checked) =>
+                    updateSettings({ editorMinimap: checked })
+                  }
+                  aria-label="Show minimap"
+                />
+              </SettingsRow>
+            </SettingsSection>
+          )}
 
-              <SettingsRow label="Accent color" description="Select the primary accent for controls and highlights.">
-                <div className="flex flex-wrap gap-2">
-                  {(['orange', 'purple', 'blue', 'green'] as const).map(function mapAccent(color) {
-                    const active = settings.accentColor === color
-                    return (
-                      <Button
-                        key={color}
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => updateSettings({ accentColor: color })}
-                        className={cn(
-                          'border border-primary-200 bg-primary-100/70 text-primary-900 hover:bg-primary-200',
-                          active && 'border-primary-500 bg-primary-200',
-                        )}
-                      >
-                        <span className={cn('size-2.5 rounded-full', getAccentBadgeClass(color))} />
-                        <span className="capitalize">{color}</span>
-                      </Button>
-                    )
-                  })}
+          {/* ── Notifications ───────────────────────────────────── */}
+          {activeSection === 'notifications' && (
+            <SettingsSection
+              title="Notifications"
+              description="Control alert delivery and usage warning threshold."
+              icon={Notification03Icon}
+            >
+              <SettingsRow
+                label="Enable alerts"
+                description="Show usage and system alert notifications."
+              >
+                <Switch
+                  checked={settings.notificationsEnabled}
+                  onCheckedChange={(checked) =>
+                    updateSettings({ notificationsEnabled: checked })
+                  }
+                  aria-label="Enable alerts"
+                />
+              </SettingsRow>
+              <SettingsRow
+                label="Usage threshold"
+                description="Set usage warning trigger between 50% and 100%."
+              >
+                <div className="flex w-full max-w-xs items-center gap-2">
+                  <input
+                    type="range"
+                    min={50}
+                    max={100}
+                    value={settings.usageThreshold}
+                    onChange={(e) =>
+                      updateSettings({ usageThreshold: Number(e.target.value) })
+                    }
+                    className="w-full accent-primary-900 dark:accent-primary-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={!settings.notificationsEnabled}
+                    aria-label={`Usage threshold: ${settings.usageThreshold} percent`}
+                    aria-valuemin={50}
+                    aria-valuemax={100}
+                    aria-valuenow={settings.usageThreshold}
+                  />
+                  <span className="w-12 text-right text-sm tabular-nums text-primary-700">
+                    {settings.usageThreshold}%
+                  </span>
                 </div>
               </SettingsRow>
             </SettingsSection>
-            <LoaderStyleSection />
-          </>
-        )}
+          )}
 
-        {/* ── Chat ────────────────────────────────────────────── */}
-        {activeSection === 'chat' && <ChatDisplaySection />}
+          {/* ── Advanced ────────────────────────────────────────── */}
+          {activeSection === 'advanced' && (
+            <>
+              <SettingsSection
+                title="Gateway Connection"
+                description="Set your gateway endpoint and verify connectivity."
+                icon={CloudIcon}
+              >
+                <SettingsRow
+                  label="Gateway URL"
+                  description="Used by ClawSuite for provider connectivity checks."
+                >
+                  <div className="flex-1 max-w-md">
+                    <input
+                      type="url"
+                      placeholder="https://api.openclaw.ai"
+                      value={settings.gatewayUrl}
+                      onChange={(e) => validateAndUpdateUrl(e.target.value)}
+                      className="h-9 w-full rounded-lg border border-primary-200 dark:border-gray-600 bg-primary-50 dark:bg-gray-800 px-3 text-sm text-primary-900 dark:text-gray-100 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-primary-400 dark:focus-visible:ring-primary-500"
+                      aria-label="Gateway URL"
+                      aria-invalid={!!urlError}
+                      aria-describedby={
+                        urlError ? 'gateway-url-error' : undefined
+                      }
+                    />
+                    {urlError && (
+                      <p
+                        id="gateway-url-error"
+                        className="mt-1 text-xs text-red-600"
+                        role="alert"
+                      >
+                        {urlError}
+                      </p>
+                    )}
+                  </div>
+                </SettingsRow>
+                <SettingsRow
+                  label="Connection status"
+                  description="Current gateway reachability check state."
+                >
+                  <span
+                    className={cn(
+                      'inline-flex items-center gap-1.5 rounded-full border px-2 py-1 text-xs font-medium',
+                      connectionStatus === 'connected' &&
+                        'border-green-500/35 bg-green-500/10 text-green-600',
+                      connectionStatus === 'failed' &&
+                        'border-red-500/35 bg-red-500/10 text-red-600',
+                      connectionStatus === 'testing' &&
+                        'border-accent-500/35 bg-accent-500/10 text-accent-600',
+                      connectionStatus === 'idle' &&
+                        'border-primary-300 bg-primary-100 text-primary-700',
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        'size-2 rounded-full',
+                        getConnectionDotClass(),
+                      )}
+                    />
+                    {connectionStatus === 'idle' ? 'Not tested' : null}
+                    {connectionStatus === 'testing' ? 'Testing...' : null}
+                    {connectionStatus === 'connected' ? 'Connected' : null}
+                    {connectionStatus === 'failed' ? 'Failed' : null}
+                  </span>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => void handleTestConnection()}
+                    disabled={connectionStatus === 'testing' || !!urlError}
+                  >
+                    <HugeiconsIcon
+                      icon={CheckmarkCircle02Icon}
+                      size={20}
+                      strokeWidth={1.5}
+                    />
+                    Test
+                  </Button>
+                </SettingsRow>
+              </SettingsSection>
 
-        {/* ── Editor ──────────────────────────────────────────── */}
-        {activeSection === 'editor' && (
-          <SettingsSection
-            title="Editor"
-            description="Configure Monaco defaults for the files workspace."
-            icon={SourceCodeSquareIcon}
-          >
-            <SettingsRow label="Font size" description="Adjust editor font size between 12 and 20.">
-              <div className="flex w-full min-w-[220px] items-center gap-2">
-                <input
-                  type="range"
-                  min={12}
-                  max={20}
-                  value={settings.editorFontSize}
-                  onChange={(e) => updateSettings({ editorFontSize: Number(e.target.value) })}
-                  className="w-full accent-primary-900"
-                />
-                <span className="w-12 text-right text-sm tabular-nums text-primary-700">
-                  {settings.editorFontSize}px
-                </span>
-              </div>
-            </SettingsRow>
-            <SettingsRow label="Word wrap" description="Wrap long lines in the editor by default.">
-              <Switch
-                checked={settings.editorWordWrap}
-                onCheckedChange={(checked) => updateSettings({ editorWordWrap: checked })}
+              <SettingsSection
+                title="Smart Suggestions"
+                description="Get proactive model suggestions to optimize cost and quality."
+                icon={Settings02Icon}
+              >
+                <SettingsRow
+                  label="Enable smart suggestions"
+                  description="Suggest cheaper models for simple tasks or better models for complex work."
+                >
+                  <Switch
+                    checked={settings.smartSuggestionsEnabled}
+                    onCheckedChange={(checked) =>
+                      updateSettings({ smartSuggestionsEnabled: checked })
+                    }
+                    aria-label="Enable smart suggestions"
+                  />
+                </SettingsRow>
+                <SettingsRow
+                  label="Preferred budget model"
+                  description="Default model for cheaper suggestions (leave empty for auto-detect)."
+                >
+                  <select
+                    value={settings.preferredBudgetModel}
+                    onChange={(e) =>
+                      updateSettings({ preferredBudgetModel: e.target.value })
+                    }
+                    className="h-9 w-full max-w-xs rounded-lg border border-primary-200 dark:border-gray-600 bg-primary-50 dark:bg-gray-800 px-3 text-sm text-primary-900 dark:text-gray-100 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-primary-400 dark:focus-visible:ring-primary-500"
+                    aria-label="Preferred budget model"
+                  >
+                    <option value="">Auto-detect</option>
+                    {modelsError && (
+                      <option disabled>Failed to load models</option>
+                    )}
+                    {availableModels.map((model) => (
+                      <option key={model.id} value={model.id}>
+                        {model.label}
+                      </option>
+                    ))}
+                  </select>
+                </SettingsRow>
+                <SettingsRow
+                  label="Preferred premium model"
+                  description="Default model for upgrade suggestions (leave empty for auto-detect)."
+                >
+                  <select
+                    value={settings.preferredPremiumModel}
+                    onChange={(e) =>
+                      updateSettings({ preferredPremiumModel: e.target.value })
+                    }
+                    className="h-9 w-full max-w-xs rounded-lg border border-primary-200 dark:border-gray-600 bg-primary-50 dark:bg-gray-800 px-3 text-sm text-primary-900 dark:text-gray-100 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-primary-400 dark:focus-visible:ring-primary-500"
+                    aria-label="Preferred premium model"
+                  >
+                    <option value="">Auto-detect</option>
+                    {modelsError && (
+                      <option disabled>Failed to load models</option>
+                    )}
+                    {availableModels.map((model) => (
+                      <option key={model.id} value={model.id}>
+                        {model.label}
+                      </option>
+                    ))}
+                  </select>
+                </SettingsRow>
+                <SettingsRow
+                  label="Only suggest cheaper models"
+                  description="Never suggest upgrades, only suggest cheaper alternatives."
+                >
+                  <Switch
+                    checked={settings.onlySuggestCheaper}
+                    onCheckedChange={(checked) =>
+                      updateSettings({ onlySuggestCheaper: checked })
+                    }
+                    aria-label="Only suggest cheaper models"
+                  />
+                </SettingsRow>
+              </SettingsSection>
+            </>
+          )}
+
+          <footer className="mt-auto pt-4">
+            <div className="flex items-center gap-2 rounded-2xl border border-primary-200 bg-primary-50/70 p-3 text-sm text-primary-600 backdrop-blur-sm">
+              <HugeiconsIcon
+                icon={Settings02Icon}
+                size={20}
+                strokeWidth={1.5}
               />
-            </SettingsRow>
-            <SettingsRow label="Minimap" description="Show minimap preview in Monaco editor.">
-              <Switch
-                checked={settings.editorMinimap}
-                onCheckedChange={(checked) => updateSettings({ editorMinimap: checked })}
-              />
-            </SettingsRow>
-          </SettingsSection>
-        )}
-
-        {/* ── Notifications ───────────────────────────────────── */}
-        {activeSection === 'notifications' && (
-          <SettingsSection
-            title="Notifications"
-            description="Control alert delivery and usage warning threshold."
-            icon={Notification03Icon}
-          >
-            <SettingsRow label="Enable alerts" description="Show usage and system alert notifications.">
-              <Switch
-                checked={settings.notificationsEnabled}
-                onCheckedChange={(checked) => updateSettings({ notificationsEnabled: checked })}
-              />
-            </SettingsRow>
-            <SettingsRow label="Usage threshold" description="Set usage warning trigger between 50% and 100%.">
-              <div className="flex w-full min-w-[220px] items-center gap-2">
-                <input
-                  type="range"
-                  min={50}
-                  max={100}
-                  value={settings.usageThreshold}
-                  onChange={(e) => updateSettings({ usageThreshold: Number(e.target.value) })}
-                  className="w-full accent-primary-900"
-                  disabled={!settings.notificationsEnabled}
-                />
-                <span className="w-12 text-right text-sm tabular-nums text-primary-700">
-                  {settings.usageThreshold}%
-                </span>
-              </div>
-            </SettingsRow>
-          </SettingsSection>
-        )}
-
-        {/* ── Advanced ────────────────────────────────────────── */}
-        {activeSection === 'advanced' && (
-          <>
-            <SettingsSection
-              title="Gateway Connection"
-              description="Set your gateway endpoint and verify connectivity."
-              icon={CloudIcon}
-            >
-              <SettingsRow label="Gateway URL" description="Used by ClawSuite for provider connectivity checks.">
-                <input
-                  type="url"
-                  placeholder="https://api.openclaw.ai"
-                  value={settings.gatewayUrl}
-                  onChange={(e) => updateSettings({ gatewayUrl: e.target.value })}
-                  className="h-9 w-full min-w-[220px] rounded-lg border border-primary-200 bg-primary-50 px-3 text-sm text-primary-900 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-primary-400"
-                />
-              </SettingsRow>
-              <SettingsRow label="Connection status" description="Current gateway reachability check state.">
-                <span
-                  className={cn(
-                    'inline-flex items-center gap-1.5 rounded-full border px-2 py-1 text-xs font-medium',
-                    connectionStatus === 'connected' && 'border-green-500/35 bg-green-500/10 text-green-500',
-                    connectionStatus === 'failed' && 'border-red-500/35 bg-red-500/10 text-red-500',
-                    connectionStatus === 'testing' && 'border-accent-500/35 bg-accent-500/10 text-accent-500',
-                    connectionStatus === 'idle' && 'border-primary-300 bg-primary-100 text-primary-700',
-                  )}
-                >
-                  <span className={cn('size-2 rounded-full', getConnectionDotClass())} />
-                  {connectionStatus === 'idle' ? 'Not tested' : null}
-                  {connectionStatus === 'testing' ? 'Testing...' : null}
-                  {connectionStatus === 'connected' ? 'Connected' : null}
-                  {connectionStatus === 'failed' ? 'Failed' : null}
-                </span>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => void handleTestConnection()}
-                  disabled={connectionStatus === 'testing'}
-                >
-                  <HugeiconsIcon icon={CheckmarkCircle02Icon} size={20} strokeWidth={1.5} />
-                  Test
-                </Button>
-              </SettingsRow>
-            </SettingsSection>
-
-            <SettingsSection
-              title="Smart Suggestions"
-              description="Get proactive model suggestions to optimize cost and quality."
-              icon={Settings02Icon}
-            >
-              <SettingsRow label="Enable smart suggestions" description="Suggest cheaper models for simple tasks or better models for complex work.">
-                <Switch
-                  checked={settings.smartSuggestionsEnabled}
-                  onCheckedChange={(checked) => updateSettings({ smartSuggestionsEnabled: checked })}
-                />
-              </SettingsRow>
-              <SettingsRow label="Preferred budget model" description="Default model for cheaper suggestions (leave empty for auto-detect).">
-                <select
-                  value={settings.preferredBudgetModel}
-                  onChange={(e) => updateSettings({ preferredBudgetModel: e.target.value })}
-                  className="h-9 min-w-[220px] rounded-lg border border-primary-200 bg-primary-50 px-3 text-sm text-primary-900 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-primary-400"
-                >
-                  <option value="">Auto-detect</option>
-                  {availableModels.map((model) => (
-                    <option key={model.id} value={model.id}>{model.label}</option>
-                  ))}
-                </select>
-              </SettingsRow>
-              <SettingsRow label="Preferred premium model" description="Default model for upgrade suggestions (leave empty for auto-detect).">
-                <select
-                  value={settings.preferredPremiumModel}
-                  onChange={(e) => updateSettings({ preferredPremiumModel: e.target.value })}
-                  className="h-9 min-w-[220px] rounded-lg border border-primary-200 bg-primary-50 px-3 text-sm text-primary-900 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-primary-400"
-                >
-                  <option value="">Auto-detect</option>
-                  {availableModels.map((model) => (
-                    <option key={model.id} value={model.id}>{model.label}</option>
-                  ))}
-                </select>
-              </SettingsRow>
-              <SettingsRow label="Only suggest cheaper models" description="Never suggest upgrades, only suggest cheaper alternatives.">
-                <Switch
-                  checked={settings.onlySuggestCheaper}
-                  onCheckedChange={(checked) => updateSettings({ onlySuggestCheaper: checked })}
-                />
-              </SettingsRow>
-            </SettingsSection>
-          </>
-        )}
-
-        <footer className="mt-auto pt-4">
-          <div className="flex items-center gap-2 rounded-2xl border border-primary-200 bg-primary-50/70 p-3 text-sm text-primary-600 backdrop-blur-sm">
-            <HugeiconsIcon icon={Settings02Icon} size={20} strokeWidth={1.5} />
-            <span className="text-pretty">Changes are saved automatically to local storage.</span>
-          </div>
-        </footer>
+              <span className="text-pretty">
+                Changes are saved automatically to local storage.
+              </span>
+            </div>
+          </footer>
         </div>
       </main>
     </div>
@@ -461,12 +626,25 @@ const PROFILE_IMAGE_MAX_DIMENSION = 128
 const PROFILE_IMAGE_MAX_FILE_SIZE = 10 * 1024 * 1024
 
 function ProfileSection() {
-  const { settings: chatSettings, updateSettings: updateChatSettings } = useChatSettingsStore()
+  const { settings: chatSettings, updateSettings: updateChatSettings } =
+    useChatSettingsStore()
   const [profileError, setProfileError] = useState<string | null>(null)
   const [profileProcessing, setProfileProcessing] = useState(false)
+  const [nameError, setNameError] = useState<string | null>(null)
   const displayName = getChatProfileDisplayName(chatSettings.displayName)
 
-  async function handleAvatarUpload(event: React.ChangeEvent<HTMLInputElement>) {
+  function handleNameChange(value: string) {
+    if (value.length > 50) {
+      setNameError('Display name too long (max 50 characters)')
+      return
+    }
+    setNameError(null)
+    updateChatSettings({ displayName: value })
+  }
+
+  async function handleAvatarUpload(
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) {
     const file = event.target.files?.[0]
     event.target.value = ''
     if (!file) return
@@ -509,41 +687,79 @@ function ProfileSection() {
   }
 
   return (
-    <SettingsSection title="Profile" description="Your display name and avatar for chat." icon={UserIcon}>
+    <SettingsSection
+      title="Profile"
+      description="Your display name and avatar for chat."
+      icon={UserIcon}
+    >
       <div className="flex items-center gap-4">
-        <UserAvatar size={56} src={chatSettings.avatarDataUrl} alt={displayName} />
+        <UserAvatar
+          size={56}
+          src={chatSettings.avatarDataUrl}
+          alt={displayName}
+        />
         <div className="min-w-0 flex-1">
           <p className="text-sm font-medium text-primary-900">{displayName}</p>
-          <p className="text-xs text-primary-500">Shown in the sidebar and chat messages.</p>
+          <p className="text-xs text-primary-500">
+            Shown in the sidebar and chat messages.
+          </p>
         </div>
       </div>
       <SettingsRow label="Display name" description="Leave blank for default.">
-        <Input
-          value={chatSettings.displayName}
-          onChange={(e) => updateChatSettings({ displayName: e.target.value })}
-          placeholder="User"
-          className="h-9 min-w-[220px]"
-        />
-      </SettingsRow>
-      <SettingsRow label="Profile picture" description="Resized to 128×128, stored locally.">
-        <div className="flex items-center gap-2">
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleAvatarUpload}
-            className="block w-full max-w-[220px] cursor-pointer text-xs text-primary-700 file:mr-2 file:rounded-md file:border file:border-primary-200 file:bg-primary-100 file:px-2.5 file:py-1.5 file:text-xs file:font-medium"
+        <div className="flex-1 max-w-xs">
+          <Input
+            value={chatSettings.displayName}
+            onChange={(e) => handleNameChange(e.target.value)}
+            placeholder="User"
+            className="h-9 w-full"
+            maxLength={50}
+            aria-label="Display name"
+            aria-invalid={!!nameError}
+            aria-describedby={nameError ? 'profile-name-error' : undefined}
           />
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => updateChatSettings({ avatarDataUrl: null })}
-            disabled={!chatSettings.avatarDataUrl || profileProcessing}
-          >
-            Remove
-          </Button>
+          {nameError && (
+            <p
+              id="profile-name-error"
+              className="mt-1 text-xs text-red-600"
+              role="alert"
+            >
+              {nameError}
+            </p>
+          )}
         </div>
       </SettingsRow>
-      {profileError && <p className="text-xs text-red-600">{profileError}</p>}
+      <SettingsRow
+        label="Profile picture"
+        description="Resized to 128×128, stored locally."
+      >
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <label className="block">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleAvatarUpload}
+                disabled={profileProcessing}
+                aria-label="Upload profile picture"
+                className="block max-w-xs cursor-pointer text-xs text-primary-700 dark:text-gray-300 file:mr-2 file:cursor-pointer file:rounded-md file:border file:border-primary-200 dark:file:border-gray-600 file:bg-primary-100 dark:file:bg-gray-700 file:px-2.5 file:py-1.5 file:text-xs file:font-medium file:text-primary-900 dark:file:text-gray-100 file:transition-colors hover:file:bg-primary-200 dark:hover:file:bg-gray-600 disabled:cursor-not-allowed disabled:opacity-50"
+              />
+            </label>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => updateChatSettings({ avatarDataUrl: null })}
+              disabled={!chatSettings.avatarDataUrl || profileProcessing}
+            >
+              Remove
+            </Button>
+          </div>
+          {profileError && (
+            <p className="text-xs text-red-600" role="alert">
+              {profileError}
+            </p>
+          )}
+        </div>
+      </SettingsRow>
     </SettingsSection>
   )
 }
@@ -551,20 +767,37 @@ function ProfileSection() {
 // ── Chat Display Section ────────────────────────────────────────────────
 
 function ChatDisplaySection() {
-  const { settings: chatSettings, updateSettings: updateChatSettings } = useChatSettingsStore()
+  const { settings: chatSettings, updateSettings: updateChatSettings } =
+    useChatSettingsStore()
 
   return (
-    <SettingsSection title="Chat Display" description="Control what's visible in chat messages." icon={MessageMultiple01Icon}>
-      <SettingsRow label="Show tool messages" description="Display tool call/result blocks in chat.">
+    <SettingsSection
+      title="Chat Display"
+      description="Control what's visible in chat messages."
+      icon={MessageMultiple01Icon}
+    >
+      <SettingsRow
+        label="Show tool messages"
+        description="Display tool call details when the agent uses tools."
+      >
         <Switch
           checked={chatSettings.showToolMessages}
-          onCheckedChange={(checked) => updateChatSettings({ showToolMessages: checked })}
+          onCheckedChange={(checked) =>
+            updateChatSettings({ showToolMessages: checked })
+          }
+          aria-label="Show tool messages"
         />
       </SettingsRow>
-      <SettingsRow label="Show reasoning blocks" description="Display model thinking/reasoning in chat.">
+      <SettingsRow
+        label="Show reasoning blocks"
+        description="Display model thinking and reasoning process."
+      >
         <Switch
           checked={chatSettings.showReasoningBlocks}
-          onCheckedChange={(checked) => updateChatSettings({ showReasoningBlocks: checked })}
+          onCheckedChange={(checked) =>
+            updateChatSettings({ showReasoningBlocks: checked })
+          }
+          aria-label="Show reasoning blocks"
         />
       </SettingsRow>
     </SettingsSection>
@@ -588,25 +821,43 @@ const LOADER_STYLES: LoaderStyleOption[] = [
 
 function getPreset(style: LoaderStyle): BrailleSpinnerPreset | null {
   const map: Record<string, BrailleSpinnerPreset> = {
-    'braille-claw': 'claw', 'braille-orbit': 'orbit',
-    'braille-breathe': 'breathe', 'braille-pulse': 'pulse', 'braille-wave': 'wave',
+    'braille-claw': 'claw',
+    'braille-orbit': 'orbit',
+    'braille-breathe': 'breathe',
+    'braille-pulse': 'pulse',
+    'braille-wave': 'wave',
   }
   return map[style] ?? null
 }
 
 function LoaderPreview({ style }: { style: LoaderStyle }) {
   if (style === 'dots') return <ThreeDotsSpinner />
-  if (style === 'lobster') return <span className="inline-block text-sm animate-pulse">🦞</span>
+  if (style === 'lobster')
+    return <span className="inline-block text-sm animate-pulse">🦞</span>
   if (style === 'logo') return <LogoLoader />
   const preset = getPreset(style)
-  return preset ? <BrailleSpinner preset={preset} size={16} speed={120} className="text-primary-500" /> : <ThreeDotsSpinner />
+  return preset ? (
+    <BrailleSpinner
+      preset={preset}
+      size={16}
+      speed={120}
+      className="text-primary-500"
+    />
+  ) : (
+    <ThreeDotsSpinner />
+  )
 }
 
 function LoaderStyleSection() {
-  const { settings: chatSettings, updateSettings: updateChatSettings } = useChatSettingsStore()
+  const { settings: chatSettings, updateSettings: updateChatSettings } =
+    useChatSettingsStore()
 
   return (
-    <SettingsSection title="Loading Animation" description="Choose the animation while the assistant is streaming." icon={Settings02Icon}>
+    <SettingsSection
+      title="Loading Animation"
+      description="Choose the animation while the assistant is streaming."
+      icon={Settings02Icon}
+    >
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         {LOADER_STYLES.map((option) => {
           const active = chatSettings.loaderStyle === option.value
@@ -626,7 +877,9 @@ function LoaderStyleSection() {
               <span className="flex h-5 items-center justify-center">
                 <LoaderPreview style={option.value} />
               </span>
-              <span className="text-[11px] font-medium text-center leading-4">{option.label}</span>
+              <span className="text-[11px] font-medium text-center leading-4">
+                {option.label}
+              </span>
             </button>
           )
         })}

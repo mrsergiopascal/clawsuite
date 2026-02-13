@@ -236,12 +236,21 @@ export function AgentStatusWidget({
       onRemove={onRemove}
       className="h-full rounded-xl border-primary-200 p-4 shadow-sm [&_h2]:text-sm [&_h2]:font-semibold [&_h2]:normal-case [&_h2]:text-ink"
     >
-      {agents.length === 0 ? (
+      {sessionsQuery.isLoading && agents.length === 0 ? (
+        <div className="flex h-32 items-center justify-center gap-3 rounded-lg border border-primary-200 bg-primary-100/45">
+          <span
+            className="size-4 animate-spin rounded-full border-2 border-primary-300 border-t-accent-600"
+            role="status"
+            aria-label="Loading"
+          />
+          <span className="text-sm text-primary-600">Loading sessions…</span>
+        </div>
+      ) : agents.length === 0 ? (
         <div className="flex h-32 flex-col items-center justify-center gap-1 rounded-lg border border-primary-200 bg-primary-100/45">
-          <span className="text-sm text-primary-600">No active sessions</span>
-          <span className="text-xs text-primary-400">
-            Sessions will appear here when running
-          </span>
+          <p className="text-sm font-semibold text-ink">No active sessions</p>
+          <p className="text-xs text-primary-500">
+            Active chat sessions and agents will appear here
+          </p>
         </div>
       ) : (
         <div className="max-h-80 space-y-2 overflow-y-auto">

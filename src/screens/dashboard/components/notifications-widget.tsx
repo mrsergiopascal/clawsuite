@@ -139,9 +139,23 @@ export function NotificationsWidget({
       onRemove={onRemove}
       className="h-full rounded-xl border-primary-200 p-4 shadow-sm [&_h2]:text-sm [&_h2]:font-semibold [&_h2]:normal-case [&_h2]:text-ink"
     >
-      {notifications.length === 0 ? (
-        <div className="flex h-[150px] items-center justify-center rounded-xl border border-primary-200 bg-primary-100/50 text-sm text-primary-600 text-pretty">
-          No recent activity
+      {notificationsQuery.isLoading && notifications.length === 0 ? (
+        <div className="flex h-[150px] items-center justify-center gap-3 rounded-xl border border-primary-200 bg-primary-100/50">
+          <span
+            className="size-4 animate-spin rounded-full border-2 border-primary-300 border-t-accent-600"
+            role="status"
+            aria-label="Loading"
+          />
+          <span className="text-sm text-primary-600">
+            Loading notifications…
+          </span>
+        </div>
+      ) : notifications.length === 0 ? (
+        <div className="flex h-[150px] flex-col items-center justify-center gap-1 rounded-xl border border-primary-200 bg-primary-100/50">
+          <p className="text-sm font-semibold text-ink">No notifications</p>
+          <p className="text-xs text-primary-500 text-pretty">
+            Session events will appear here
+          </p>
         </div>
       ) : (
         <div className="max-h-[190px] space-y-2 overflow-y-auto pr-1">

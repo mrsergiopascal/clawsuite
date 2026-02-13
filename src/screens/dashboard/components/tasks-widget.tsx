@@ -192,8 +192,13 @@ export function TasksWidget({ draggable = false, onRemove }: TasksWidgetProps) {
       </div>
 
       {cronJobsQuery.isLoading && tasks.length === 0 ? (
-        <div className="mb-2 rounded-lg border border-primary-200 bg-primary-100/45 px-3 py-2.5 text-sm text-primary-600 text-pretty">
-          Loading tasks...
+        <div className="mb-2 flex items-center gap-3 rounded-lg border border-primary-200 bg-primary-100/45 px-3 py-2.5">
+          <span
+            className="size-4 animate-spin rounded-full border-2 border-primary-300 border-t-accent-600"
+            role="status"
+            aria-label="Loading"
+          />
+          <span className="text-sm text-primary-600">Loading tasks…</span>
         </div>
       ) : null}
       {cronJobsQuery.isError ? (
@@ -204,8 +209,11 @@ export function TasksWidget({ draggable = false, onRemove }: TasksWidgetProps) {
       {!cronJobsQuery.isLoading &&
       !cronJobsQuery.isError &&
       tasks.length === 0 ? (
-        <div className="mb-2 rounded-lg border border-primary-200 bg-primary-100/45 px-3 py-2.5 text-sm text-primary-600 text-pretty">
-          No tasks reported by the Gateway.
+        <div className="mb-2 rounded-lg border border-primary-200 bg-primary-100/45 px-3 py-2.5">
+          <p className="text-sm font-semibold text-ink">No tasks yet</p>
+          <p className="mt-0.5 text-sm text-primary-600 text-pretty">
+            Scheduled cron jobs and automated tasks will appear here.
+          </p>
         </div>
       ) : null}
 
