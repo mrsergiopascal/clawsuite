@@ -3,7 +3,12 @@ import { createFileRoute } from '@tanstack/react-router'
 import { json } from '@tanstack/react-start'
 import { z } from 'zod'
 import { gatewayRpc } from '../../server/gateway'
-import { getClientIp, rateLimit, rateLimitResponse, safeErrorMessage } from '../../server/rate-limit'
+import {
+  getClientIp,
+  rateLimit,
+  rateLimitResponse,
+  safeErrorMessage,
+} from '../../server/rate-limit'
 import { isAuthenticated } from '../../server/auth-middleware'
 
 const SendSchema = z.object({
@@ -40,7 +45,10 @@ export const Route = createFileRoute('/api/send')({
           const raw = await request.json().catch(() => ({}))
           const parsed = SendSchema.safeParse(raw)
           if (!parsed.success) {
-            return json({ ok: false, error: 'Invalid request body' }, { status: 400 })
+            return json(
+              { ok: false, error: 'Invalid request body' },
+              { status: 400 },
+            )
           }
           const body = parsed.data
 
@@ -115,9 +123,17 @@ export const Route = createFileRoute('/api/send')({
             sendPayload,
           )
 
-          return json({ ok: true, ...res, sessionKey, clientId: clientId ?? null })
+          return json({
+            ok: true,
+            ...res,
+            sessionKey,
+            clientId: clientId ?? null,
+          })
         } catch (err) {
-          console.error('[/api/send] Error:', err instanceof Error ? err.message : String(err))
+          console.error(
+            '[/api/send] Error:',
+            err instanceof Error ? err.message : String(err),
+          )
           return json(
             { ok: false, error: safeErrorMessage(err) },
             { status: 500 },

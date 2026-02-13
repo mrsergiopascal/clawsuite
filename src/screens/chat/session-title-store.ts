@@ -1,4 +1,4 @@
-"use client"
+'use client'
 
 import { useSyncExternalStore } from 'react'
 
@@ -50,19 +50,16 @@ function ensureLoaded() {
               // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- runtime safety
               if (value && typeof value === 'object') {
                 if (
-                  typeof (value).title === 'string' &&
-                  (value).title.trim().length > 0
+                  typeof value.title === 'string' &&
+                  value.title.trim().length > 0
                 ) {
-                  normalized.title = (value).title.trim()
+                  normalized.title = value.title.trim()
                 }
-                if (
-                  (value).source === 'auto' ||
-                  (value).source === 'manual'
-                ) {
-                  normalized.source = (value).source
+                if (value.source === 'auto' || value.source === 'manual') {
+                  normalized.source = value.source
                 }
-                if (typeof (value).updatedAt === 'number') {
-                  normalized.updatedAt = (value).updatedAt
+                if (typeof value.updatedAt === 'number') {
+                  normalized.updatedAt = value.updatedAt
                 }
               }
               return [key, normalized]

@@ -51,8 +51,13 @@ export async function startProxy(): Promise<{ port: number; url: string }> {
   return new Promise((resolve, reject) => {
     proxyServer = http.createServer((clientReq, clientRes) => {
       // The target URL is passed via the "x-proxy-url" header or query param
-      const reqUrl = new URL(clientReq.url || '/', `http://localhost:${PROXY_PORT}`)
-      const targetUrl = reqUrl.searchParams.get('url') || clientReq.headers['x-proxy-url'] as string
+      const reqUrl = new URL(
+        clientReq.url || '/',
+        `http://localhost:${PROXY_PORT}`,
+      )
+      const targetUrl =
+        reqUrl.searchParams.get('url') ||
+        (clientReq.headers['x-proxy-url'] as string)
 
       // Handle CORS preflight
       if (clientReq.method === 'OPTIONS') {
@@ -71,7 +76,10 @@ export async function startProxy(): Promise<{ port: number; url: string }> {
         const url = reqUrl.searchParams.get('url') || ''
         if (url && isValidUrl(url)) {
           currentTargetOrigin = url
-          clientRes.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' })
+          clientRes.writeHead(200, {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+          })
           clientRes.end(JSON.stringify({ ok: true, url }))
         } else {
           clientRes.writeHead(400, { 'Content-Type': 'application/json' })
@@ -82,8 +90,17 @@ export async function startProxy(): Promise<{ port: number; url: string }> {
 
       // Status endpoint
       if (reqUrl.pathname === '/__proxy__/status') {
-        clientRes.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' })
-        clientRes.end(JSON.stringify({ running: true, target: currentTargetOrigin, port: PROXY_PORT }))
+        clientRes.writeHead(200, {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+        })
+        clientRes.end(
+          JSON.stringify({
+            running: true,
+            target: currentTargetOrigin,
+            port: PROXY_PORT,
+          }),
+        )
         return
       }
 
@@ -95,7 +112,10 @@ export async function startProxy(): Promise<{ port: number; url: string }> {
         // Relative path — resolve against current target
         try {
           const base = new URL(currentTargetOrigin)
-          fullUrl = new URL(reqUrl.pathname + reqUrl.search, base.origin).toString()
+          fullUrl = new URL(
+            reqUrl.pathname + reqUrl.search,
+            base.origin,
+          ).toString()
         } catch {
           clientRes.writeHead(400)
           clientRes.end('Bad request')
@@ -104,7 +124,9 @@ export async function startProxy(): Promise<{ port: number; url: string }> {
       } else {
         // No target set — show instructions
         clientRes.writeHead(200, { 'Content-Type': 'text/html' })
-        clientRes.end(`<html><body style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:system-ui;color:#666"><p>Enter a URL above to start browsing</p></body></html>`)
+        clientRes.end(
+          `<html><body style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:system-ui;color:#666"><p>Enter a URL above to start browsing</p></body></html>`,
+        )
         return
       }
 
@@ -129,7 +151,10 @@ export async function startProxy(): Promise<{ port: number; url: string }> {
           // Strip iframe-blocking headers
           const headers: Record<string, string | string[]> = {}
           for (const [key, value] of Object.entries(proxyRes.headers)) {
-            if (!STRIP_HEADERS.includes(key.toLowerCase()) && value !== undefined) {
+            if (
+              !STRIP_HEADERS.includes(key.toLowerCase()) &&
+              value !== undefined
+            ) {
               headers[key] = value as string | string[]
             }
           }
@@ -183,7 +208,10 @@ try { window.parent.postMessage({ type: 'proxy-navigate', url: window.location.h
               } else if (html.includes('<HEAD>')) {
                 html = html.replace('<HEAD>', `<HEAD>${baseTag}`)
               } else if (html.includes('<html')) {
-                html = html.replace(/(<html[^>]*>)/i, `$1<head>${baseTag}</head>`)
+                html = html.replace(
+                  /(<html[^>]*>)/i,
+                  `$1<head>${baseTag}</head>`,
+                )
               } else {
                 html = baseTag + html
               }
@@ -206,7 +234,9 @@ try { window.parent.postMessage({ type: 'proxy-navigate', url: window.location.h
 
       proxyReq.on('error', (err) => {
         clientRes.writeHead(502, { 'Content-Type': 'text/html' })
-        clientRes.end(`<html><body style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:system-ui;color:#666"><p>Failed to load page: ${err.message}</p></body></html>`)
+        clientRes.end(
+          `<html><body style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:system-ui;color:#666"><p>Failed to load page: ${err.message}</p></body></html>`,
+        )
       })
 
       clientReq.pipe(proxyReq)

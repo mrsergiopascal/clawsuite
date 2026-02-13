@@ -5,7 +5,12 @@ import { execFile } from 'node:child_process'
 import { promisify } from 'node:util'
 import { createFileRoute } from '@tanstack/react-router'
 import { json } from '@tanstack/react-start'
-import { getClientIp, rateLimit, rateLimitResponse, safeErrorMessage } from '../../server/rate-limit'
+import {
+  getClientIp,
+  rateLimit,
+  rateLimitResponse,
+  safeErrorMessage,
+} from '../../server/rate-limit'
 
 const execFileAsync = promisify(execFile)
 
@@ -65,9 +70,7 @@ function parseGlobPattern(input: string) {
   const directoryPath =
     lastSlashIndex >= 0 ? normalized.slice(0, lastSlashIndex) : ''
   const filePattern =
-    lastSlashIndex >= 0
-      ? normalized.slice(lastSlashIndex + 1)
-      : normalized
+    lastSlashIndex >= 0 ? normalized.slice(lastSlashIndex + 1) : normalized
 
   const regexSource = `^${escapeRegex(filePattern).replace(/\\\*/g, '.*')}$`
 
@@ -78,8 +81,15 @@ function parseGlobPattern(input: string) {
 }
 
 const IGNORED_DIRS = new Set([
-  'node_modules', '.git', '.next', '.turbo', '.cache',
-  '__pycache__', '.venv', 'dist', '.DS_Store',
+  'node_modules',
+  '.git',
+  '.next',
+  '.turbo',
+  '.cache',
+  '__pycache__',
+  '.venv',
+  'dist',
+  '.DS_Store',
 ])
 
 const MAX_DIRECTORY_DEPTH = 8
@@ -221,7 +231,9 @@ export const Route = createFileRoute('/api/files')({
           const action = url.searchParams.get('action') || 'list'
           const inputPath = url.searchParams.get('path') || ''
           const maxDepthParam = parseMaxDepth(url.searchParams.get('maxDepth'))
-          const maxEntriesParam = parseMaxEntries(url.searchParams.get('maxEntries'))
+          const maxEntriesParam = parseMaxEntries(
+            url.searchParams.get('maxEntries'),
+          )
 
           if (action === 'list' && hasGlob(inputPath)) {
             const globListing = await readGlobDirectory(inputPath)
@@ -274,10 +286,7 @@ export const Route = createFileRoute('/api/files')({
             entries: tree,
           })
         } catch (err) {
-          return json(
-            { error: safeErrorMessage(err) },
-            { status: 500 },
-          )
+          return json({ error: safeErrorMessage(err) }, { status: 500 })
         }
       },
       POST: async ({ request }) => {
@@ -348,10 +357,7 @@ export const Route = createFileRoute('/api/files')({
           await fs.writeFile(filePath, content, 'utf8')
           return json({ ok: true, path: toRelative(filePath) })
         } catch (err) {
-          return json(
-            { error: safeErrorMessage(err) },
-            { status: 500 },
-          )
+          return json({ error: safeErrorMessage(err) }, { status: 500 })
         }
       },
     },

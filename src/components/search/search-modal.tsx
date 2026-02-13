@@ -227,7 +227,9 @@ export function SearchModal() {
       icon: <HugeiconsIcon icon={Chat01Icon} size={20} strokeWidth={1.5} />,
       title: entry.title || entry.friendlyId,
       snippet: entry.preview || `Session: ${entry.key}`,
-      meta: entry.updatedAt ? new Date(entry.updatedAt).toLocaleTimeString() : '',
+      meta: entry.updatedAt
+        ? new Date(entry.updatedAt).toLocaleTimeString()
+        : '',
       onSelect: () => {
         closeModal()
         navigate({
@@ -286,7 +288,9 @@ export function SearchModal() {
     ).map<SearchResultItemData>((entry) => ({
       id: entry.id,
       scope: 'skills',
-      icon: <HugeiconsIcon icon={LanguageSkillIcon} size={20} strokeWidth={1.5} />,
+      icon: (
+        <HugeiconsIcon icon={LanguageSkillIcon} size={20} strokeWidth={1.5} />
+      ),
       title: entry.name,
       snippet: entry.description,
       meta: entry.installed ? 'Installed' : 'Available',
@@ -299,7 +303,8 @@ export function SearchModal() {
 
     const actions: Array<SearchResultItemData> = []
     for (const entry of quickActions) {
-      if (!includesQuery(`${entry.label} ${entry.description}`, normalized)) continue
+      if (!includesQuery(`${entry.label} ${entry.description}`, normalized))
+        continue
       actions.push({
         id: entry.id,
         scope: 'actions',
@@ -330,10 +335,13 @@ export function SearchModal() {
     if (scope === 'skills') return skillResults
     if (scope === 'actions') return actions
 
-    return [...chats, ...fileResults, ...activityResults, ...skillResults, ...actions].slice(
-      0,
-      RESULT_LIMITS.total,
-    )
+    return [
+      ...chats,
+      ...fileResults,
+      ...activityResults,
+      ...skillResults,
+      ...actions,
+    ].slice(0, RESULT_LIMITS.total)
   }, [
     activity,
     closeModal,
@@ -377,7 +385,9 @@ export function SearchModal() {
       if (event.key === 'Tab') {
         event.preventDefault()
         const direction = event.shiftKey ? -1 : 1
-        const currentIndex = SCOPE_TABS.findIndex((item) => item.value === scope)
+        const currentIndex = SCOPE_TABS.findIndex(
+          (item) => item.value === scope,
+        )
         const nextIndex =
           (currentIndex + direction + SCOPE_TABS.length) % SCOPE_TABS.length
         setScope(SCOPE_TABS[nextIndex].value)
@@ -394,8 +404,8 @@ export function SearchModal() {
       if (event.key === 'ArrowUp') {
         event.preventDefault()
         if (resultItems.length === 0) return
-        setSelectedIndex((prev) =>
-          (prev - 1 + resultItems.length) % resultItems.length,
+        setSelectedIndex(
+          (prev) => (prev - 1 + resultItems.length) % resultItems.length,
         )
         return
       }
@@ -424,7 +434,15 @@ export function SearchModal() {
     return () => {
       window.removeEventListener('keydown', handleKeyDown)
     }
-  }, [closeModal, isOpen, resultItems, scope, selectedIndex, setScope, toggleModal])
+  }, [
+    closeModal,
+    isOpen,
+    resultItems,
+    scope,
+    selectedIndex,
+    setScope,
+    toggleModal,
+  ])
 
   if (typeof document === 'undefined') return null
 

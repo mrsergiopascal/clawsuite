@@ -31,7 +31,10 @@ function statusDotColor(s: TaskStatus): string {
 function formatDate(iso: string): string {
   const d = new Date(iso)
   if (Number.isNaN(d.getTime())) return ''
-  return new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric' }).format(d)
+  return new Intl.DateTimeFormat(undefined, {
+    month: 'short',
+    day: 'numeric',
+  }).format(d)
 }
 
 /* ── Add Task Dialog ── */
@@ -69,7 +72,10 @@ function AddTaskDialog({
   )
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+      onClick={onClose}
+    >
       <form
         onClick={(e) => e.stopPropagation()}
         onSubmit={handleSubmit}
@@ -78,7 +84,9 @@ function AddTaskDialog({
         <h2 className="mb-4 text-sm font-semibold text-ink">New Task</h2>
 
         <label className="mb-3 block">
-          <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-primary-500">Title</span>
+          <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-primary-500">
+            Title
+          </span>
           <input
             type="text"
             value={title}
@@ -90,7 +98,9 @@ function AddTaskDialog({
         </label>
 
         <label className="mb-3 block">
-          <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-primary-500">Description</span>
+          <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-primary-500">
+            Description
+          </span>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -102,26 +112,34 @@ function AddTaskDialog({
 
         <div className="mb-3 flex gap-3">
           <label className="flex-1">
-            <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-primary-500">Priority</span>
+            <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-primary-500">
+              Priority
+            </span>
             <select
               value={priority}
               onChange={(e) => setPriority(e.target.value as TaskPriority)}
               className="w-full rounded-lg border border-primary-200 bg-primary-50 px-3 py-2 text-[13px] text-ink outline-none dark:bg-primary-50"
             >
               {PRIORITY_ORDER.map((p) => (
-                <option key={p} value={p}>{p}</option>
+                <option key={p} value={p}>
+                  {p}
+                </option>
               ))}
             </select>
           </label>
           <label className="flex-1">
-            <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-primary-500">Status</span>
+            <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-primary-500">
+              Status
+            </span>
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value as TaskStatus)}
               className="w-full rounded-lg border border-primary-200 bg-primary-50 px-3 py-2 text-[13px] text-ink outline-none dark:bg-primary-50"
             >
               {STATUS_ORDER.map((s) => (
-                <option key={s} value={s}>{STATUS_LABELS[s]}</option>
+                <option key={s} value={s}>
+                  {STATUS_LABELS[s]}
+                </option>
               ))}
             </select>
           </label>
@@ -129,7 +147,9 @@ function AddTaskDialog({
 
         <div className="mb-4 flex gap-3">
           <label className="flex-1">
-            <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-primary-500">Due Date</span>
+            <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-primary-500">
+              Due Date
+            </span>
             <input
               type="date"
               value={dueDate}
@@ -138,7 +158,9 @@ function AddTaskDialog({
             />
           </label>
           <label className="flex-1">
-            <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-primary-500">Reminder</span>
+            <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-primary-500">
+              Reminder
+            </span>
             <input
               type="datetime-local"
               value={reminder}
@@ -187,7 +209,9 @@ function TaskCard({
       className="group cursor-pointer rounded-lg border border-primary-200 bg-primary-50/90 px-3 py-2.5 transition-colors hover:border-primary-300"
       onClick={() => onSelect(task)}
     >
-      <p className="line-clamp-2 text-[13px] font-medium text-ink">{task.title}</p>
+      <p className="line-clamp-2 text-[13px] font-medium text-ink">
+        {task.title}
+      </p>
 
       {task.project ? (
         <p className="mt-1 text-[11px] text-primary-400">{task.project}</p>
@@ -195,18 +219,26 @@ function TaskCard({
 
       <div className="mt-2 flex items-center justify-between">
         <div className="flex items-center gap-1.5">
-          <span className={cn('rounded px-1.5 py-0.5 text-[10px] font-medium tabular-nums', priorityColor(task.priority))}>
+          <span
+            className={cn(
+              'rounded px-1.5 py-0.5 text-[10px] font-medium tabular-nums',
+              priorityColor(task.priority),
+            )}
+          >
             {task.priority}
           </span>
           {task.dueDate ? (
-            <span className={cn(
-              'rounded px-1.5 py-0.5 text-[10px] tabular-nums',
-              new Date(task.dueDate).getTime() < Date.now()
-                ? 'bg-red-500/15 text-red-600 dark:text-red-400'
-                : new Date(task.dueDate).getTime() - Date.now() < 24 * 60 * 60 * 1000
-                  ? 'bg-amber-500/15 text-amber-700 dark:text-amber-400'
-                  : 'bg-primary-100 text-primary-500',
-            )}>
+            <span
+              className={cn(
+                'rounded px-1.5 py-0.5 text-[10px] tabular-nums',
+                new Date(task.dueDate).getTime() < Date.now()
+                  ? 'bg-red-500/15 text-red-600 dark:text-red-400'
+                  : new Date(task.dueDate).getTime() - Date.now() <
+                      24 * 60 * 60 * 1000
+                    ? 'bg-amber-500/15 text-amber-700 dark:text-amber-400'
+                    : 'bg-primary-100 text-primary-500',
+              )}
+            >
               {formatDate(task.dueDate)}
             </span>
           ) : null}
@@ -216,7 +248,10 @@ function TaskCard({
           {task.status !== 'in_progress' && task.status !== 'done' ? (
             <button
               type="button"
-              onClick={(e) => { e.stopPropagation(); onMove(task.id, 'in_progress') }}
+              onClick={(e) => {
+                e.stopPropagation()
+                onMove(task.id, 'in_progress')
+              }}
               className="rounded px-1.5 py-0.5 text-[10px] text-primary-500 hover:bg-primary-100 hover:text-ink"
               title="Start"
             >
@@ -226,7 +261,10 @@ function TaskCard({
           {task.status === 'in_progress' ? (
             <button
               type="button"
-              onClick={(e) => { e.stopPropagation(); onMove(task.id, 'review') }}
+              onClick={(e) => {
+                e.stopPropagation()
+                onMove(task.id, 'review')
+              }}
               className="rounded px-1.5 py-0.5 text-[10px] text-primary-500 hover:bg-primary-100 hover:text-ink"
               title="Review"
             >
@@ -236,7 +274,10 @@ function TaskCard({
           {task.status === 'review' ? (
             <button
               type="button"
-              onClick={(e) => { e.stopPropagation(); onMove(task.id, 'done') }}
+              onClick={(e) => {
+                e.stopPropagation()
+                onMove(task.id, 'done')
+              }}
               className="rounded px-1.5 py-0.5 text-[10px] text-emerald-600 hover:bg-emerald-50"
               title="Done"
             >
@@ -245,7 +286,10 @@ function TaskCard({
           ) : null}
           <button
             type="button"
-            onClick={(e) => { e.stopPropagation(); onDelete(task.id) }}
+            onClick={(e) => {
+              e.stopPropagation()
+              onDelete(task.id)
+            }}
             className="rounded p-0.5 text-primary-300 hover:text-red-500"
             title="Delete"
           >
@@ -268,7 +312,10 @@ function TaskDetailPanel({
   task: Task
   onClose: () => void
   onMove: (id: string, status: TaskStatus) => void
-  onUpdate: (id: string, updates: Partial<Omit<Task, 'id' | 'createdAt'>>) => void
+  onUpdate: (
+    id: string,
+    updates: Partial<Omit<Task, 'id' | 'createdAt'>>,
+  ) => void
 }) {
   const [editing, setEditing] = useState(false)
   const [editTitle, setEditTitle] = useState(task.title)
@@ -280,7 +327,10 @@ function TaskDetailPanel({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+      onClick={onClose}
+    >
       <div
         onClick={(e) => e.stopPropagation()}
         className="w-full max-w-lg rounded-xl border border-primary-200 bg-primary-50 p-5 shadow-2xl dark:bg-primary-100"
@@ -295,21 +345,37 @@ function TaskDetailPanel({
               autoFocus
             />
           ) : (
-            <h2 className="flex-1 text-sm font-semibold text-ink">{task.title}</h2>
+            <h2 className="flex-1 text-sm font-semibold text-ink">
+              {task.title}
+            </h2>
           )}
-          <span className="shrink-0 text-[11px] text-primary-400 tabular-nums">{task.id}</span>
+          <span className="shrink-0 text-[11px] text-primary-400 tabular-nums">
+            {task.id}
+          </span>
         </div>
 
         <div className="mb-4 flex flex-wrap gap-2">
-          <span className={cn('rounded px-2 py-0.5 text-[11px] font-medium', priorityColor(task.priority))}>
+          <span
+            className={cn(
+              'rounded px-2 py-0.5 text-[11px] font-medium',
+              priorityColor(task.priority),
+            )}
+          >
             {task.priority}
           </span>
           <span className="flex items-center gap-1 rounded bg-primary-100 px-2 py-0.5 text-[11px] text-primary-600">
-            <span className={cn('size-1.5 rounded-full', statusDotColor(task.status))} />
+            <span
+              className={cn(
+                'size-1.5 rounded-full',
+                statusDotColor(task.status),
+              )}
+            />
             {STATUS_LABELS[task.status]}
           </span>
           {task.project ? (
-            <span className="rounded bg-primary-100 px-2 py-0.5 text-[11px] text-primary-500">{task.project}</span>
+            <span className="rounded bg-primary-100 px-2 py-0.5 text-[11px] text-primary-500">
+              {task.project}
+            </span>
           ) : null}
         </div>
 
@@ -349,19 +415,35 @@ function TaskDetailPanel({
         <div className="flex justify-end gap-2">
           {editing ? (
             <>
-              <button type="button" onClick={() => setEditing(false)} className="rounded-lg px-3 py-1.5 text-[13px] text-primary-500 hover:text-ink">
+              <button
+                type="button"
+                onClick={() => setEditing(false)}
+                className="rounded-lg px-3 py-1.5 text-[13px] text-primary-500 hover:text-ink"
+              >
                 Cancel
               </button>
-              <button type="button" onClick={handleSave} className="rounded-lg bg-primary-900 px-4 py-1.5 text-[13px] font-medium text-primary-50 hover:bg-primary-800 dark:bg-primary-200 dark:text-primary-900">
+              <button
+                type="button"
+                onClick={handleSave}
+                className="rounded-lg bg-primary-900 px-4 py-1.5 text-[13px] font-medium text-primary-50 hover:bg-primary-800 dark:bg-primary-200 dark:text-primary-900"
+              >
                 Save
               </button>
             </>
           ) : (
             <>
-              <button type="button" onClick={() => setEditing(true)} className="rounded-lg px-3 py-1.5 text-[13px] text-primary-500 hover:text-ink">
+              <button
+                type="button"
+                onClick={() => setEditing(true)}
+                className="rounded-lg px-3 py-1.5 text-[13px] text-primary-500 hover:text-ink"
+              >
                 Edit
               </button>
-              <button type="button" onClick={onClose} className="rounded-lg bg-primary-900 px-4 py-1.5 text-[13px] font-medium text-primary-50 hover:bg-primary-800 dark:bg-primary-200 dark:text-primary-900">
+              <button
+                type="button"
+                onClick={onClose}
+                className="rounded-lg bg-primary-900 px-4 py-1.5 text-[13px] font-medium text-primary-50 hover:bg-primary-800 dark:bg-primary-200 dark:text-primary-900"
+              >
                 Close
               </button>
             </>
@@ -375,12 +457,15 @@ function TaskDetailPanel({
 /* ── Main Screen ── */
 
 export function TasksScreen() {
-  const { tasks, addTask, moveTask, updateTask, deleteTask, syncFromApi } = useTaskStore()
+  const { tasks, addTask, moveTask, updateTask, deleteTask, syncFromApi } =
+    useTaskStore()
   const [showAdd, setShowAdd] = useState(false)
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
 
   // Sync from API on mount
-  useEffect(() => { void syncFromApi() }, [syncFromApi])
+  useEffect(() => {
+    void syncFromApi()
+  }, [syncFromApi])
 
   const columns = STATUS_ORDER.map((status) => ({
     status,
@@ -402,7 +487,8 @@ export function TasksScreen() {
             <div>
               <h1 className="text-lg font-semibold text-ink">Tasks</h1>
               <p className="text-[11px] text-primary-400">
-                {tasks.filter((t) => t.status !== 'done').length} active · {tasks.filter((t) => t.status === 'done').length} completed
+                {tasks.filter((t) => t.status !== 'done').length} active ·{' '}
+                {tasks.filter((t) => t.status === 'done').length} completed
               </p>
             </div>
           </div>
@@ -425,8 +511,15 @@ export function TasksScreen() {
             >
               <header className="mb-3 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className={cn('size-2 rounded-full', statusDotColor(col.status))} />
-                  <h2 className="text-[13px] font-medium text-ink">{col.label}</h2>
+                  <span
+                    className={cn(
+                      'size-2 rounded-full',
+                      statusDotColor(col.status),
+                    )}
+                  />
+                  <h2 className="text-[13px] font-medium text-ink">
+                    {col.label}
+                  </h2>
                 </div>
                 <span className="rounded-full border border-primary-200 bg-primary-50/80 px-2 py-0.5 text-[11px] font-medium text-primary-600 tabular-nums">
                   {col.tasks.length}
@@ -455,12 +548,17 @@ export function TasksScreen() {
         </div>
       </section>
 
-      {showAdd ? <AddTaskDialog onAdd={addTask} onClose={() => setShowAdd(false)} /> : null}
+      {showAdd ? (
+        <AddTaskDialog onAdd={addTask} onClose={() => setShowAdd(false)} />
+      ) : null}
       {selectedTask ? (
         <TaskDetailPanel
           task={selectedTask}
           onClose={() => setSelectedTask(null)}
-          onMove={(id, status) => { moveTask(id, status); setSelectedTask(null) }}
+          onMove={(id, status) => {
+            moveTask(id, status)
+            setSelectedTask(null)
+          }}
           onUpdate={updateTask}
         />
       ) : null}

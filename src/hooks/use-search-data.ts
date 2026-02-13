@@ -59,11 +59,18 @@ type SkillsApiResponse = {
   skills?: Array<Record<string, unknown>>
 }
 
-type SearchQueryScope = 'all' | 'chats' | 'files' | 'agents' | 'skills' | 'actions'
+type SearchQueryScope =
+  | 'all'
+  | 'chats'
+  | 'files'
+  | 'agents'
+  | 'skills'
+  | 'actions'
 
-function withTimeoutSignal(
-  querySignal?: AbortSignal,
-): { signal: AbortSignal; cleanup: () => void } {
+function withTimeoutSignal(querySignal?: AbortSignal): {
+  signal: AbortSignal
+  cleanup: () => void
+} {
   const controller = new AbortController()
   const timeoutId = setTimeout(() => {
     controller.abort()
@@ -118,7 +125,11 @@ function flattenFileTree(
     const name = String(entry.name || '')
     const type = String(entry.type || 'file')
 
-    if (path.length > 0 && name.length > 0 && (type === 'file' || type === 'folder')) {
+    if (
+      path.length > 0 &&
+      name.length > 0 &&
+      (type === 'file' || type === 'folder')
+    ) {
       flattened.push({
         id: path,
         path,
@@ -138,8 +149,13 @@ function flattenFileTree(
   return flattened
 }
 
-async function fetchSessions(querySignal?: AbortSignal): Promise<Array<SearchSession>> {
-  const data = await fetchJsonWithTimeout<SessionsApiResponse>('/api/sessions', querySignal)
+async function fetchSessions(
+  querySignal?: AbortSignal,
+): Promise<Array<SearchSession>> {
+  const data = await fetchJsonWithTimeout<SessionsApiResponse>(
+    '/api/sessions',
+    querySignal,
+  )
   if (!data) return []
 
   const sessions = Array.isArray(data.sessions) ? data.sessions : []
@@ -155,7 +171,9 @@ async function fetchSessions(querySignal?: AbortSignal): Promise<Array<SearchSes
   }))
 }
 
-async function fetchFiles(querySignal?: AbortSignal): Promise<Array<SearchFile>> {
+async function fetchFiles(
+  querySignal?: AbortSignal,
+): Promise<Array<SearchFile>> {
   const data = await fetchJsonWithTimeout<FilesApiResponse>(
     '/api/files?action=list&maxDepth=5&maxEntries=2500',
     querySignal,
@@ -166,7 +184,9 @@ async function fetchFiles(querySignal?: AbortSignal): Promise<Array<SearchFile>>
   return flattenFileTree(entries, MAX_SEARCH_FILES)
 }
 
-async function fetchSkills(querySignal?: AbortSignal): Promise<Array<SearchSkill>> {
+async function fetchSkills(
+  querySignal?: AbortSignal,
+): Promise<Array<SearchSkill>> {
   const data = await fetchJsonWithTimeout<SkillsApiResponse>(
     '/api/skills?summary=search&limit=120',
     querySignal,
@@ -231,7 +251,8 @@ export function useSearchData(scope: SearchQueryScope) {
     files: filesQuery.data || [],
     skills: skillsQuery.data || [],
     activity: activityResults,
-    isLoading: sessionsQuery.isLoading || filesQuery.isLoading || skillsQuery.isLoading,
+    isLoading:
+      sessionsQuery.isLoading || filesQuery.isLoading || skillsQuery.isLoading,
   }
 }
 

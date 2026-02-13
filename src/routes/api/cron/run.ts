@@ -12,8 +12,7 @@ export const Route = createFileRoute('/api/cron/run')({
             unknown
           >
 
-          const jobId =
-            typeof body.jobId === 'string' ? body.jobId.trim() : ''
+          const jobId = typeof body.jobId === 'string' ? body.jobId.trim() : ''
           if (!jobId) {
             return json({ error: 'jobId is required' }, { status: 400 })
           }

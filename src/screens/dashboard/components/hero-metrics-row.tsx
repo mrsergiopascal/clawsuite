@@ -51,9 +51,9 @@ export function HeroMetricsRow({
     },
     { label: 'Active Agents', value: `${activeAgents}`, icon: UserGroupIcon },
     { label: 'Uptime', value: formatUptime(uptimeSeconds), icon: Timer02Icon },
-    { 
-      label: 'Cost', 
-      value: costError ? 'Failed to load' : totalSpend, 
+    {
+      label: 'Cost',
+      value: costError ? 'Failed to load' : totalSpend,
       icon: ChartLineData02Icon,
       isError: costError,
       onRetry: onRetryCost,
@@ -78,7 +78,9 @@ export function HeroMetricsRow({
           <div className="min-w-0 flex-1">
             {m.isError ? (
               <>
-                <p className="text-2xl font-bold font-mono tabular-nums leading-none text-primary-300">—</p>
+                <p className="text-2xl font-bold font-mono tabular-nums leading-none text-primary-300">
+                  —
+                </p>
                 <p className="mt-1 text-xs font-medium text-red-600 dark:text-red-500">
                   {m.value}
                 </p>
@@ -102,11 +104,7 @@ export function HeroMetricsRow({
               aria-label="Retry"
               title="Retry loading cost data"
             >
-              <HugeiconsIcon
-                icon={RefreshIcon}
-                size={14}
-                strokeWidth={1.5}
-              />
+              <HugeiconsIcon icon={RefreshIcon} size={14} strokeWidth={1.5} />
             </button>
           ) : null}
         </div>

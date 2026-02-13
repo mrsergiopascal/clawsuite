@@ -26,10 +26,17 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { AgentAvatar } from '@/components/agent-avatar'
-import { PERSONA_COLORS, PixelAvatar } from '@/components/agent-swarm/pixel-avatar'
+import {
+  PERSONA_COLORS,
+  PixelAvatar,
+} from '@/components/agent-swarm/pixel-avatar'
 import { assignPersona } from '@/lib/agent-personas'
 import { formatCost, formatRuntime } from '@/hooks/use-agent-view'
-import { TooltipContent, TooltipRoot, TooltipTrigger } from '@/components/ui/tooltip'
+import {
+  TooltipContent,
+  TooltipRoot,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
 
 export type AgentNodeStatus = AgentProgressStatus
@@ -77,10 +84,13 @@ type AgentCardProps = {
 }
 
 function getModelBadgeClassName(model: string): string {
-  if (model === 'opus') return 'bg-violet-500/20 text-violet-200 ring-violet-500/40'
+  if (model === 'opus')
+    return 'bg-violet-500/20 text-violet-200 ring-violet-500/40'
   if (model === 'sonnet') return 'bg-sky-500/20 text-sky-200 ring-sky-500/40'
-  if (model === 'codex') return 'bg-accent-500/20 text-accent-200 ring-accent-500/40'
-  if (model === 'swarm') return 'bg-primary-300/70 text-primary-800 ring-primary-400/50'
+  if (model === 'codex')
+    return 'bg-accent-500/20 text-accent-200 ring-accent-500/40'
+  if (model === 'swarm')
+    return 'bg-primary-300/70 text-primary-800 ring-primary-400/50'
   return 'bg-primary-300/70 text-primary-800 ring-primary-400/50'
 }
 
@@ -108,7 +118,6 @@ function getStatusLabel(status: AgentNodeStatus): string {
   return 'running'
 }
 
-
 function shouldPulse(status: AgentNodeStatus): boolean {
   return status === 'running' || status === 'thinking'
 }
@@ -131,16 +140,23 @@ function extractPersonaName(agentName: string): string {
  * Get persona colors for an agent based on its name.
  * Falls back to default blue/cyan if persona not found.
  */
-function getPersonaColors(agentName: string, agentId: string): { body: string; accent: string } {
+function getPersonaColors(
+  agentName: string,
+  agentId: string,
+): { body: string; accent: string } {
   const personaName = extractPersonaName(agentName)
   // Try direct match from PERSONA_COLORS
-  const directMatch = PERSONA_COLORS[personaName] as { body: string; accent: string } | undefined
+  const directMatch = PERSONA_COLORS[personaName] as
+    | { body: string; accent: string }
+    | undefined
   if (directMatch) {
     return { body: directMatch.body, accent: directMatch.accent }
   }
   // Fallback: use assignPersona to get colors based on id
   const persona = assignPersona(agentId, agentName)
-  const personaMatch = PERSONA_COLORS[persona.name] as { body: string; accent: string } | undefined
+  const personaMatch = PERSONA_COLORS[persona.name] as
+    | { body: string; accent: string }
+    | undefined
   if (personaMatch) {
     return { body: personaMatch.body, accent: personaMatch.accent }
   }
@@ -213,7 +229,9 @@ export function AgentCard({
         {/* Full task description */}
         <div className="mb-3 rounded-xl border border-primary-300/60 bg-primary-200/30 p-2.5">
           <p className="text-[11px] font-medium text-primary-700 mb-1">Task</p>
-          <p className="text-[12px] text-primary-800 leading-relaxed">{node.task}</p>
+          <p className="text-[12px] text-primary-800 leading-relaxed">
+            {node.task}
+          </p>
         </div>
 
         {/* Stats grid */}
@@ -223,28 +241,40 @@ export function AgentCard({
               <HugeiconsIcon icon={Clock01Icon} size={14} strokeWidth={1.5} />
               <span className="text-[9px] font-medium">Runtime</span>
             </div>
-            <p className="text-[13px] font-mono text-primary-900">{formatRuntime(node.runtimeSeconds)}</p>
+            <p className="text-[13px] font-mono text-primary-900">
+              {formatRuntime(node.runtimeSeconds)}
+            </p>
           </div>
           <div className="rounded-lg border border-primary-300/60 bg-primary-200/30 p-2">
             <div className="flex items-center gap-1.5 text-primary-600 mb-0.5">
               <HugeiconsIcon icon={AiChat01Icon} size={14} strokeWidth={1.5} />
               <span className="text-[9px] font-medium">Tokens</span>
             </div>
-            <p className="text-[13px] font-mono text-primary-900">{node.tokenCount.toLocaleString()}</p>
+            <p className="text-[13px] font-mono text-primary-900">
+              {node.tokenCount.toLocaleString()}
+            </p>
           </div>
           <div className="rounded-lg border border-primary-300/60 bg-primary-200/30 p-2">
             <div className="flex items-center gap-1.5 text-primary-600 mb-0.5">
-              <HugeiconsIcon icon={CoinsDollarIcon} size={14} strokeWidth={1.5} />
+              <HugeiconsIcon
+                icon={CoinsDollarIcon}
+                size={14}
+                strokeWidth={1.5}
+              />
               <span className="text-[9px] font-medium">Cost</span>
             </div>
-            <p className="text-[13px] font-mono text-primary-900">{formatCost(node.cost)}</p>
+            <p className="text-[13px] font-mono text-primary-900">
+              {formatCost(node.cost)}
+            </p>
           </div>
           <div className="rounded-lg border border-primary-300/60 bg-primary-200/30 p-2">
             <div className="flex items-center gap-1.5 text-primary-600 mb-0.5">
               <HugeiconsIcon icon={AiBrain01Icon} size={14} strokeWidth={1.5} />
               <span className="text-[9px] font-medium">Model</span>
             </div>
-            <p className="text-[13px] font-mono text-primary-900 truncate">{node.model}</p>
+            <p className="text-[13px] font-mono text-primary-900 truncate">
+              {node.model}
+            </p>
           </div>
         </div>
 
@@ -255,7 +285,9 @@ export function AgentCard({
               <HugeiconsIcon icon={KeyIcon} size={14} strokeWidth={1.5} />
               <span className="text-[9px] font-medium">Session Key</span>
             </div>
-            <p className="text-[11px] font-mono text-primary-700 truncate">{node.sessionKey}</p>
+            <p className="text-[11px] font-mono text-primary-700 truncate">
+              {node.sessionKey}
+            </p>
           </div>
         ) : null}
 
@@ -263,7 +295,12 @@ export function AgentCard({
         <div className="mb-3">
           <div className="flex items-center justify-between mb-1">
             <span className="text-[10px] text-primary-600">Progress</span>
-            <span className={cn('text-[10px] font-medium tabular-nums', getStatusTextClassName(node.status))}>
+            <span
+              className={cn(
+                'text-[10px] font-medium tabular-nums',
+                getStatusTextClassName(node.status),
+              )}
+            >
               {node.progress}% · {getStatusLabel(node.status)}
             </span>
           </div>
@@ -274,10 +311,13 @@ export function AgentCard({
               transition={{ duration: 0.3, ease: 'easeOut' }}
               className={cn(
                 'h-full rounded-full',
-                node.status === 'complete' ? 'bg-emerald-500' :
-                node.status === 'failed' ? 'bg-red-500' :
-                node.status === 'thinking' ? 'bg-accent-500' :
-                'bg-emerald-500',
+                node.status === 'complete'
+                  ? 'bg-emerald-500'
+                  : node.status === 'failed'
+                    ? 'bg-red-500'
+                    : node.status === 'thinking'
+                      ? 'bg-accent-500'
+                      : 'bg-emerald-500',
               )}
             />
           </div>
@@ -293,7 +333,11 @@ export function AgentCard({
                 className="flex-1 h-8 justify-center"
                 onClick={() => onChat(node.id)}
               >
-                <HugeiconsIcon icon={AiChat01Icon} size={16} strokeWidth={1.5} />
+                <HugeiconsIcon
+                  icon={AiChat01Icon}
+                  size={16}
+                  strokeWidth={1.5}
+                />
                 Chat
               </Button>
             ) : null}
@@ -304,7 +348,11 @@ export function AgentCard({
                 className="flex-1 h-8 justify-center"
                 onClick={() => onCancel?.(node.id)}
               >
-                <HugeiconsIcon icon={Cancel01Icon} size={16} strokeWidth={1.5} />
+                <HugeiconsIcon
+                  icon={Cancel01Icon}
+                  size={16}
+                  strokeWidth={1.5}
+                />
                 Cancel
               </Button>
             ) : (
@@ -316,7 +364,11 @@ export function AgentCard({
                       size="icon-sm"
                       className="size-8 rounded-full"
                     >
-                      <HugeiconsIcon icon={Delete02Icon} size={16} strokeWidth={1.5} />
+                      <HugeiconsIcon
+                        icon={Delete02Icon}
+                        size={16}
+                        strokeWidth={1.5}
+                      />
                     </Button>
                   }
                 />
@@ -324,10 +376,13 @@ export function AgentCard({
                   <div className="space-y-3 p-4">
                     <AlertDialogTitle>Kill this agent run?</AlertDialogTitle>
                     <AlertDialogDescription className="text-pretty">
-                      {node.name} will stop immediately and be moved to history as failed.
+                      {node.name} will stop immediately and be moved to history
+                      as failed.
                     </AlertDialogDescription>
                     <div className="flex items-center justify-end gap-2 pt-1">
-                      <AlertDialogCancel className="h-8">Cancel</AlertDialogCancel>
+                      <AlertDialogCancel className="h-8">
+                        Cancel
+                      </AlertDialogCancel>
                       <AlertDialogAction
                         className="h-8"
                         onClick={() => onKill?.(node.id)}
@@ -351,7 +406,9 @@ export function AgentCard({
       layout
       layoutId={layoutId}
       initial={false}
-      animate={node.status === 'failed' ? { x: [0, -3, 3, -3, 3, 0] } : { x: 0 }}
+      animate={
+        node.status === 'failed' ? { x: [0, -3, 3, -3, 3, 0] } : { x: 0 }
+      }
       transition={{
         layout: { type: 'spring', stiffness: 300, damping: 28 },
         x: { duration: 0.3, ease: 'easeOut' },
@@ -381,7 +438,11 @@ export function AgentCard({
                 <motion.span
                   aria-hidden
                   animate={{ opacity: [0.5, 1, 0.5], scale: [1, 1.15, 1] }}
-                  transition={{ duration: 1.4, repeat: Infinity, ease: 'easeInOut' }}
+                  transition={{
+                    duration: 1.4,
+                    repeat: Infinity,
+                    ease: 'easeInOut',
+                  }}
                   className="size-1.5 rounded-full bg-emerald-400"
                 />
               ) : null}
@@ -399,19 +460,35 @@ export function AgentCard({
           <div className="relative mx-auto mb-1 size-10">
             <div className="relative flex size-10 items-center justify-center">
               {/* Mini progress ring */}
-              <svg className="absolute inset-0 size-10 -rotate-90" viewBox="0 0 40 40">
-                <circle cx="20" cy="20" r="17" fill="none" stroke="currentColor" strokeWidth="2" className="text-primary-300/40" />
+              <svg
+                className="absolute inset-0 size-10 -rotate-90"
+                viewBox="0 0 40 40"
+              >
                 <circle
-                  cx="20" cy="20" r="17"
+                  cx="20"
+                  cy="20"
+                  r="17"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  className="text-primary-300/40"
+                />
+                <circle
+                  cx="20"
+                  cy="20"
+                  r="17"
                   fill="none"
                   strokeWidth="2.5"
                   strokeLinecap="round"
                   strokeDasharray={`${(node.progress / 100) * 106.8} 106.8`}
                   className={cn(
-                    node.status === 'complete' ? 'text-emerald-400' :
-                    node.status === 'failed' ? 'text-red-400' :
-                    node.status === 'thinking' ? 'text-accent-400' :
-                    'text-emerald-400',
+                    node.status === 'complete'
+                      ? 'text-emerald-400'
+                      : node.status === 'failed'
+                        ? 'text-red-400'
+                        : node.status === 'thinking'
+                          ? 'text-accent-400'
+                          : 'text-emerald-400',
                   )}
                   stroke="currentColor"
                 />
@@ -437,7 +514,11 @@ export function AgentCard({
                   exit={{ opacity: 0 }}
                   className="absolute -right-1 -bottom-1 inline-flex size-4 items-center justify-center rounded-full bg-emerald-500 text-primary-50"
                 >
-                  <HugeiconsIcon icon={CheckmarkCircle01Icon} size={12} strokeWidth={1.5} />
+                  <HugeiconsIcon
+                    icon={CheckmarkCircle01Icon}
+                    size={12}
+                    strokeWidth={1.5}
+                  />
                 </motion.span>
               ) : null}
             </AnimatePresence>
@@ -464,7 +545,11 @@ export function AgentCard({
                 <motion.span
                   aria-hidden
                   animate={{ scale: [1, 1.12, 1], opacity: [0.3, 0.08, 0.3] }}
-                  transition={{ duration: 1.3, repeat: Infinity, ease: 'easeInOut' }}
+                  transition={{
+                    duration: 1.3,
+                    repeat: Infinity,
+                    ease: 'easeInOut',
+                  }}
                   className={cn(
                     'absolute inset-0 rounded-full ring-2',
                     getStatusRingClassName(node.status),
@@ -491,13 +576,18 @@ export function AgentCard({
                     exit={{ opacity: 0 }}
                     className="absolute -right-0.5 -bottom-0.5 inline-flex size-5 items-center justify-center rounded-full bg-emerald-500 text-primary-50"
                   >
-                    <HugeiconsIcon icon={CheckmarkCircle01Icon} size={14} strokeWidth={1.5} />
+                    <HugeiconsIcon
+                      icon={CheckmarkCircle01Icon}
+                      size={14}
+                      strokeWidth={1.5}
+                    />
                   </motion.span>
                 ) : null}
               </AnimatePresence>
             </TooltipTrigger>
             <TooltipContent side="right" className="text-xs">
-              <span className="font-medium tabular-nums">{node.progress}%</span> complete
+              <span className="font-medium tabular-nums">{node.progress}%</span>{' '}
+              complete
             </TooltipContent>
           </TooltipRoot>
 
@@ -521,7 +611,11 @@ export function AgentCard({
                 <motion.span
                   aria-hidden
                   animate={{ opacity: [0.5, 1, 0.5], scale: [1, 1.15, 1] }}
-                  transition={{ duration: 1.4, repeat: Infinity, ease: 'easeInOut' }}
+                  transition={{
+                    duration: 1.4,
+                    repeat: Infinity,
+                    ease: 'easeInOut',
+                  }}
                   className="size-1.5 rounded-full bg-emerald-400"
                 />
               ) : null}
@@ -546,15 +640,34 @@ export function AgentCard({
             : 'mt-2 max-h-0 overflow-hidden opacity-0 transition-all duration-200 group-hover:max-h-48 group-hover:opacity-100',
         )}
       >
-        <p className={cn('text-pretty text-primary-700', isCompact ? 'line-clamp-1 text-[9px]' : 'line-clamp-2 text-[11px]')}>
+        <p
+          className={cn(
+            'text-pretty text-primary-700',
+            isCompact ? 'line-clamp-1 text-[9px]' : 'line-clamp-2 text-[11px]',
+          )}
+        >
           {node.task}
         </p>
-        <p className={cn('mt-0.5 truncate tabular-nums', isCompact ? 'text-[9px] text-primary-600' : 'text-[10px] text-primary-600')}>
-          {formatRuntime(node.runtimeSeconds)} · {node.tokenCount.toLocaleString()} tokens · {formatCost(node.cost)}
+        <p
+          className={cn(
+            'mt-0.5 truncate tabular-nums',
+            isCompact
+              ? 'text-[9px] text-primary-600'
+              : 'text-[10px] text-primary-600',
+          )}
+        >
+          {formatRuntime(node.runtimeSeconds)} ·{' '}
+          {node.tokenCount.toLocaleString()} tokens · {formatCost(node.cost)}
         </p>
 
         {showActions ? (
-          <div className={cn(isCompact ? 'mt-1.5 max-h-0 overflow-hidden opacity-0 transition-all duration-200 group-hover:max-h-32 group-hover:opacity-100' : 'mt-2')}>
+          <div
+            className={cn(
+              isCompact
+                ? 'mt-1.5 max-h-0 overflow-hidden opacity-0 transition-all duration-200 group-hover:max-h-32 group-hover:opacity-100'
+                : 'mt-2',
+            )}
+          >
             {/* Buttons row: Chat | View | Kill icon — all inline */}
             <div className="flex items-center gap-1.5">
               {onChat ? (
@@ -566,11 +679,15 @@ export function AgentCard({
                     onChat(node.id)
                   }}
                 >
-                  <HugeiconsIcon icon={AiChat01Icon} size={14} strokeWidth={1.5} />
+                  <HugeiconsIcon
+                    icon={AiChat01Icon}
+                    size={14}
+                    strokeWidth={1.5}
+                  />
                   Chat
                 </Button>
               ) : null}
-              {(onView || useInlineDetail) ? (
+              {onView || useInlineDetail ? (
                 <Button
                   variant="outline"
                   size="sm"
@@ -591,7 +708,11 @@ export function AgentCard({
                   }}
                   title="Cancel"
                 >
-                  <HugeiconsIcon icon={Cancel01Icon} size={14} strokeWidth={1.5} />
+                  <HugeiconsIcon
+                    icon={Cancel01Icon}
+                    size={14}
+                    strokeWidth={1.5}
+                  />
                 </Button>
               ) : (
                 <AlertDialogRoot>
@@ -603,7 +724,11 @@ export function AgentCard({
                         className="flex-shrink-0 rounded-full size-7"
                         title="Kill agent"
                       >
-                        <HugeiconsIcon icon={Delete02Icon} size={14} strokeWidth={1.5} />
+                        <HugeiconsIcon
+                          icon={Delete02Icon}
+                          size={14}
+                          strokeWidth={1.5}
+                        />
                       </Button>
                     }
                   />
@@ -611,10 +736,13 @@ export function AgentCard({
                     <div className="space-y-3 p-4">
                       <AlertDialogTitle>Kill this agent run?</AlertDialogTitle>
                       <AlertDialogDescription className="text-pretty">
-                        {node.name} will stop immediately and be moved to history as failed.
+                        {node.name} will stop immediately and be moved to
+                        history as failed.
                       </AlertDialogDescription>
                       <div className="flex items-center justify-end gap-2 pt-1">
-                        <AlertDialogCancel className="h-8">Cancel</AlertDialogCancel>
+                        <AlertDialogCancel className="h-8">
+                          Cancel
+                        </AlertDialogCancel>
                         <AlertDialogAction
                           className="h-8"
                           onClick={function handleKillConfirm() {
@@ -632,7 +760,6 @@ export function AgentCard({
           </div>
         ) : null}
       </div>
-
     </motion.article>
   )
 }

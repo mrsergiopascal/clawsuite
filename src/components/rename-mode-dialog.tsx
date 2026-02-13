@@ -1,80 +1,83 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
-import { cn } from '@/lib/utils';
-import { useModes } from '@/hooks/use-modes';
-import type { Mode } from '@/hooks/use-modes';
+import { useState, useCallback, useEffect, useRef } from 'react'
+import { cn } from '@/lib/utils'
+import { useModes } from '@/hooks/use-modes'
+import type { Mode } from '@/hooks/use-modes'
 
 type RenameDialogProps = {
-  mode: Mode;
-  onClose: () => void;
-};
+  mode: Mode
+  onClose: () => void
+}
 
 export function RenameDialog({ mode, onClose }: RenameDialogProps) {
-  const [name, setName] = useState(mode.name);
-  const [error, setError] = useState<string | null>(null);
-  const { renameMode } = useModes();
-  const inputRef = useRef<HTMLInputElement>(null);
-  const dialogRef = useRef<HTMLDivElement>(null);
+  const [name, setName] = useState(mode.name)
+  const [error, setError] = useState<string | null>(null)
+  const { renameMode } = useModes()
+  const inputRef = useRef<HTMLInputElement>(null)
+  const dialogRef = useRef<HTMLDivElement>(null)
 
   // Focus input on mount
   useEffect(() => {
-    inputRef.current?.focus();
-    inputRef.current?.select();
-  }, []);
+    inputRef.current?.focus()
+    inputRef.current?.select()
+  }, [])
 
   // Focus trap
   useEffect(() => {
-    const dialog = dialogRef.current;
-    if (!dialog) return;
+    const dialog = dialogRef.current
+    if (!dialog) return
 
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === 'Escape') {
-        onClose();
-        return;
+        onClose()
+        return
       }
 
       if (event.key === 'Tab') {
-        if (!dialog) return;
+        if (!dialog) return
         const focusable = dialog.querySelectorAll<HTMLElement>(
-          'button, input, [tabindex]:not([tabindex="-1"])'
-        );
-        const first = focusable[0];
-        const last = focusable[focusable.length - 1];
+          'button, input, [tabindex]:not([tabindex="-1"])',
+        )
+        const first = focusable[0]
+        const last = focusable[focusable.length - 1]
 
         if (event.shiftKey && document.activeElement === first) {
-          event.preventDefault();
-          last.focus();
+          event.preventDefault()
+          last.focus()
         } else if (!event.shiftKey && document.activeElement === last) {
-          event.preventDefault();
-          first.focus();
+          event.preventDefault()
+          first.focus()
         }
       }
     }
 
-    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('keydown', handleKeyDown)
     return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [onClose]);
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [onClose])
 
   const handleRename = useCallback(() => {
-    const trimmed = name.trim();
+    const trimmed = name.trim()
     if (!trimmed) {
-      setError('Mode name is required');
-      return;
+      setError('Mode name is required')
+      return
     }
 
-    const result = renameMode(mode.id, trimmed);
+    const result = renameMode(mode.id, trimmed)
     if (result.error) {
-      setError(result.error);
+      setError(result.error)
     } else {
-      onClose();
+      onClose()
     }
-  }, [name, mode.id, renameMode, onClose]);
+  }, [name, mode.id, renameMode, onClose])
 
-  const handleSubmit = useCallback((event: React.FormEvent) => {
-    event.preventDefault();
-    handleRename();
-  }, [handleRename]);
+  const handleSubmit = useCallback(
+    (event: React.FormEvent) => {
+      event.preventDefault()
+      handleRename()
+    },
+    [handleRename],
+  )
 
   return (
     <>
@@ -114,12 +117,13 @@ export function RenameDialog({ mode, onClose }: RenameDialogProps) {
               type="text"
               value={name}
               onChange={(e) => {
-                setName(e.target.value);
-                setError(null);
+                setName(e.target.value)
+                setError(null)
               }}
               className={cn(
                 'w-full rounded-lg border border-primary-200 bg-primary-50 px-3 py-2 text-sm text-primary-900 placeholder-primary-400 focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-400',
-                error && 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                error &&
+                  'border-red-500 focus:border-red-500 focus:ring-red-500',
               )}
               maxLength={50}
               aria-invalid={!!error}
@@ -154,5 +158,5 @@ export function RenameDialog({ mode, onClose }: RenameDialogProps) {
         </form>
       </div>
     </>
-  );
+  )
 }

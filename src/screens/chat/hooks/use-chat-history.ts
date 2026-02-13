@@ -60,7 +60,9 @@ export function useChatHistory({
   const historyQuery = useQuery({
     queryKey: historyKey,
     queryFn: async function fetchHistoryForSession() {
-      const cached = queryClient.getQueryData(historyKey) as Record<string, unknown> | undefined
+      const cached = queryClient.getQueryData(historyKey) as
+        | Record<string, unknown>
+        | undefined
       const optimisticMessages = Array.isArray((cached as any)?.messages)
         ? (cached as any).messages.filter((message: any) => {
             if (message.status === 'sending') return true
@@ -88,7 +90,10 @@ export function useChatHistory({
     enabled:
       Boolean(sessionKeyForHistory) &&
       !isRedirecting &&
-      (!sessionsReady || activeExists || Boolean(explicitRouteSessionKey) || isNewChat),
+      (!sessionsReady ||
+        activeExists ||
+        Boolean(explicitRouteSessionKey) ||
+        isNewChat),
     placeholderData: function useCachedHistory(): HistoryResponse | undefined {
       return queryClient.getQueryData(historyKey)
     },
@@ -120,7 +125,9 @@ export function useChatHistory({
     return messages
   }, [historyQuery.data?.messages])
 
-  const showToolMessages = useChatSettingsStore((s) => s.settings.showToolMessages)
+  const showToolMessages = useChatSettingsStore(
+    (s) => s.settings.showToolMessages,
+  )
 
   // Filter messages for display - hide tool calls, system events, etc.
   const displayMessages = useMemo(() => {
@@ -135,8 +142,13 @@ export function useChatHistory({
         if (text.includes('Pre-compaction memory flush')) return false
         if (text.includes('Store durable memories now')) return false
         if (text.includes('Summarize this naturally for the user')) return false
-        if (text.includes('APPEND new content only and do not overwrite')) return false
-        if (text.includes('Stats: runtime') && text.includes('sessionKey agent:codex:subagent:')) return false
+        if (text.includes('APPEND new content only and do not overwrite'))
+          return false
+        if (
+          text.includes('Stats: runtime') &&
+          text.includes('sessionKey agent:codex:subagent:')
+        )
+          return false
         return true
       }
 
@@ -153,7 +165,10 @@ export function useChatHistory({
 
         // Has at least one text block with actual content?
         const hasText = content.some(
-          (c) => c.type === 'text' && typeof c.text === 'string' && c.text.trim().length > 0
+          (c) =>
+            c.type === 'text' &&
+            typeof c.text === 'string' &&
+            c.text.trim().length > 0,
         )
         if (!hasText) return false
 
@@ -172,18 +187,26 @@ export function useChatHistory({
       if (msg.role !== 'assistant') continue
       const content = Array.isArray(msg.content) ? msg.content : []
       const hasToolCall = content.some(
-        (c: any) => c.type === 'toolCall' || c.type === 'tool_use' || c.type === 'toolUse'
+        (c: any) =>
+          c.type === 'toolCall' ||
+          c.type === 'tool_use' ||
+          c.type === 'toolUse',
       )
       if (!hasToolCall) continue
-      
+
       // Check if this message has substantial text (not just empty/whitespace)
       const substantialText = content.some(
-        (c: any) => c.type === 'text' && typeof c.text === 'string' && c.text.trim().length > 20
+        (c: any) =>
+          c.type === 'text' &&
+          typeof c.text === 'string' &&
+          c.text.trim().length > 20,
       )
       // If it has real text content, it's a response — never hide it
       if (substantialText) continue
-      
-      const hasLater = filtered.slice(i + 1).some((m: GatewayMessage) => m.role === 'assistant')
+
+      const hasLater = filtered
+        .slice(i + 1)
+        .some((m: GatewayMessage) => m.role === 'assistant')
       if (hasLater) {
         if (!showToolMessages) {
           // Hide intermediate narration entirely
@@ -224,7 +247,8 @@ export function useChatHistory({
     forcedSessionKey,
     historyQuery.data?.sessionKey,
   ])
-  const activeCanonicalKey = resolvedSessionKey || sessionKeyForHistory || 'main'
+  const activeCanonicalKey =
+    resolvedSessionKey || sessionKeyForHistory || 'main'
 
   return {
     historyQuery,
@@ -245,7 +269,7 @@ function mergeOptimisticHistoryMessages(
   if (!optimisticMessages.length) return serverMessages
 
   const merged = [...serverMessages]
-  
+
   for (const optimisticMessage of optimisticMessages) {
     // Check if this optimistic message has been confirmed by the server
     const hasMatch = serverMessages.some((serverMessage) => {
@@ -257,7 +281,7 @@ function mergeOptimisticHistoryMessages(
       ) {
         return true
       }
-      
+
       // Secondary match: __optimisticId
       if (
         optimisticMessage.__optimisticId &&
@@ -266,7 +290,7 @@ function mergeOptimisticHistoryMessages(
       ) {
         return true
       }
-      
+
       // Fallback match: same text content + role + timestamp within 10s
       if (optimisticMessage.role && serverMessage.role) {
         if (optimisticMessage.role !== serverMessage.role) return false
@@ -282,8 +306,10 @@ function mergeOptimisticHistoryMessages(
     if (!hasMatch) {
       // Preserve unconfirmed optimistic messages regardless of age
       // They will be shown with a "queued" indicator
-      const isSending = optimisticMessage.status === 'sending' || Boolean(optimisticMessage.__optimisticId)
-      
+      const isSending =
+        optimisticMessage.status === 'sending' ||
+        Boolean(optimisticMessage.__optimisticId)
+
       if (isSending) {
         merged.push(optimisticMessage)
       }

@@ -17,7 +17,8 @@ export function SearchInput({
   inputRef,
 }: SearchInputProps) {
   const shortcut =
-    typeof navigator !== 'undefined' && /Mac|iPhone|iPad|iPod/i.test(navigator.platform)
+    typeof navigator !== 'undefined' &&
+    /Mac|iPhone|iPad|iPod/i.test(navigator.platform)
       ? '⌘K'
       : 'Ctrl K'
 

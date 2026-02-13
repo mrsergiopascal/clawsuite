@@ -21,7 +21,9 @@ type UseVoiceRecorderReturn = {
   stop: () => void
 }
 
-export function useVoiceRecorder(options: UseVoiceRecorderOptions = {}): UseVoiceRecorderReturn {
+export function useVoiceRecorder(
+  options: UseVoiceRecorderOptions = {},
+): UseVoiceRecorderReturn {
   const { maxDurationMs = 120_000, onRecorded, onError } = options
   const [state, setState] = useState<RecorderState>('idle')
   const [durationMs, setDurationMs] = useState(0)
@@ -34,14 +36,21 @@ export function useVoiceRecorder(options: UseVoiceRecorderOptions = {}): UseVoic
   const callbacksRef = useRef({ onRecorded, onError })
   callbacksRef.current = { onRecorded, onError }
 
-  const isSupported = typeof window !== 'undefined' &&
+  const isSupported =
+    typeof window !== 'undefined' &&
     typeof navigator !== 'undefined' &&
     Boolean(navigator.mediaDevices?.getUserMedia) &&
     typeof MediaRecorder !== 'undefined'
 
   const cleanup = useCallback(() => {
-    if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null }
-    if (maxTimerRef.current) { clearTimeout(maxTimerRef.current); maxTimerRef.current = null }
+    if (timerRef.current) {
+      clearInterval(timerRef.current)
+      timerRef.current = null
+    }
+    if (maxTimerRef.current) {
+      clearTimeout(maxTimerRef.current)
+      maxTimerRef.current = null
+    }
   }, [])
 
   const stop = useCallback(() => {
@@ -52,7 +61,7 @@ export function useVoiceRecorder(options: UseVoiceRecorderOptions = {}): UseVoic
     }
     recorder.stop()
     // Stream tracks cleanup
-    recorder.stream.getTracks().forEach(t => t.stop())
+    recorder.stream.getTracks().forEach((t) => t.stop())
     cleanup()
   }, [cleanup])
 
@@ -65,7 +74,7 @@ export function useVoiceRecorder(options: UseVoiceRecorderOptions = {}): UseVoic
     // Stop any existing recording
     if (recorderRef.current && recorderRef.current.state !== 'inactive') {
       recorderRef.current.stop()
-      recorderRef.current.stream.getTracks().forEach(t => t.stop())
+      recorderRef.current.stream.getTracks().forEach((t) => t.stop())
     }
     cleanup()
 
@@ -122,9 +131,9 @@ export function useVoiceRecorder(options: UseVoiceRecorderOptions = {}): UseVoic
       maxTimerRef.current = setTimeout(() => {
         stop()
       }, maxDurationMs)
-
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Microphone access denied'
+      const msg =
+        err instanceof Error ? err.message : 'Microphone access denied'
       callbacksRef.current.onError?.(msg)
       setState('idle')
     }

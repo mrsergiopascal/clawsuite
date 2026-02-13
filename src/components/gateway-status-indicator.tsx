@@ -8,7 +8,9 @@ type PingResponse = {
 
 async function pingGateway(): Promise<boolean> {
   try {
-    const response = await fetch('/api/ping', { signal: AbortSignal.timeout(5000) })
+    const response = await fetch('/api/ping', {
+      signal: AbortSignal.timeout(5000),
+    })
     if (!response.ok) return false
     const data = (await response.json()) as PingResponse
     return Boolean(data.ok)
@@ -47,9 +49,13 @@ export function GatewayStatusIndicator({ collapsed }: { collapsed?: boolean }) {
     <div className="flex items-center gap-2 px-2 py-1.5" title={label}>
       <span className="relative flex h-2 w-2 shrink-0">
         {(isLoading || isConnected) && (
-          <span className={`absolute inline-flex h-full w-full animate-ping rounded-full ${pulseColor}`} />
+          <span
+            className={`absolute inline-flex h-full w-full animate-ping rounded-full ${pulseColor}`}
+          />
         )}
-        <span className={`relative inline-flex h-2 w-2 rounded-full ${dotColor}`} />
+        <span
+          className={`relative inline-flex h-2 w-2 rounded-full ${dotColor}`}
+        />
       </span>
       {!collapsed && (
         <span className="truncate text-[11px] text-primary-500">{label}</span>

@@ -39,6 +39,8 @@ export const usePinnedSessionsStore = create<PinnedSessionsState>()(
 
 export function usePinnedSessions() {
   const pinnedSessionKeys = usePinnedSessionsStore((s) => s.pinnedSessionKeys)
-  const togglePinnedSession = usePinnedSessionsStore((s) => s.togglePinnedSession)
+  const togglePinnedSession = usePinnedSessionsStore(
+    (s) => s.togglePinnedSession,
+  )
   return { pinnedSessionKeys, togglePinnedSession }
 }

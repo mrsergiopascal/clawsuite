@@ -26,7 +26,9 @@ export function useRenameSession(): RenameSessionResult {
   const [error, setError] = useState<string | null>(null)
 
   const mutation = useMutation({
-    mutationFn: async function renameSessionRequest(payload: RenameSessionPayload) {
+    mutationFn: async function renameSessionRequest(
+      payload: RenameSessionPayload,
+    ) {
       const res = await fetch('/api/sessions', {
         method: 'PATCH',
         headers: { 'content-type': 'application/json' },

@@ -22,9 +22,7 @@ async function isValidDirectory(dirPath: string): Promise<boolean> {
   }
 }
 
-async function detectWorkspace(
-  savedPath?: string,
-): Promise<{
+async function detectWorkspace(savedPath?: string): Promise<{
   path: string
   folderName: string
   source: string

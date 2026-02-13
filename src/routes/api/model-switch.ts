@@ -23,14 +23,10 @@ export const Route = createFileRoute('/api/model-switch')({
           const rawSessionKey =
             typeof body.sessionKey === 'string' ? body.sessionKey.trim() : ''
           const sessionKey = rawSessionKey || 'main'
-          const model =
-            typeof body.model === 'string' ? body.model.trim() : ''
+          const model = typeof body.model === 'string' ? body.model.trim() : ''
 
           if (!model) {
-            return json(
-              { ok: false, error: 'model required' },
-              { status: 400 },
-            )
+            return json({ ok: false, error: 'model required' }, { status: 400 })
           }
 
           const payload = await gatewayRpc<SessionsPatchResponse>(

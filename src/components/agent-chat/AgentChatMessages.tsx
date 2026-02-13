@@ -75,7 +75,9 @@ export function AgentChatMessages({
                     isUser
                       ? 'border-primary-400/60 bg-primary-300/70 text-primary-900'
                       : 'border-primary-300/70 bg-primary-100/85 text-primary-900',
-                    message.status === 'error' ? 'border-red-500/60 bg-red-500/15 text-red-200' : '',
+                    message.status === 'error'
+                      ? 'border-red-500/60 bg-red-500/15 text-red-200'
+                      : '',
                   )}
                 >
                   {isUser ? (
@@ -92,7 +94,9 @@ export function AgentChatMessages({
                 <div
                   className={cn(
                     'flex items-center gap-1 text-xs tabular-nums',
-                    isUser ? 'justify-end text-primary-700' : 'justify-start text-primary-700',
+                    isUser
+                      ? 'justify-end text-primary-700'
+                      : 'justify-start text-primary-700',
                   )}
                 >
                   <MessageTimestamp timestamp={message.timestamp} />

@@ -1,4 +1,8 @@
-import type { CronJob, CronRun, CronRunStatus } from '@/components/cron-manager/cron-types'
+import type {
+  CronJob,
+  CronRun,
+  CronRunStatus,
+} from '@/components/cron-manager/cron-types'
 
 type CronJobsResponse = {
   jobs?: Array<Record<string, unknown>>
@@ -35,14 +39,19 @@ type UpsertCronPayload = {
 function normalizeStatus(value: unknown): CronRunStatus {
   if (typeof value !== 'string') return 'unknown'
   const normalized = value.trim().toLowerCase()
-  if (normalized.includes('success') || normalized === 'ok' || normalized === 'completed') {
+  if (
+    normalized.includes('success') ||
+    normalized === 'ok' ||
+    normalized === 'completed'
+  ) {
     return 'success'
   }
   if (normalized.includes('error') || normalized.includes('fail')) {
     return 'error'
   }
   if (normalized.includes('run')) return 'running'
-  if (normalized.includes('queue') || normalized.includes('pending')) return 'queued'
+  if (normalized.includes('queue') || normalized.includes('pending'))
+    return 'queued'
   return 'unknown'
 }
 
@@ -69,7 +78,9 @@ function normalizeRun(row: Record<string, unknown>, index: number): CronRun {
     startedAt: normalizeTimestamp(
       row.startedAt ?? row.started_at ?? row.createdAt ?? row.timestamp,
     ),
-    finishedAt: normalizeTimestamp(row.finishedAt ?? row.finished_at ?? row.completedAt),
+    finishedAt: normalizeTimestamp(
+      row.finishedAt ?? row.finished_at ?? row.completedAt,
+    ),
     durationMs:
       typeof row.durationMs === 'number'
         ? row.durationMs
@@ -120,7 +131,8 @@ function normalizeJob(row: Record<string, unknown>, index: number): CronJob {
     payload: row.payload,
     deliveryConfig: row.deliveryConfig,
     status: typeof row.status === 'string' ? row.status : undefined,
-    description: typeof row.description === 'string' ? row.description : undefined,
+    description:
+      typeof row.description === 'string' ? row.description : undefined,
     lastRun,
   }
 }
@@ -151,7 +163,9 @@ export async function fetchCronJobs(): Promise<Array<CronJob>> {
 }
 
 export async function fetchCronRuns(jobId: string): Promise<Array<CronRun>> {
-  const response = await fetch(`/api/cron/runs/${encodeURIComponent(jobId)}?limit=10`)
+  const response = await fetch(
+    `/api/cron/runs/${encodeURIComponent(jobId)}?limit=10`,
+  )
   if (!response.ok) {
     throw new Error(await readError(response))
   }

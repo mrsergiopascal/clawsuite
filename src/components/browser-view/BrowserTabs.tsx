@@ -17,12 +17,19 @@ type BrowserTabsProps = {
   onSelect: (tabId: string) => void
 }
 
-function BrowserTabs({ tabs, activeTabId, loading, onSelect }: BrowserTabsProps) {
+function BrowserTabs({
+  tabs,
+  activeTabId,
+  loading,
+  onSelect,
+}: BrowserTabsProps) {
   if (loading && tabs.length === 0) {
     return (
       <section className="rounded-2xl border border-primary-200 bg-primary-100/45 p-3 shadow-sm backdrop-blur-xl">
         <div className="mb-2 flex items-center justify-between">
-          <h2 className="text-sm font-medium text-primary-900 text-balance">Open Tabs</h2>
+          <h2 className="text-sm font-medium text-primary-900 text-balance">
+            Open Tabs
+          </h2>
           <HugeiconsIcon
             icon={Loading03Icon}
             size={20}
@@ -47,8 +54,12 @@ function BrowserTabs({ tabs, activeTabId, loading, onSelect }: BrowserTabsProps)
   return (
     <section className="rounded-2xl border border-primary-200 bg-primary-100/45 p-3 shadow-sm backdrop-blur-xl">
       <div className="mb-2 flex items-center justify-between">
-        <h2 className="text-sm font-medium text-primary-900 text-balance">Open Tabs</h2>
-        <span className="text-xs text-primary-500 tabular-nums">{tabs.length}</span>
+        <h2 className="text-sm font-medium text-primary-900 text-balance">
+          Open Tabs
+        </h2>
+        <span className="text-xs text-primary-500 tabular-nums">
+          {tabs.length}
+        </span>
       </div>
 
       {tabs.length === 0 ? (
@@ -59,7 +70,9 @@ function BrowserTabs({ tabs, activeTabId, loading, onSelect }: BrowserTabsProps)
         <ul className="space-y-2">
           <AnimatePresence initial={false}>
             {tabs.map(function mapTab(tab) {
-              const isActive = activeTabId ? tab.id === activeTabId : tab.isActive
+              const isActive = activeTabId
+                ? tab.id === activeTabId
+                : tab.isActive
               return (
                 <motion.li
                   key={tab.id}

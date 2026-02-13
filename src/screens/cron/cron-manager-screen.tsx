@@ -39,7 +39,9 @@ export function CronManagerScreen() {
   const [editingJobId, setEditingJobId] = useState<string | null>(null)
   const [formError, setFormError] = useState<string | null>(null)
   const [actionError, setActionError] = useState<string | null>(null)
-  const [togglePendingJobId, setTogglePendingJobId] = useState<string | null>(null)
+  const [togglePendingJobId, setTogglePendingJobId] = useState<string | null>(
+    null,
+  )
   const [runPendingJobId, setRunPendingJobId] = useState<string | null>(null)
   const [deletePendingJobId, setDeletePendingJobId] = useState<string | null>(
     null,
@@ -77,7 +79,9 @@ export function CronManagerScreen() {
     mutationFn: runCronJob,
     onSuccess: async (_, jobId) => {
       await queryClient.invalidateQueries({ queryKey: cronQueryKeys.jobs })
-      await queryClient.invalidateQueries({ queryKey: cronQueryKeys.runs(jobId) })
+      await queryClient.invalidateQueries({
+        queryKey: cronQueryKeys.runs(jobId),
+      })
     },
     onError: (error) => {
       setActionError(error instanceof Error ? error.message : String(error))
@@ -98,17 +102,23 @@ export function CronManagerScreen() {
     },
   })
 
-  const jobs = useMemo(function deriveJobs() {
-    return Array.isArray(jobsQuery.data) ? jobsQuery.data : []
-  }, [jobsQuery.data])
+  const jobs = useMemo(
+    function deriveJobs() {
+      return Array.isArray(jobsQuery.data) ? jobsQuery.data : []
+    },
+    [jobsQuery.data],
+  )
   const jobsErrorMessage =
     jobsQuery.error instanceof Error ? jobsQuery.error.message : null
   const runsErrorMessage =
     runsQuery.error instanceof Error ? runsQuery.error.message : null
-  const editingJob = useMemo(function deriveEditingJob() {
-    if (formMode !== 'edit' || !editingJobId) return null
-    return jobs.find((job) => job.id === editingJobId) ?? null
-  }, [editingJobId, formMode, jobs])
+  const editingJob = useMemo(
+    function deriveEditingJob() {
+      if (formMode !== 'edit' || !editingJobId) return null
+      return jobs.find((job) => job.id === editingJobId) ?? null
+    },
+    [editingJobId, formMode, jobs],
+  )
 
   const runsByJobId = useMemo<Record<string, Array<CronRun>>>(
     function deriveRunsByJobId() {
@@ -193,7 +203,9 @@ export function CronManagerScreen() {
     try {
       await deleteMutation.mutateAsync(job.id)
       await queryClient.invalidateQueries({ queryKey: cronQueryKeys.jobs })
-      await queryClient.invalidateQueries({ queryKey: cronQueryKeys.runs(job.id) })
+      await queryClient.invalidateQueries({
+        queryKey: cronQueryKeys.runs(job.id),
+      })
 
       if (selectedJobId === job.id) {
         setSelectedJobId(null)
@@ -223,8 +235,8 @@ export function CronManagerScreen() {
             Scheduled Task Control
           </h1>
           <p className="mt-1 max-w-3xl text-sm text-primary-600 text-pretty md:text-base">
-            Monitor cron jobs, toggle schedules, trigger manual runs, and inspect
-            execution history from one screen.
+            Monitor cron jobs, toggle schedules, trigger manual runs, and
+            inspect execution history from one screen.
           </p>
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <Button

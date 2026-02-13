@@ -77,7 +77,10 @@ const DEFAULT_CATEGORIES = [
   'Finance & Crypto',
 ]
 
-function resolveSkillSearchTier(skill: SkillSummary, query: string): SkillSearchTier {
+function resolveSkillSearchTier(
+  skill: SkillSummary,
+  query: string,
+): SkillSearchTier {
   const normalizedQuery = query.trim().toLowerCase()
   if (!normalizedQuery) return 0
 
@@ -172,10 +175,13 @@ export function SkillsScreen() {
     [searchInput, skillsQuery.data?.skills],
   )
 
-  async function runSkillAction(action: 'install' | 'uninstall' | 'toggle', payload: {
-    skillId: string
-    enabled?: boolean
-  }) {
+  async function runSkillAction(
+    action: 'install' | 'uninstall' | 'toggle',
+    payload: {
+      skillId: string
+      enabled?: boolean
+    },
+  ) {
     setActionError(null)
     setActionSkillId(payload.skillId)
 
@@ -228,7 +234,9 @@ export function SkillsScreen() {
 
   function handleTabChange(nextTab: string) {
     const parsedTab: SkillsTab =
-      nextTab === 'installed' || nextTab === 'marketplace' || nextTab === 'featured'
+      nextTab === 'installed' ||
+      nextTab === 'marketplace' ||
+      nextTab === 'featured'
         ? nextTab
         : 'installed'
 
@@ -268,17 +276,20 @@ export function SkillsScreen() {
                 Skills Browser
               </h1>
               <p className="text-sm text-primary-500 text-pretty sm:text-base">
-                Discover, install, and manage skills across your local workspace and ClawdHub registry.
+                Discover, install, and manage skills across your local workspace
+                and ClawdHub registry.
               </p>
             </div>
-
           </div>
         </header>
 
         <section className="rounded-2xl border border-primary-200 bg-primary-50/80 p-3 backdrop-blur-xl sm:p-4">
           <Tabs value={tab} onValueChange={handleTabChange}>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <TabsList className="rounded-xl border border-primary-200 bg-primary-100/60 p-1" variant="default">
+              <TabsList
+                className="rounded-xl border border-primary-200 bg-primary-100/60 p-1"
+                variant="default"
+              >
                 <TabsTab value="installed" className="min-w-[132px]">
                   Installed Skills
                 </TabsTab>
@@ -301,7 +312,9 @@ export function SkillsScreen() {
                 {tab === 'marketplace' ? (
                   <select
                     value={category}
-                    onChange={(event) => handleCategoryChange(event.target.value)}
+                    onChange={(event) =>
+                      handleCategoryChange(event.target.value)
+                    }
                     className="h-9 rounded-lg border border-primary-200 bg-primary-100/60 px-3 text-sm text-ink outline-none"
                   >
                     {categories.map((item) => (
@@ -343,7 +356,9 @@ export function SkillsScreen() {
                 tab="installed"
                 onOpenDetails={setSelectedSkill}
                 onInstall={(skillId) => runSkillAction('install', { skillId })}
-                onUninstall={(skillId) => runSkillAction('uninstall', { skillId })}
+                onUninstall={(skillId) =>
+                  runSkillAction('uninstall', { skillId })
+                }
                 onToggle={(skillId, enabled) =>
                   runSkillAction('toggle', { skillId, enabled })
                 }
@@ -358,7 +373,9 @@ export function SkillsScreen() {
                 tab="marketplace"
                 onOpenDetails={setSelectedSkill}
                 onInstall={(skillId) => runSkillAction('install', { skillId })}
-                onUninstall={(skillId) => runSkillAction('uninstall', { skillId })}
+                onUninstall={(skillId) =>
+                  runSkillAction('uninstall', { skillId })
+                }
                 onToggle={(skillId, enabled) =>
                   runSkillAction('toggle', { skillId, enabled })
                 }
@@ -372,7 +389,9 @@ export function SkillsScreen() {
                 actionSkillId={actionSkillId}
                 onOpenDetails={setSelectedSkill}
                 onInstall={(skillId) => runSkillAction('install', { skillId })}
-                onUninstall={(skillId) => runSkillAction('uninstall', { skillId })}
+                onUninstall={(skillId) =>
+                  runSkillAction('uninstall', { skillId })
+                }
               />
             </TabsPanel>
           </Tabs>
@@ -422,13 +441,19 @@ export function SkillsScreen() {
           {selectedSkill ? (
             <div className="flex max-h-[85vh] flex-col">
               <div className="border-b border-primary-200 px-5 py-4">
-                <DialogTitle className="text-balance">{selectedSkill.icon} {selectedSkill.name}</DialogTitle>
+                <DialogTitle className="text-balance">
+                  {selectedSkill.icon} {selectedSkill.name}
+                </DialogTitle>
                 <DialogDescription className="mt-1 text-pretty">
-                  by {selectedSkill.author} • {selectedSkill.category} • {selectedSkill.fileCount.toLocaleString()} files
+                  by {selectedSkill.author} • {selectedSkill.category} •{' '}
+                  {selectedSkill.fileCount.toLocaleString()} files
                 </DialogDescription>
                 {selectedSkill.security && (
                   <div className="mt-3 rounded-xl border border-primary-200 bg-primary-50/80 overflow-hidden">
-                    <SecurityBadge security={selectedSkill.security} compact={false} />
+                    <SecurityBadge
+                      security={selectedSkill.security}
+                      compact={false}
+                    />
                   </div>
                 )}
               </div>
@@ -451,25 +476,26 @@ export function SkillsScreen() {
                     ) : null}
 
                     <div className="flex flex-wrap gap-1.5">
-                      {selectedSkill.triggers.length > 0
-                        ? selectedSkill.triggers.slice(0, 8).map((trigger) => (
-                            <span
-                              key={trigger}
-                              className="rounded-md border border-primary-200 bg-primary-100/50 px-2 py-0.5 text-xs text-primary-500"
-                            >
-                              {trigger}
-                            </span>
-                          ))
-                        : (
-                          <span className="rounded-md border border-primary-200 bg-primary-100/50 px-2 py-0.5 text-xs text-primary-500">
-                            No triggers listed
+                      {selectedSkill.triggers.length > 0 ? (
+                        selectedSkill.triggers.slice(0, 8).map((trigger) => (
+                          <span
+                            key={trigger}
+                            className="rounded-md border border-primary-200 bg-primary-100/50 px-2 py-0.5 text-xs text-primary-500"
+                          >
+                            {trigger}
                           </span>
-                        )}
+                        ))
+                      ) : (
+                        <span className="rounded-md border border-primary-200 bg-primary-100/50 px-2 py-0.5 text-xs text-primary-500">
+                          No triggers listed
+                        </span>
+                      )}
                     </div>
 
                     <article className="rounded-xl border border-primary-200 bg-primary-100/30 p-4 backdrop-blur-sm">
                       <Markdown>
-                        {selectedSkill.content || `# ${selectedSkill.name}\n\n${selectedSkill.description}`}
+                        {selectedSkill.content ||
+                          `# ${selectedSkill.name}\n\n${selectedSkill.description}`}
                       </Markdown>
                     </article>
                   </div>
@@ -481,7 +507,10 @@ export function SkillsScreen() {
 
               <div className="flex flex-wrap items-center justify-between gap-2 border-t border-primary-200 px-5 py-3">
                 <p className="text-sm text-primary-500 text-pretty">
-                  Source: <code className="inline-code">{selectedSkill.sourcePath}</code>
+                  Source:{' '}
+                  <code className="inline-code">
+                    {selectedSkill.sourcePath}
+                  </code>
                 </p>
                 <div className="flex items-center gap-2">
                   {selectedSkill.installed ? (
@@ -490,7 +519,9 @@ export function SkillsScreen() {
                       size="sm"
                       disabled={actionSkillId === selectedSkill.id}
                       onClick={() => {
-                        runSkillAction('uninstall', { skillId: selectedSkill.id })
+                        runSkillAction('uninstall', {
+                          skillId: selectedSkill.id,
+                        })
                       }}
                     >
                       Uninstall
@@ -499,7 +530,9 @@ export function SkillsScreen() {
                     <Button
                       size="sm"
                       disabled={actionSkillId === selectedSkill.id}
-                      onClick={() => runSkillAction('install', { skillId: selectedSkill.id })}
+                      onClick={() =>
+                        runSkillAction('install', { skillId: selectedSkill.id })
+                      }
                     >
                       Install
                     </Button>
@@ -532,14 +565,39 @@ type SkillsGridProps = {
   onToggle: (skillId: string, enabled: boolean) => void
 }
 
-const SECURITY_BADGE: Record<string, { label: string; badgeClass: string; confidence: string }> = {
-  safe: { label: 'Benign', badgeClass: 'bg-green-100 text-green-700 border-green-200', confidence: 'HIGH CONFIDENCE' },
-  low: { label: 'Benign', badgeClass: 'bg-green-100 text-green-700 border-green-200', confidence: 'MODERATE' },
-  medium: { label: 'Caution', badgeClass: 'bg-amber-100 text-amber-700 border-amber-200', confidence: 'REVIEW RECOMMENDED' },
-  high: { label: 'Warning', badgeClass: 'bg-red-100 text-red-700 border-red-200', confidence: 'MANUAL REVIEW' },
+const SECURITY_BADGE: Record<
+  string,
+  { label: string; badgeClass: string; confidence: string }
+> = {
+  safe: {
+    label: 'Benign',
+    badgeClass: 'bg-green-100 text-green-700 border-green-200',
+    confidence: 'HIGH CONFIDENCE',
+  },
+  low: {
+    label: 'Benign',
+    badgeClass: 'bg-green-100 text-green-700 border-green-200',
+    confidence: 'MODERATE',
+  },
+  medium: {
+    label: 'Caution',
+    badgeClass: 'bg-amber-100 text-amber-700 border-amber-200',
+    confidence: 'REVIEW RECOMMENDED',
+  },
+  high: {
+    label: 'Warning',
+    badgeClass: 'bg-red-100 text-red-700 border-red-200',
+    confidence: 'MANUAL REVIEW',
+  },
 }
 
-function SecurityBadge({ security, compact = true }: { security?: SecurityRisk; compact?: boolean }) {
+function SecurityBadge({
+  security,
+  compact = true,
+}: {
+  security?: SecurityRisk
+  compact?: boolean
+}) {
   if (!security) return null
   const config = SECURITY_BADGE[security.level]
   if (!config) return null
@@ -558,7 +616,10 @@ function SecurityBadge({ security, compact = true }: { security?: SecurityRisk; 
           )}
           onMouseEnter={() => setExpanded(true)}
           onMouseLeave={() => setExpanded(false)}
-          onClick={(e) => { e.stopPropagation(); setExpanded((v) => !v) }}
+          onClick={(e) => {
+            e.stopPropagation()
+            setExpanded((v) => !v)
+          }}
         >
           {config.label}
         </button>
@@ -580,20 +641,30 @@ function SecurityScanCard({ security }: { security: SecurityRisk }) {
   const config = SECURITY_BADGE[security.level]
   if (!config) return null
 
-  const summaryText = security.flags.length === 0
-    ? 'No risky patterns detected. This skill appears safe to install.'
-    : security.level === 'high'
-      ? `Found ${security.flags.length} potential security concern${security.flags.length !== 1 ? 's' : ''}. Review before installing.`
-      : `The skill's code was scanned for common risk patterns. ${security.flags.length} item${security.flags.length !== 1 ? 's' : ''} noted.`
+  const summaryText =
+    security.flags.length === 0
+      ? 'No risky patterns detected. This skill appears safe to install.'
+      : security.level === 'high'
+        ? `Found ${security.flags.length} potential security concern${security.flags.length !== 1 ? 's' : ''}. Review before installing.`
+        : `The skill's code was scanned for common risk patterns. ${security.flags.length} item${security.flags.length !== 1 ? 's' : ''} noted.`
 
   return (
     <div className="text-xs">
       <div className="px-3 pt-3 pb-2">
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-primary-400 mb-2">Security Scan</p>
+        <p className="text-[10px] font-semibold uppercase tracking-wider text-primary-400 mb-2">
+          Security Scan
+        </p>
         <div className="space-y-1.5">
           <div className="flex items-center gap-2">
-            <span className="text-primary-500 font-medium w-16 shrink-0">ClawSuite</span>
-            <span className={cn('rounded-md border px-1.5 py-0.5 text-[10px] font-semibold', config.badgeClass)}>
+            <span className="text-primary-500 font-medium w-16 shrink-0">
+              ClawSuite
+            </span>
+            <span
+              className={cn(
+                'rounded-md border px-1.5 py-0.5 text-[10px] font-semibold',
+                config.badgeClass,
+              )}
+            >
               {config.label}
             </span>
             <span className="text-[10px] text-primary-400 uppercase tracking-wide font-medium">
@@ -603,13 +674,18 @@ function SecurityScanCard({ security }: { security: SecurityRisk }) {
         </div>
       </div>
       <div className="px-3 pb-2">
-        <p className="text-primary-500 text-pretty leading-relaxed">{summaryText}</p>
+        <p className="text-primary-500 text-pretty leading-relaxed">
+          {summaryText}
+        </p>
       </div>
       {security.flags.length > 0 && (
         <div className="border-t border-primary-100">
           <button
             type="button"
-            onClick={(e) => { e.stopPropagation(); setShowDetails((v) => !v) }}
+            onClick={(e) => {
+              e.stopPropagation()
+              setShowDetails((v) => !v)
+            }}
             className="flex w-full items-center justify-between px-3 py-2 text-accent-500 hover:text-accent-600 transition-colors"
           >
             <span className="text-[11px] font-medium">Details</span>
@@ -618,7 +694,10 @@ function SecurityScanCard({ security }: { security: SecurityRisk }) {
           {showDetails && (
             <div className="px-3 pb-3 space-y-1">
               {security.flags.map((flag) => (
-                <div key={flag} className="flex items-start gap-2 text-primary-600">
+                <div
+                  key={flag}
+                  className="flex items-start gap-2 text-primary-600"
+                >
                   <span className="mt-0.5 text-[9px] text-primary-400">●</span>
                   <span>{flag}</span>
                 </div>
@@ -629,7 +708,8 @@ function SecurityScanCard({ security }: { security: SecurityRisk }) {
       )}
       <div className="border-t border-primary-100 px-3 py-2">
         <p className="text-[10px] text-primary-400 italic">
-          Like a lobster shell, security has layers — review code before you run it.
+          Like a lobster shell, security has layers — review code before you run
+          it.
         </p>
       </div>
     </div>
@@ -660,8 +740,20 @@ function SkillsGrid({
         <p className="mt-1 text-xs text-primary-500 text-pretty max-w-sm mx-auto">
           {isMarketplace ? (
             <>
-              Run <code className="rounded bg-primary-200 px-1.5 py-0.5 font-mono text-[11px]">clawdhub sync</code> in your terminal to download the skills registry, or browse skills at{' '}
-              <a href="https://clawdhub.com" target="_blank" rel="noopener noreferrer" className="text-accent-500 hover:underline">clawdhub.com</a>
+              Run{' '}
+              <code className="rounded bg-primary-200 px-1.5 py-0.5 font-mono text-[11px]">
+                clawdhub sync
+              </code>{' '}
+              in your terminal to download the skills registry, or browse skills
+              at{' '}
+              <a
+                href="https://clawdhub.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-accent-500 hover:underline"
+              >
+                clawdhub.com
+              </a>
             </>
           ) : (
             'Try adjusting your filters or search term'
@@ -691,7 +783,9 @@ function SkillsGrid({
                   <h3 className="line-clamp-1 text-base font-medium text-ink text-balance">
                     {skill.name}
                   </h3>
-                  <p className="line-clamp-1 text-xs text-primary-500">by {skill.author}</p>
+                  <p className="line-clamp-1 text-xs text-primary-500">
+                    by {skill.author}
+                  </p>
                 </div>
                 <span
                   className={cn(
@@ -739,7 +833,9 @@ function SkillsGrid({
                       <Switch
                         checked={skill.enabled}
                         disabled={isActing}
-                        onCheckedChange={(checked) => onToggle(skill.id, checked)}
+                        onCheckedChange={(checked) =>
+                          onToggle(skill.id, checked)
+                        }
                         aria-label={`Toggle ${skill.name}`}
                       />
                       {skill.enabled ? 'Enabled' : 'Disabled'}
@@ -753,25 +849,23 @@ function SkillsGrid({
                       Uninstall
                     </Button>
                   </div>
+                ) : skill.installed ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={isActing}
+                    onClick={() => onUninstall(skill.id)}
+                  >
+                    Uninstall
+                  </Button>
                 ) : (
-                  skill.installed ? (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      disabled={isActing}
-                      onClick={() => onUninstall(skill.id)}
-                    >
-                      Uninstall
-                    </Button>
-                  ) : (
-                    <Button
-                      size="sm"
-                      disabled={isActing}
-                      onClick={() => onInstall(skill.id)}
-                    >
-                      Install
-                    </Button>
-                  )
+                  <Button
+                    size="sm"
+                    disabled={isActing}
+                    onClick={() => onInstall(skill.id)}
+                  >
+                    Install
+                  </Button>
                 )}
               </div>
             </motion.article>
@@ -848,7 +942,11 @@ function FeaturedGrid({
             </p>
 
             <div className="mt-auto flex items-center justify-between gap-2 pt-3">
-              <Button variant="outline" size="sm" onClick={() => onOpenDetails(skill)}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onOpenDetails(skill)}
+              >
                 Details
               </Button>
               {skill.installed ? (
@@ -877,9 +975,22 @@ function FeaturedGrid({
   )
 }
 
-function SkillsSkeleton({ count, large = false }: { count: number; large?: boolean }) {
+function SkillsSkeleton({
+  count,
+  large = false,
+}: {
+  count: number
+  large?: boolean
+}) {
   return (
-    <div className={cn('grid gap-3', large ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-1 sm:grid-cols-2 xl:grid-cols-3')}>
+    <div
+      className={cn(
+        'grid gap-3',
+        large
+          ? 'grid-cols-1 lg:grid-cols-2'
+          : 'grid-cols-1 sm:grid-cols-2 xl:grid-cols-3',
+      )}
+    >
       {Array.from({ length: count }).map((_, index) => (
         <div
           key={index}

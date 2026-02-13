@@ -26,13 +26,13 @@ export function useChatMeasurements(): ChatMeasurements {
       const nextHeaderHeight = headerEl?.offsetHeight ?? 0
       const composerHeight = composerEl?.offsetHeight ?? 0
       const mainHeight = mainEl.clientHeight
-      
+
       // Safety: If all dimensions are 0, retry after paint to avoid race condition
       if (nextHeaderHeight === 0 && composerHeight === 0 && mainHeight === 0) {
         requestAnimationFrame(() => applySizes())
         return
       }
-      
+
       mainEl.style.setProperty(
         '--chat-header-height',
         `${Math.max(0, nextHeaderHeight)}px`,

@@ -1,4 +1,9 @@
-export type CronRunStatus = 'success' | 'error' | 'running' | 'queued' | 'unknown'
+export type CronRunStatus =
+  | 'success'
+  | 'error'
+  | 'running'
+  | 'queued'
+  | 'unknown'
 
 export type CronRun = {
   id: string

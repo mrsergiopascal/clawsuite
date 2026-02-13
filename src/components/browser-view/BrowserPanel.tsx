@@ -183,7 +183,9 @@ function BrowserPanel() {
   const effectiveTabId =
     selectedTabId && tabSet.has(selectedTabId)
       ? selectedTabId
-      : tabsQuery.data?.activeTabId ?? tabs.find((tab) => tab.isActive)?.id ?? null
+      : (tabsQuery.data?.activeTabId ??
+        tabs.find((tab) => tab.isActive)?.id ??
+        null)
 
   const screenshotQuery = useQuery({
     queryKey: ['browser', 'screenshot', effectiveTabId ?? 'active'],
@@ -210,7 +212,10 @@ function BrowserPanel() {
 
   // Default to local browser — gateway RPC browser is an advanced/optional mode
   // Show local browser immediately, no waiting for gateway probe
-  const gatewayBrowserAvailable = tabsQuery.isSuccess && !showGatewaySupportPlaceholder && (tabsQuery.data?.tabs?.length ?? 0) > 0
+  const gatewayBrowserAvailable =
+    tabsQuery.isSuccess &&
+    !showGatewaySupportPlaceholder &&
+    (tabsQuery.data?.tabs?.length ?? 0) > 0
 
   if (!gatewayBrowserAvailable) {
     return (
@@ -246,7 +251,9 @@ function BrowserPanel() {
             <HugeiconsIcon icon={GlobeIcon} size={20} strokeWidth={1.5} />
             <span>Live Browser Monitor</span>
           </div>
-          <h1 className="mt-2 text-xl font-medium text-balance sm:text-2xl">Browser View</h1>
+          <h1 className="mt-2 text-xl font-medium text-balance sm:text-2xl">
+            Browser View
+          </h1>
           <p className="mt-1 text-sm text-primary-600 text-pretty">
             Track agent browser tabs and live screenshots every 2 seconds.
           </p>
@@ -263,7 +270,12 @@ function BrowserPanel() {
         {demoMode ? (
           <div className="flex items-center gap-3 rounded-xl border border-amber-500/30 bg-amber-500/5 px-4 py-3">
             <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-amber-500/15">
-              <HugeiconsIcon icon={GlobeIcon} size={20} strokeWidth={1.5} className="text-amber-600" />
+              <HugeiconsIcon
+                icon={GlobeIcon}
+                size={20}
+                strokeWidth={1.5}
+                className="text-amber-600"
+              />
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
@@ -275,7 +287,9 @@ function BrowserPanel() {
                 {showGatewaySupportPlaceholder
                   ? 'Browser control requires gateway support. Enable browser RPC in your Gateway configuration.'
                   : 'Connect a browser to use live features. Configure the browser plugin in your Gateway settings.'}
-                {errorText ? <span className="text-amber-600/80"> ({errorText})</span> : null}
+                {errorText ? (
+                  <span className="text-amber-600/80"> ({errorText})</span>
+                ) : null}
               </p>
             </div>
           </div>
@@ -298,28 +312,59 @@ function BrowserPanel() {
                 Browser Control Setup
               </h3>
               <p className="max-w-md text-sm text-primary-600 text-pretty">
-                Connect a browser so your AI agent can browse the web, fill forms, and extract data.
+                Connect a browser so your AI agent can browse the web, fill
+                forms, and extract data.
               </p>
               <div className="mt-2 w-full max-w-md rounded-xl border border-primary-200 bg-surface p-4 text-left space-y-3">
                 <div className="flex items-start gap-3">
-                  <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-accent-500/15 text-xs font-bold text-accent-600">1</span>
+                  <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-accent-500/15 text-xs font-bold text-accent-600">
+                    1
+                  </span>
                   <div>
-                    <p className="text-sm font-medium text-ink">Install the Chrome Extension</p>
-                    <p className="text-xs text-primary-500 mt-0.5">Install the <a href="https://docs.openclaw.ai/browser" target="_blank" rel="noopener noreferrer" className="text-accent-500 hover:underline">OpenClaw Browser Relay</a> extension from the Chrome Web Store.</p>
+                    <p className="text-sm font-medium text-ink">
+                      Install the Chrome Extension
+                    </p>
+                    <p className="text-xs text-primary-500 mt-0.5">
+                      Install the{' '}
+                      <a
+                        href="https://docs.openclaw.ai/browser"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-accent-500 hover:underline"
+                      >
+                        OpenClaw Browser Relay
+                      </a>{' '}
+                      extension from the Chrome Web Store.
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-accent-500/15 text-xs font-bold text-accent-600">2</span>
+                  <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-accent-500/15 text-xs font-bold text-accent-600">
+                    2
+                  </span>
                   <div>
-                    <p className="text-sm font-medium text-ink">Enable Browser RPC</p>
-                    <p className="text-xs text-primary-500 mt-0.5">Add <code className="rounded bg-primary-100 px-1 py-0.5 font-mono text-[11px]">browser: true</code> to your OpenClaw gateway config.</p>
+                    <p className="text-sm font-medium text-ink">
+                      Enable Browser RPC
+                    </p>
+                    <p className="text-xs text-primary-500 mt-0.5">
+                      Add{' '}
+                      <code className="rounded bg-primary-100 px-1 py-0.5 font-mono text-[11px]">
+                        browser: true
+                      </code>{' '}
+                      to your OpenClaw gateway config.
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-accent-500/15 text-xs font-bold text-accent-600">3</span>
+                  <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-accent-500/15 text-xs font-bold text-accent-600">
+                    3
+                  </span>
                   <div>
                     <p className="text-sm font-medium text-ink">Attach a Tab</p>
-                    <p className="text-xs text-primary-500 mt-0.5">Click the OpenClaw toolbar icon on any Chrome tab to connect it. The badge turns ON when attached.</p>
+                    <p className="text-xs text-primary-500 mt-0.5">
+                      Click the OpenClaw toolbar icon on any Chrome tab to
+                      connect it. The badge turns ON when attached.
+                    </p>
                   </div>
                 </div>
               </div>
@@ -353,7 +398,8 @@ function BrowserPanel() {
                 Screenshot unavailable
               </h3>
               <p className="max-w-md text-sm text-primary-600 text-pretty">
-                {errorText || 'No screenshot was returned by the gateway. Use refresh to retry.'}
+                {errorText ||
+                  'No screenshot was returned by the gateway. Use refresh to retry.'}
               </p>
             </div>
           )}

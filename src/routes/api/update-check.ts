@@ -32,7 +32,11 @@ type UpdateCheckResult = {
 
 function runGit(args: string, cwd: string): string {
   try {
-    return execSync(`git ${args}`, { cwd, timeout: 15_000, encoding: 'utf8' }).trim()
+    return execSync(`git ${args}`, {
+      cwd,
+      timeout: 15_000,
+      encoding: 'utf8',
+    }).trim()
   } catch {
     return ''
   }
@@ -40,7 +44,9 @@ function runGit(args: string, cwd: string): string {
 
 function readPackageVersion(repoPath: string): string {
   try {
-    const pkg = require(path.join(repoPath, 'package.json')) as { version?: string }
+    const pkg = require(path.join(repoPath, 'package.json')) as {
+      version?: string
+    }
     return pkg.version || '0.0.0'
   } catch {
     return '0.0.0'
@@ -53,7 +59,10 @@ function buildVersionLabel(baseVersion: string, commit: string): string {
 
 function detectRemote(repoPath: string): string {
   // Prefer 'production' or 'studio' remote (Eric's fork), fall back to 'origin'
-  const remotes = runGit('remote', repoPath).split('\n').map((r) => r.trim()).filter(Boolean)
+  const remotes = runGit('remote', repoPath)
+    .split('\n')
+    .map((r) => r.trim())
+    .filter(Boolean)
   if (remotes.includes('production')) return 'production'
   if (remotes.includes('studio')) return 'studio'
   return 'origin'
@@ -67,7 +76,8 @@ function checkForUpdates(): UpdateCheckResult {
   // Fetch latest from remote (quiet, won't fail if offline)
   runGit(`fetch ${remote} --quiet`, repoPath)
 
-  const currentBranch = runGit('rev-parse --abbrev-ref HEAD', repoPath) || 'main'
+  const currentBranch =
+    runGit('rev-parse --abbrev-ref HEAD', repoPath) || 'main'
   const localCommit = runGit('rev-parse --short HEAD', repoPath)
   const localDate = runGit('log -1 --format=%ci', repoPath)
 
@@ -81,9 +91,8 @@ function checkForUpdates(): UpdateCheckResult {
 
   // Build version labels
   const localVersion = buildVersionLabel(pkgVersion, localCommit)
-  const remoteVersion = behindBy > 0
-    ? buildVersionLabel(pkgVersion, remoteCommit)
-    : localVersion
+  const remoteVersion =
+    behindBy > 0 ? buildVersionLabel(pkgVersion, remoteCommit) : localVersion
 
   // Get changelog (up to 20 commits)
   const changelog: Array<CommitEntry> = []
@@ -96,7 +105,11 @@ function checkForUpdates(): UpdateCheckResult {
       if (!line.trim()) continue
       const [hash, subject, date] = line.split('||')
       if (hash && subject) {
-        changelog.push({ hash: hash.trim(), subject: subject.trim(), date: (date || '').trim() })
+        changelog.push({
+          hash: hash.trim(),
+          subject: subject.trim(),
+          date: (date || '').trim(),
+        })
       }
     }
   }
@@ -118,7 +131,8 @@ function checkForUpdates(): UpdateCheckResult {
 function runUpdate(): { ok: boolean; output: string } {
   const repoPath = path.resolve(process.cwd())
   const remote = detectRemote(repoPath)
-  const currentBranch = runGit('rev-parse --abbrev-ref HEAD', repoPath) || 'main'
+  const currentBranch =
+    runGit('rev-parse --abbrev-ref HEAD', repoPath) || 'main'
 
   try {
     // Pull latest — use merge (not rebase) to avoid conflict hell with forked repos
@@ -176,7 +190,10 @@ export const Route = createFileRoute('/api/update-check')({
           return json(result)
         } catch (err) {
           return json(
-            { ok: false, output: err instanceof Error ? err.message : String(err) },
+            {
+              ok: false,
+              output: err instanceof Error ? err.message : String(err),
+            },
             { status: 500 },
           )
         }

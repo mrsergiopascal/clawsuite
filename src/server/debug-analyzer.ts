@@ -60,7 +60,8 @@ const ANTHROPIC_MODEL = 'claude-sonnet-4-5-20250514'
 const OPENAI_MODEL = 'gpt-4o-mini'
 
 function getGatewayHttpUrl(path: string): string {
-  const envUrl = process.env.CLAWDBOT_GATEWAY_URL?.trim() || 'ws://127.0.0.1:18789'
+  const envUrl =
+    process.env.CLAWDBOT_GATEWAY_URL?.trim() || 'ws://127.0.0.1:18789'
   try {
     const parsed = new URL(envUrl)
     parsed.protocol = parsed.protocol === 'wss:' ? 'https:' : 'http:'
@@ -107,11 +108,17 @@ function buildPrompt(terminalOutput: string, logContent: string): string {
   ].join('\n')
 }
 
-function readProviderApiKey(config: OpenClawConfig, provider: 'anthropic' | 'openai'): string {
+function readProviderApiKey(
+  config: OpenClawConfig,
+  provider: 'anthropic' | 'openai',
+): string {
   const providerConfig = config.models?.providers?.[provider]
   if (!providerConfig) return ''
 
-  if (typeof providerConfig.apiKey === 'string' && providerConfig.apiKey.trim()) {
+  if (
+    typeof providerConfig.apiKey === 'string' &&
+    providerConfig.apiKey.trim()
+  ) {
     return providerConfig.apiKey.trim()
   }
 
@@ -146,7 +153,9 @@ async function resolveProvider(): Promise<ResolvedProvider | null> {
         return { provider: 'gateway', apiKey: gwTokenEnv }
       }
     }
-  } catch { /* gateway not available, fall through */ }
+  } catch {
+    /* gateway not available, fall through */
+  }
 
   const anthropicEnv = process.env.ANTHROPIC_API_KEY?.trim()
   if (anthropicEnv) {
@@ -199,7 +208,9 @@ function normalizeAnalysis(rawValue: unknown): DebugAnalysis {
       const commandEntry = toRecord(entry)
       if (!commandEntry) return null
       const command =
-        typeof commandEntry.command === 'string' ? commandEntry.command.trim() : ''
+        typeof commandEntry.command === 'string'
+          ? commandEntry.command.trim()
+          : ''
       const description =
         typeof commandEntry.description === 'string'
           ? commandEntry.description.trim()
@@ -207,9 +218,10 @@ function normalizeAnalysis(rawValue: unknown): DebugAnalysis {
       if (!command || !description) return null
       return { command, description }
     })
-    .filter(function removeNulls(
-      entry,
-    ): entry is { command: string; description: string } {
+    .filter(function removeNulls(entry): entry is {
+      command: string
+      description: string
+    } {
       return Boolean(entry)
     })
 
@@ -277,9 +289,7 @@ async function callAnthropic(apiKey: string, prompt: string): Promise<string> {
     }),
   })
 
-  const payload = (await response
-    .json()
-    .catch(() => ({}))) as AnthropicResponse
+  const payload = (await response.json().catch(() => ({}))) as AnthropicResponse
   if (!response.ok) {
     throw new Error(
       payload.error?.message || `Anthropic request failed (${response.status})`,

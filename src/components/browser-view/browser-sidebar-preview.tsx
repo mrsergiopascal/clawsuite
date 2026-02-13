@@ -55,7 +55,9 @@ function normalizeStatusPayload(payload: unknown): BrowserStatusResponse {
 async function fetchBrowserStatus(): Promise<BrowserStatusResponse> {
   try {
     // Check local stream server status (same server the browser UI uses)
-    const res = await fetch('http://localhost:9223', { signal: AbortSignal.timeout(2000) })
+    const res = await fetch('http://localhost:9223', {
+      signal: AbortSignal.timeout(2000),
+    })
     if (res.ok) {
       const data = (await res.json()) as Record<string, unknown>
       if (data.running) {
@@ -66,7 +68,9 @@ async function fetchBrowserStatus(): Promise<BrowserStatusResponse> {
           body: JSON.stringify({ action: 'screenshot' }),
           signal: AbortSignal.timeout(3000),
         })
-        const ssData = ssRes.ok ? (await ssRes.json()) as Record<string, unknown> : {}
+        const ssData = ssRes.ok
+          ? ((await ssRes.json()) as Record<string, unknown>)
+          : {}
         return {
           active: true,
           url: readString(data.url),
@@ -115,7 +119,10 @@ function BrowserSidebarPreview() {
             icon={GlobeIcon}
             size={20}
             strokeWidth={1.5}
-            className={cn('shrink-0', status.active ? 'text-primary-700' : 'text-primary-500')}
+            className={cn(
+              'shrink-0',
+              status.active ? 'text-primary-700' : 'text-primary-500',
+            )}
           />
           <span
             className={cn(

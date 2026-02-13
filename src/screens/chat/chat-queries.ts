@@ -143,11 +143,7 @@ export function updateHistoryMessageByClientId(
     function update(messages) {
       return messages.map((message) => {
         if (
-          isMatchingClientMessage(
-            message,
-            normalizedClientId,
-            optimisticId,
-          )
+          isMatchingClientMessage(message, normalizedClientId, optimisticId)
         ) {
           return updater(message)
         }
@@ -206,7 +202,9 @@ export function moveHistoryMessages(
 ) {
   const fromKey = chatQueryKeys.history(fromFriendlyId, fromSessionKey)
   const toKey = chatQueryKeys.history(toFriendlyId, toSessionKey)
-  const fromData = queryClient.getQueryData(fromKey) as Record<string, unknown> | undefined
+  const fromData = queryClient.getQueryData(fromKey) as
+    | Record<string, unknown>
+    | undefined
   if (!fromData) return
   const messages = Array.isArray(fromData.messages) ? fromData.messages : []
   queryClient.setQueryData(toKey, {

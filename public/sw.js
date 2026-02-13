@@ -1,54 +1,50 @@
 // ClawSuite Service Worker
-const CACHE_NAME = 'clawsuite-v2';
-const API_CACHE = 'clawsuite-api-v2';
+const CACHE_NAME = 'clawsuite-v2'
+const API_CACHE = 'clawsuite-api-v2'
 
 // App shell - critical assets cached on install
-const APP_SHELL = [
-  '/',
-  '/favicon.svg',
-  '/logo-icon-simple.svg',
-];
+const APP_SHELL = ['/', '/favicon.svg', '/logo-icon-simple.svg']
 
 // Install event - cache app shell
 self.addEventListener('install', (event) => {
-  console.log('[SW] Installing service worker...');
+  console.log('[SW] Installing service worker...')
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('[SW] Caching app shell');
-      return cache.addAll(APP_SHELL);
-    })
-  );
+      console.log('[SW] Caching app shell')
+      return cache.addAll(APP_SHELL)
+    }),
+  )
   // Activate immediately
-  self.skipWaiting();
-});
+  self.skipWaiting()
+})
 
 // Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
-  console.log('[SW] Activating service worker...');
+  console.log('[SW] Activating service worker...')
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames
           .filter((name) => name !== CACHE_NAME && name !== API_CACHE)
           .map((name) => {
-            console.log('[SW] Deleting old cache:', name);
-            return caches.delete(name);
-          })
-      );
-    })
-  );
+            console.log('[SW] Deleting old cache:', name)
+            return caches.delete(name)
+          }),
+      )
+    }),
+  )
   // Take control immediately
-  return self.clients.claim();
-});
+  return self.clients.claim()
+})
 
 // Fetch event - network-first for API, cache-first for static assets
 self.addEventListener('fetch', (event) => {
-  const { request } = event;
-  const url = new URL(request.url);
+  const { request } = event
+  const url = new URL(request.url)
 
   // Skip non-GET requests
   if (request.method !== 'GET') {
-    return;
+    return
   }
 
   // API calls - network-first strategy
@@ -58,26 +54,26 @@ self.addEventListener('fetch', (event) => {
         .then((response) => {
           // Clone and cache successful responses
           if (response.ok) {
-            const responseClone = response.clone();
+            const responseClone = response.clone()
             caches.open(API_CACHE).then((cache) => {
-              cache.put(request, responseClone);
-            });
+              cache.put(request, responseClone)
+            })
           }
-          return response;
+          return response
         })
         .catch(() => {
           // Fallback to cache on network failure
-          return caches.match(request);
-        })
-    );
-    return;
+          return caches.match(request)
+        }),
+    )
+    return
   }
 
   // Static assets - cache-first strategy
   event.respondWith(
     caches.match(request).then((cachedResponse) => {
       if (cachedResponse) {
-        return cachedResponse;
+        return cachedResponse
       }
 
       // Not in cache, fetch from network
@@ -92,13 +88,13 @@ self.addEventListener('fetch', (event) => {
             url.pathname.endsWith('.jpg') ||
             url.pathname.endsWith('.webp'))
         ) {
-          const responseClone = response.clone();
+          const responseClone = response.clone()
           caches.open(CACHE_NAME).then((cache) => {
-            cache.put(request, responseClone);
-          });
+            cache.put(request, responseClone)
+          })
         }
-        return response;
-      });
-    })
-  );
-});
+        return response
+      })
+    }),
+  )
+})

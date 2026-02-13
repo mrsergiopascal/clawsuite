@@ -82,7 +82,7 @@ export const tourSteps: Step[] = [
     content:
       'Monitor your AI provider usage in real-time. Track costs and API consumption.',
   },
-  // Step 9: Settings
+  // Step 10: Settings
   {
     target: '[data-tour="settings"]',
     placement: 'right',
@@ -90,12 +90,12 @@ export const tourSteps: Step[] = [
     content:
       'Configure providers, themes, accent colors, and more. Make ClawSuite yours.',
   },
-  // Step 10: Finish
+  // Step 11: Finish
   {
     target: 'body',
     placement: 'center',
     title: "You're all set! 🎉",
     content:
-      'Start chatting with your AI, explore the tools, and customize ClawSuite to fit your workflow. Need help? Press ⌘K and search "help".',
+      'Start chatting with your AI, explore the tools, and customize ClawSuite to fit your workflow. Need help? Press ? to see all keyboard shortcuts.',
   },
 ]

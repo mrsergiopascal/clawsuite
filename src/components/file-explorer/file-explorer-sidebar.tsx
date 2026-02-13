@@ -210,15 +210,18 @@ export function FileExplorerSidebar({
     [openPrompt],
   )
 
-  const handleDelete = useCallback(async (entry: FileEntry) => {
-    if (!window.confirm(`Move ${entry.name} to trash?`)) return
-    await fetch('/api/files', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ action: 'delete', path: entry.path }),
-    })
-    await refresh()
-  }, [refresh])
+  const handleDelete = useCallback(
+    async (entry: FileEntry) => {
+      if (!window.confirm(`Move ${entry.name} to trash?`)) return
+      await fetch('/api/files', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ action: 'delete', path: entry.path }),
+      })
+      await refresh()
+    },
+    [refresh],
+  )
 
   const handleDownload = useCallback(async (entry: FileEntry) => {
     const res = await fetch(
@@ -367,11 +370,15 @@ export function FileExplorerSidebar({
     <aside
       className={cn(
         'border-r border-primary-200 bg-primary-100 h-full flex flex-col transition-all duration-200 ease-out',
-        collapsed ? 'w-0 opacity-0 pointer-events-none' : 'w-[260px] opacity-100',
+        collapsed
+          ? 'w-0 opacity-0 pointer-events-none'
+          : 'w-[260px] opacity-100',
       )}
     >
       <div className="flex items-center justify-between h-12 px-3 border-b border-primary-200">
-        <div className="text-sm font-semibold text-primary-900">{ROOT_LABEL}</div>
+        <div className="text-sm font-semibold text-primary-900">
+          {ROOT_LABEL}
+        </div>
         <div className="flex items-center gap-1">
           <Button
             size="icon-sm"
@@ -416,10 +423,17 @@ export function FileExplorerSidebar({
           ) : error ? (
             <div className="flex flex-col items-center justify-center gap-3 px-4 py-8 text-center">
               <div className="flex size-10 items-center justify-center rounded-xl border border-primary-200 bg-primary-100/60">
-                <HugeiconsIcon icon={Folder01Icon} size={20} strokeWidth={1.5} className="text-primary-500" />
+                <HugeiconsIcon
+                  icon={Folder01Icon}
+                  size={20}
+                  strokeWidth={1.5}
+                  className="text-primary-500"
+                />
               </div>
               <div>
-                <p className="text-sm font-medium text-primary-800">No workspace selected</p>
+                <p className="text-sm font-medium text-primary-800">
+                  No workspace selected
+                </p>
                 <p className="mt-1 text-xs text-primary-500 text-pretty">
                   Select a folder to browse and edit files.
                 </p>
@@ -437,10 +451,17 @@ export function FileExplorerSidebar({
           ) : entries.length === 0 ? (
             <div className="flex flex-col items-center justify-center gap-3 px-4 py-8 text-center">
               <div className="flex size-10 items-center justify-center rounded-xl border border-primary-200 bg-primary-100/60">
-                <HugeiconsIcon icon={Folder01Icon} size={20} strokeWidth={1.5} className="text-primary-500" />
+                <HugeiconsIcon
+                  icon={Folder01Icon}
+                  size={20}
+                  strokeWidth={1.5}
+                  className="text-primary-500"
+                />
               </div>
               <div>
-                <p className="text-sm font-medium text-primary-800">Workspace is empty</p>
+                <p className="text-sm font-medium text-primary-800">
+                  Workspace is empty
+                </p>
                 <p className="mt-1 text-xs text-primary-500 text-pretty">
                   Create files or upload content to get started.
                 </p>
@@ -449,7 +470,9 @@ export function FileExplorerSidebar({
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => openPrompt({ mode: 'new-file', targetPath: '' })}
+                  onClick={() =>
+                    openPrompt({ mode: 'new-file', targetPath: '' })
+                  }
                 >
                   <HugeiconsIcon icon={PlusSignIcon} size={16} />
                   New file

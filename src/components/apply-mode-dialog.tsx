@@ -1,60 +1,60 @@
-import { useEffect, useRef, useCallback } from 'react';
-import type { Mode } from '@/hooks/use-modes';
+import { useEffect, useRef, useCallback } from 'react'
+import type { Mode } from '@/hooks/use-modes'
 
 type ApplyModeDialogProps = {
-  mode: Mode;
-  onConfirm: (switchModel: boolean) => void;
-  onClose: () => void;
-};
+  mode: Mode
+  onConfirm: (switchModel: boolean) => void
+  onClose: () => void
+}
 
 export function ApplyModeDialog({
   mode,
   onConfirm,
   onClose,
 }: ApplyModeDialogProps) {
-  const dialogRef = useRef<HTMLDivElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null)
 
   // Focus trap
   useEffect(() => {
-    const dialog = dialogRef.current;
-    if (!dialog) return;
+    const dialog = dialogRef.current
+    if (!dialog) return
 
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === 'Escape') {
-        onClose();
-        return;
+        onClose()
+        return
       }
 
       if (event.key === 'Tab') {
         const focusable = dialog!.querySelectorAll<HTMLElement>(
-          'button, [tabindex]:not([tabindex="-1"])'
-        );
-        const first = focusable[0];
-        const last = focusable[focusable.length - 1];
+          'button, [tabindex]:not([tabindex="-1"])',
+        )
+        const first = focusable[0]
+        const last = focusable[focusable.length - 1]
 
         if (event.shiftKey && document.activeElement === first) {
-          event.preventDefault();
-          last.focus();
+          event.preventDefault()
+          last.focus()
         } else if (!event.shiftKey && document.activeElement === last) {
-          event.preventDefault();
-          first.focus();
+          event.preventDefault()
+          first.focus()
         }
       }
     }
 
-    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('keydown', handleKeyDown)
     return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [onClose]);
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [onClose])
 
   const handleSwitchNow = useCallback(() => {
-    onConfirm(true);
-  }, [onConfirm]);
+    onConfirm(true)
+  }, [onConfirm])
 
   const handleSkip = useCallback(() => {
-    onConfirm(false);
-  }, [onConfirm]);
+    onConfirm(false)
+  }, [onConfirm])
 
   return (
     <>
@@ -81,8 +81,9 @@ export function ApplyModeDialog({
         </h2>
 
         <p className="mb-6 text-sm text-primary-600">
-          Mode "{mode.name}" uses <span className="font-medium">{mode.preferredModel}</span>.
-          Would you like to switch to this model now?
+          Mode "{mode.name}" uses{' '}
+          <span className="font-medium">{mode.preferredModel}</span>. Would you
+          like to switch to this model now?
         </p>
 
         <div className="flex justify-end gap-2">
@@ -103,5 +104,5 @@ export function ApplyModeDialog({
         </div>
       </div>
     </>
-  );
+  )
 }

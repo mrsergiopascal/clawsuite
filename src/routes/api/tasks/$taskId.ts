@@ -3,7 +3,12 @@ import path from 'node:path'
 import { createFileRoute } from '@tanstack/react-router'
 import { json } from '@tanstack/react-start'
 import { z } from 'zod'
-import { getClientIp, rateLimit, rateLimitResponse, safeErrorMessage } from '../../../server/rate-limit'
+import {
+  getClientIp,
+  rateLimit,
+  rateLimitResponse,
+  safeErrorMessage,
+} from '../../../server/rate-limit'
 
 const TASKS_FILE = path.join(process.cwd(), 'data', 'tasks.json')
 
@@ -44,24 +49,30 @@ export const Route = createFileRoute('/api/tasks/$taskId')({
     handlers: {
       PATCH: async ({ request }) => {
         const ip = getClientIp(request)
-        if (!rateLimit(`tasks-patch:${ip}`, 30, 60_000)) return rateLimitResponse()
+        if (!rateLimit(`tasks-patch:${ip}`, 30, 60_000))
+          return rateLimitResponse()
 
         try {
           const taskId = extractTaskId(request)
-          if (!taskId) return json({ error: 'taskId is required' }, { status: 400 })
+          if (!taskId)
+            return json({ error: 'taskId is required' }, { status: 400 })
 
           const body = await request.json().catch(() => ({}))
           const parsed = UpdateTaskSchema.safeParse(body)
           if (!parsed.success) {
             return json(
-              { error: 'Validation failed', details: parsed.error.flatten().fieldErrors },
+              {
+                error: 'Validation failed',
+                details: parsed.error.flatten().fieldErrors,
+              },
               { status: 400 },
             )
           }
 
           const tasks = await readTasks()
           const idx = tasks.findIndex((t) => t.id === taskId)
-          if (idx === -1) return json({ error: 'Task not found' }, { status: 404 })
+          if (idx === -1)
+            return json({ error: 'Task not found' }, { status: 404 })
 
           const updated = {
             ...tasks[idx],
@@ -79,15 +90,18 @@ export const Route = createFileRoute('/api/tasks/$taskId')({
 
       DELETE: async ({ request }) => {
         const ip = getClientIp(request)
-        if (!rateLimit(`tasks-delete:${ip}`, 30, 60_000)) return rateLimitResponse()
+        if (!rateLimit(`tasks-delete:${ip}`, 30, 60_000))
+          return rateLimitResponse()
 
         try {
           const taskId = extractTaskId(request)
-          if (!taskId) return json({ error: 'taskId is required' }, { status: 400 })
+          if (!taskId)
+            return json({ error: 'taskId is required' }, { status: 400 })
 
           const tasks = await readTasks()
           const filtered = tasks.filter((t) => t.id !== taskId)
-          if (filtered.length === tasks.length) return json({ error: 'Task not found' }, { status: 404 })
+          if (filtered.length === tasks.length)
+            return json({ error: 'Task not found' }, { status: 404 })
 
           await writeTasks(filtered)
           return json({ ok: true })

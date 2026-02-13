@@ -53,18 +53,36 @@ async function fetchSessions(): Promise<Array<Record<string, unknown>>> {
   return Array.isArray(payload.sessions) ? payload.sessions : []
 }
 
-function toNotifications(rows: Array<Record<string, unknown>>): NotificationItem[] {
+function toNotifications(
+  rows: Array<Record<string, unknown>>,
+): NotificationItem[] {
   return rows
     .map((session, index) => {
       const key = readString(session.friendlyId) || `session-${index}`
-      const updatedAt = normalizeTimestamp(session.updatedAt ?? session.startedAt ?? session.createdAt)
+      const updatedAt = normalizeTimestamp(
+        session.updatedAt ?? session.startedAt ?? session.createdAt,
+      )
       const status = readString(session.status).toLowerCase()
-      const label = readString(session.label) || readString(session.title) || readString(session.derivedTitle) || key
+      const label =
+        readString(session.label) ||
+        readString(session.title) ||
+        readString(session.derivedTitle) ||
+        key
 
       if (status.includes('error')) {
-        return { id: `${key}-err`, label: 'Error', detail: `${label} reported an error`, occurredAt: updatedAt }
+        return {
+          id: `${key}-err`,
+          label: 'Error',
+          detail: `${label} reported an error`,
+          occurredAt: updatedAt,
+        }
       }
-      return { id: `${key}-start`, label: 'Session', detail: `Session started: ${label}`, occurredAt: updatedAt }
+      return {
+        id: `${key}-start`,
+        label: 'Session',
+        detail: `Session started: ${label}`,
+        occurredAt: updatedAt,
+      }
     })
     .sort((a, b) => b.occurredAt - a.occurredAt)
     .slice(0, 8)
@@ -112,10 +130,14 @@ export function NotificationsPopover() {
 
       {open ? (
         <div className="absolute right-0 top-full z-[9999] mt-2 w-72 rounded-xl border border-primary-200 bg-primary-50 p-3 shadow-xl backdrop-blur-xl dark:bg-primary-100">
-          <h3 className="mb-2 text-xs font-medium uppercase tracking-wide text-primary-500">Notifications</h3>
+          <h3 className="mb-2 text-xs font-medium uppercase tracking-wide text-primary-500">
+            Notifications
+          </h3>
 
           {notifications.length === 0 ? (
-            <p className="py-4 text-center text-[13px] text-primary-400">No recent activity</p>
+            <p className="py-4 text-center text-[13px] text-primary-400">
+              No recent activity
+            </p>
           ) : (
             <div className="max-h-64 space-y-1.5 overflow-y-auto">
               {notifications.map((item) => (
@@ -124,12 +146,23 @@ export function NotificationsPopover() {
                   className="rounded-lg border border-primary-200 bg-primary-50/80 px-2.5 py-2"
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <span className={cn('text-[11px] font-medium', item.label === 'Error' ? 'text-red-600' : 'text-primary-600')}>
+                    <span
+                      className={cn(
+                        'text-[11px] font-medium',
+                        item.label === 'Error'
+                          ? 'text-red-600'
+                          : 'text-primary-600',
+                      )}
+                    >
                       {item.label}
                     </span>
-                    <span className="text-[10px] text-primary-400 tabular-nums">{formatRelativeTime(item.occurredAt)}</span>
+                    <span className="text-[10px] text-primary-400 tabular-nums">
+                      {formatRelativeTime(item.occurredAt)}
+                    </span>
                   </div>
-                  <p className="mt-0.5 line-clamp-2 text-[11px] text-primary-500">{item.detail}</p>
+                  <p className="mt-0.5 line-clamp-2 text-[11px] text-primary-500">
+                    {item.detail}
+                  </p>
                 </div>
               ))}
             </div>

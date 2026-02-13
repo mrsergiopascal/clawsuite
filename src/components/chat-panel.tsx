@@ -29,7 +29,9 @@ export function ChatPanel() {
   const isOpen = useWorkspaceStore((s) => s.chatPanelOpen)
   const sessionKey = useWorkspaceStore((s) => s.chatPanelSessionKey)
   const setChatPanelOpen = useWorkspaceStore((s) => s.setChatPanelOpen)
-  const setChatPanelSessionKey = useWorkspaceStore((s) => s.setChatPanelSessionKey)
+  const setChatPanelSessionKey = useWorkspaceStore(
+    (s) => s.setChatPanelSessionKey,
+  )
   const navigate = useNavigate()
   const queryClient = useQueryClient()
 
@@ -52,7 +54,11 @@ export function ChatPanel() {
       const res = await fetch('/api/sessions')
       if (!res.ok) return []
       const data = await res.json()
-      return Array.isArray(data?.sessions) ? data.sessions : Array.isArray(data) ? data : []
+      return Array.isArray(data?.sessions)
+        ? data.sessions
+        : Array.isArray(data)
+          ? data
+          : []
     },
     staleTime: 10_000,
   })
@@ -61,7 +67,10 @@ export function ChatPanel() {
   // Current session title
   const activeSession = sessions.find((s) => s.friendlyId === activeFriendlyId)
   const panelTitle = activeSession
-    ? (activeSession.label || activeSession.title || activeSession.derivedTitle || 'Chat')
+    ? activeSession.label ||
+      activeSession.title ||
+      activeSession.derivedTitle ||
+      'Chat'
     : activeFriendlyId === 'main'
       ? 'Main Session'
       : isNewChat
@@ -129,128 +138,130 @@ export function ChatPanel() {
             aria-hidden
           />
           <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.15 }}
-          className="absolute right-0 top-0 h-full w-[420px] max-w-[100vw] border-l border-primary-200 bg-surface overflow-hidden flex flex-col z-20 shadow-xl min-[1200px]:relative min-[1200px]:shadow-none"
-        >
-          {/* Panel header */}
-          <div className="flex items-center justify-between h-10 px-3 border-b border-primary-200 shrink-0">
-            <div className="flex items-center gap-1.5 min-w-0">
-              <button
-                type="button"
-                onClick={() => setShowSessionList((v) => !v)}
-                className="text-xs font-medium text-primary-700 hover:text-primary-900 truncate max-w-[200px] transition-colors"
-                title={panelTitle}
-              >
-                {panelTitle}
-              </button>
-            </div>
-            <div className="flex items-center gap-0.5">
-              <TooltipProvider>
-                <TooltipRoot>
-                  <TooltipTrigger
-                    onClick={handleNewChat}
-                    render={
-                      <Button
-                        size="icon-sm"
-                        variant="ghost"
-                        className="text-primary-600 hover:text-primary-900"
-                        aria-label="New chat"
-                      >
-                        <HugeiconsIcon
-                          icon={PencilEdit02Icon}
-                          size={14}
-                          strokeWidth={1.5}
-                        />
-                      </Button>
-                    }
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="absolute right-0 top-0 h-full w-[420px] max-w-[100vw] border-l border-primary-200 bg-surface overflow-hidden flex flex-col z-20 shadow-xl min-[1200px]:relative min-[1200px]:shadow-none"
+          >
+            {/* Panel header */}
+            <div className="flex items-center justify-between h-10 px-3 border-b border-primary-200 shrink-0">
+              <div className="flex items-center gap-1.5 min-w-0">
+                <button
+                  type="button"
+                  onClick={() => setShowSessionList((v) => !v)}
+                  className="text-xs font-medium text-primary-700 hover:text-primary-900 truncate max-w-[200px] transition-colors"
+                  title={panelTitle}
+                >
+                  {panelTitle}
+                </button>
+              </div>
+              <div className="flex items-center gap-0.5">
+                <TooltipProvider>
+                  <TooltipRoot>
+                    <TooltipTrigger
+                      onClick={handleNewChat}
+                      render={
+                        <Button
+                          size="icon-sm"
+                          variant="ghost"
+                          className="text-primary-600 hover:text-primary-900"
+                          aria-label="New chat"
+                        >
+                          <HugeiconsIcon
+                            icon={PencilEdit02Icon}
+                            size={14}
+                            strokeWidth={1.5}
+                          />
+                        </Button>
+                      }
+                    />
+                    <TooltipContent side="bottom">New chat</TooltipContent>
+                  </TooltipRoot>
+                  <TooltipRoot>
+                    <TooltipTrigger
+                      onClick={handleExpand}
+                      render={
+                        <Button
+                          size="icon-sm"
+                          variant="ghost"
+                          className="text-primary-600 hover:text-primary-900"
+                          aria-label="Expand to full chat"
+                        >
+                          <HugeiconsIcon
+                            icon={ArrowExpand01Icon}
+                            size={14}
+                            strokeWidth={1.5}
+                          />
+                        </Button>
+                      }
+                    />
+                    <TooltipContent side="bottom">Full view</TooltipContent>
+                  </TooltipRoot>
+                </TooltipProvider>
+                <Button
+                  size="icon-sm"
+                  variant="ghost"
+                  onClick={handleClose}
+                  className="text-primary-600 hover:text-primary-900"
+                  aria-label="Close chat panel"
+                >
+                  <HugeiconsIcon
+                    icon={Cancel01Icon}
+                    size={14}
+                    strokeWidth={1.5}
                   />
-                  <TooltipContent side="bottom">New chat</TooltipContent>
-                </TooltipRoot>
-                <TooltipRoot>
-                  <TooltipTrigger
-                    onClick={handleExpand}
-                    render={
-                      <Button
-                        size="icon-sm"
-                        variant="ghost"
-                        className="text-primary-600 hover:text-primary-900"
-                        aria-label="Expand to full chat"
-                      >
-                        <HugeiconsIcon
-                          icon={ArrowExpand01Icon}
-                          size={14}
-                          strokeWidth={1.5}
-                        />
-                      </Button>
-                    }
-                  />
-                  <TooltipContent side="bottom">Full view</TooltipContent>
-                </TooltipRoot>
-              </TooltipProvider>
-              <Button
-                size="icon-sm"
-                variant="ghost"
-                onClick={handleClose}
-                className="text-primary-600 hover:text-primary-900"
-                aria-label="Close chat panel"
-              >
-                <HugeiconsIcon
-                  icon={Cancel01Icon}
-                  size={14}
-                  strokeWidth={1.5}
-                />
-              </Button>
+                </Button>
+              </div>
             </div>
-          </div>
 
-          {/* Session switcher dropdown */}
-          <AnimatePresence>
-            {showSessionList && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.15 }}
-                className="border-b border-primary-200 overflow-hidden"
-              >
-                <div className="max-h-48 overflow-y-auto py-1">
-                  {sessions.map((s) => (
-                    <button
-                      key={s.key}
-                      type="button"
-                      onClick={() => {
-                        handleSelectSession(s.friendlyId)
-                        setShowSessionList(false)
-                      }}
-                      className={`w-full text-left px-3 py-1.5 text-xs truncate transition-colors ${
-                        s.friendlyId === activeFriendlyId
-                          ? 'bg-accent-500/10 text-accent-600'
-                          : 'text-primary-700 hover:bg-primary-100'
-                      }`}
-                    >
-                      {s.label || s.title || s.derivedTitle || s.friendlyId}
-                    </button>
-                  ))}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+            {/* Session switcher dropdown */}
+            <AnimatePresence>
+              {showSessionList && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.15 }}
+                  className="border-b border-primary-200 overflow-hidden"
+                >
+                  <div className="max-h-48 overflow-y-auto py-1">
+                    {sessions.map((s) => (
+                      <button
+                        key={s.key}
+                        type="button"
+                        onClick={() => {
+                          handleSelectSession(s.friendlyId)
+                          setShowSessionList(false)
+                        }}
+                        className={`w-full text-left px-3 py-1.5 text-xs truncate transition-colors ${
+                          s.friendlyId === activeFriendlyId
+                            ? 'bg-accent-500/10 text-accent-600'
+                            : 'text-primary-700 hover:bg-primary-100'
+                        }`}
+                      >
+                        {s.label || s.title || s.derivedTitle || s.friendlyId}
+                      </button>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-          {/* Chat content — simplified wrapper, width controlled by parent motion.div */}
-          <div className="flex-1 min-h-0 overflow-hidden">
-            <ChatScreen
-              key={activeFriendlyId}
-              activeFriendlyId={activeFriendlyId}
-              isNewChat={isNewChat}
-              forcedSessionKey={forcedSessionKey}
-              onSessionResolved={isNewChat ? handleSessionResolved : undefined}
-              compact
-            />
-          </div>
-        </motion.div>
+            {/* Chat content — simplified wrapper, width controlled by parent motion.div */}
+            <div className="flex-1 min-h-0 overflow-hidden">
+              <ChatScreen
+                key={activeFriendlyId}
+                activeFriendlyId={activeFriendlyId}
+                isNewChat={isNewChat}
+                forcedSessionKey={forcedSessionKey}
+                onSessionResolved={
+                  isNewChat ? handleSessionResolved : undefined
+                }
+                compact
+              />
+            </div>
+          </motion.div>
         </>
       )}
     </AnimatePresence>

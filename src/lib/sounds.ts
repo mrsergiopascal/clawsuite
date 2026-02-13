@@ -45,7 +45,10 @@ function loadPrefs(): void {
     if (stored) {
       const parsed = JSON.parse(stored) as Partial<SoundPrefs>
       prefs = {
-        volume: typeof parsed.volume === 'number' ? Math.max(0, Math.min(1, parsed.volume)) : DEFAULT_VOLUME,
+        volume:
+          typeof parsed.volume === 'number'
+            ? Math.max(0, Math.min(1, parsed.volume))
+            : DEFAULT_VOLUME,
         enabled: typeof parsed.enabled === 'boolean' ? parsed.enabled : true,
       }
     }
@@ -90,7 +93,7 @@ function playTone(
   durationMs: number,
   type: OscillatorType = 'sine',
   volumeMultiplier: number = 1,
-  startTimeOffset: number = 0
+  startTimeOffset: number = 0,
 ): void {
   const ctx = getAudioContext()
   if (!ctx || !prefs.enabled) return
@@ -126,11 +129,22 @@ function playTone(
  * Play a sequence of tones
  */
 function playSequence(
-  tones: Array<{ freq: number; durationMs: number; type?: OscillatorType; volume?: number }>
+  tones: Array<{
+    freq: number
+    durationMs: number
+    type?: OscillatorType
+    volume?: number
+  }>,
 ): void {
   let offset = 0
   for (const tone of tones) {
-    playTone(tone.freq, tone.durationMs, tone.type ?? 'sine', tone.volume ?? 1, offset)
+    playTone(
+      tone.freq,
+      tone.durationMs,
+      tone.type ?? 'sine',
+      tone.volume ?? 1,
+      offset,
+    )
     offset += tone.durationMs / 1000
   }
 }

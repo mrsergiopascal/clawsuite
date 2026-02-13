@@ -15,7 +15,11 @@ import { join } from 'node:path'
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
-export type ProviderStatus = 'ok' | 'missing_credentials' | 'auth_expired' | 'error'
+export type ProviderStatus =
+  | 'ok'
+  | 'missing_credentials'
+  | 'auth_expired'
+  | 'error'
 
 export type UsageLine = {
   type: 'progress' | 'text' | 'badge'
@@ -67,7 +71,8 @@ const CLAUDE_KEYCHAIN_SERVICE = 'Claude Code-credentials'
 const CLAUDE_USAGE_URL = 'https://api.anthropic.com/api/oauth/usage'
 const CLAUDE_REFRESH_URL = 'https://platform.claude.com/v1/oauth/token'
 const CLAUDE_CLIENT_ID = '9d1c250a-e61b-44d9-88ed-5944d1962f5e'
-const CLAUDE_SCOPES = 'user:profile user:inference user:sessions:claude_code user:mcp_servers'
+const CLAUDE_SCOPES =
+  'user:profile user:inference user:sessions:claude_code user:mcp_servers'
 const REFRESH_BUFFER_MS = 5 * 60 * 1000
 
 type ClaudeOAuth = {
@@ -106,7 +111,9 @@ function loadClaudeCredentials(): ClaudeCredentials | null {
       if (oauth?.accessToken) {
         return { oauth, source: 'file', fullData: parsed }
       }
-    } catch { /* continue to keychain */ }
+    } catch {
+      /* continue to keychain */
+    }
   }
 
   // Try macOS keychain
@@ -118,13 +125,19 @@ function loadClaudeCredentials(): ClaudeCredentials | null {
       ).trim()
       if (raw) {
         let parsed: Record<string, unknown> | null = null
-        try { parsed = JSON.parse(raw) } catch { parsed = tryParseKeychainHex(raw) as Record<string, unknown> | null }
+        try {
+          parsed = JSON.parse(raw)
+        } catch {
+          parsed = tryParseKeychainHex(raw) as Record<string, unknown> | null
+        }
         const oauth = parsed?.claudeAiOauth as ClaudeOAuth | undefined
         if (oauth?.accessToken) {
           return { oauth, source: 'keychain', fullData: parsed! }
         }
       }
-    } catch { /* no keychain entry */ }
+    } catch {
+      /* no keychain entry */
+    }
   }
 
   return null
@@ -135,18 +148,24 @@ function saveClaudeCredentials(creds: ClaudeCredentials): void {
   if (creds.source === 'file') {
     try {
       writeFileSync(expandHome(CLAUDE_CRED_FILE), text, 'utf-8')
-    } catch { /* best effort */ }
+    } catch {
+      /* best effort */
+    }
   } else if (creds.source === 'keychain' && process.platform === 'darwin') {
     try {
       execSync(
         `security add-generic-password -U -s "${CLAUDE_KEYCHAIN_SERVICE}" -w "${text.replace(/"/g, '\\"')}" 2>/dev/null`,
         { timeout: 5000 },
       )
-    } catch { /* best effort */ }
+    } catch {
+      /* best effort */
+    }
   }
 }
 
-async function refreshClaudeToken(creds: ClaudeCredentials): Promise<string | null> {
+async function refreshClaudeToken(
+  creds: ClaudeCredentials,
+): Promise<string | null> {
   if (!creds.oauth.refreshToken) return null
 
   const res = await fetch(CLAUDE_REFRESH_URL, {
@@ -161,7 +180,10 @@ async function refreshClaudeToken(creds: ClaudeCredentials): Promise<string | nu
   })
 
   if (res.status === 400 || res.status === 401) {
-    const body = await res.json().catch(() => null) as Record<string, unknown> | null
+    const body = (await res.json().catch(() => null)) as Record<
+      string,
+      unknown
+    > | null
     const errorCode = body?.error ?? body?.error_description
     if (errorCode === 'invalid_grant') {
       throw new Error('Claude session expired. Run `claude` to log in again.')
@@ -171,11 +193,15 @@ async function refreshClaudeToken(creds: ClaudeCredentials): Promise<string | nu
 
   if (!res.ok) return null
 
-  const body = await res.json().catch(() => null) as Record<string, unknown> | null
+  const body = (await res.json().catch(() => null)) as Record<
+    string,
+    unknown
+  > | null
   if (!body?.access_token) return null
 
   creds.oauth.accessToken = body.access_token as string
-  if (body.refresh_token) creds.oauth.refreshToken = body.refresh_token as string
+  if (body.refresh_token)
+    creds.oauth.refreshToken = body.refresh_token as string
   if (typeof body.expires_in === 'number') {
     creds.oauth.expiresAt = Date.now() + (body.expires_in as number) * 1000
   }
@@ -188,12 +214,12 @@ async function refreshClaudeToken(creds: ClaudeCredentials): Promise<string | nu
 function planLabel(subType?: string): string | undefined {
   if (!subType) return undefined
   const labels: Record<string, string> = {
-    'claude_pro': 'Pro',
-    'claude_team': 'Team',
-    'claude_enterprise': 'Enterprise',
-    'claude_max_5x': 'Max 5x',
-    'claude_max_20x': 'Max 20x',
-    'free': 'Free',
+    claude_pro: 'Pro',
+    claude_team: 'Team',
+    claude_enterprise: 'Enterprise',
+    claude_max_5x: 'Max 5x',
+    claude_max_20x: 'Max 20x',
+    free: 'Free',
   }
   return labels[subType] ?? subType
 }
@@ -216,7 +242,10 @@ export async function fetchClaudeUsage(): Promise<ProviderUsageResult> {
   let accessToken = creds.oauth.accessToken
 
   // Auto-refresh if expired or expiring soon
-  if (creds.oauth.expiresAt && (now > creds.oauth.expiresAt - REFRESH_BUFFER_MS)) {
+  if (
+    creds.oauth.expiresAt &&
+    now > creds.oauth.expiresAt - REFRESH_BUFFER_MS
+  ) {
     try {
       const refreshed = await refreshClaudeToken(creds)
       if (refreshed) accessToken = refreshed
@@ -293,7 +322,10 @@ export async function fetchClaudeUsage(): Promise<ProviderUsageResult> {
     }
   }
 
-  const data = await res.json().catch(() => null) as Record<string, unknown> | null
+  const data = (await res.json().catch(() => null)) as Record<
+    string,
+    unknown
+  > | null
   if (!data) {
     return {
       provider: 'claude',
@@ -315,7 +347,9 @@ export async function fetchClaudeUsage(): Promise<ProviderUsageResult> {
       used: fiveHour.utilization as number,
       limit: 100,
       format: 'percent',
-      resetsAt: fiveHour.resets_at ? new Date(fiveHour.resets_at as string).toISOString() : undefined,
+      resetsAt: fiveHour.resets_at
+        ? new Date(fiveHour.resets_at as string).toISOString()
+        : undefined,
     })
   }
 
@@ -327,11 +361,15 @@ export async function fetchClaudeUsage(): Promise<ProviderUsageResult> {
       used: sevenDay.utilization as number,
       limit: 100,
       format: 'percent',
-      resetsAt: sevenDay.resets_at ? new Date(sevenDay.resets_at as string).toISOString() : undefined,
+      resetsAt: sevenDay.resets_at
+        ? new Date(sevenDay.resets_at as string).toISOString()
+        : undefined,
     })
   }
 
-  const sevenDaySonnet = data.seven_day_sonnet as Record<string, unknown> | undefined
+  const sevenDaySonnet = data.seven_day_sonnet as
+    | Record<string, unknown>
+    | undefined
   if (sevenDaySonnet && typeof sevenDaySonnet.utilization === 'number') {
     lines.push({
       type: 'progress',
@@ -339,7 +377,9 @@ export async function fetchClaudeUsage(): Promise<ProviderUsageResult> {
       used: sevenDaySonnet.utilization as number,
       limit: 100,
       format: 'percent',
-      resetsAt: sevenDaySonnet.resets_at ? new Date(sevenDaySonnet.resets_at as string).toISOString() : undefined,
+      resetsAt: sevenDaySonnet.resets_at
+        ? new Date(sevenDaySonnet.resets_at as string).toISOString()
+        : undefined,
     })
   }
 
@@ -368,7 +408,12 @@ export async function fetchClaudeUsage(): Promise<ProviderUsageResult> {
   }
 
   if (lines.length === 0) {
-    lines.push({ type: 'badge', label: 'Status', value: 'No usage data', color: '#a3a3a3' })
+    lines.push({
+      type: 'badge',
+      label: 'Status',
+      value: 'No usage data',
+      color: '#a3a3a3',
+    })
   }
 
   return {
@@ -412,8 +457,14 @@ function loadCodexAuth(): CodexAuth | null {
 
 function saveCodexAuth(auth: CodexAuth): void {
   try {
-    writeFileSync(expandHome(CODEX_AUTH_PATH), JSON.stringify(auth, null, 2), 'utf-8')
-  } catch { /* best effort */ }
+    writeFileSync(
+      expandHome(CODEX_AUTH_PATH),
+      JSON.stringify(auth, null, 2),
+      'utf-8',
+    )
+  } catch {
+    /* best effort */
+  }
 }
 
 async function refreshCodexToken(auth: CodexAuth): Promise<string | null> {
@@ -426,9 +477,19 @@ async function refreshCodexToken(auth: CodexAuth): Promise<string | null> {
   })
 
   if (res.status === 400 || res.status === 401) {
-    const body = await res.json().catch(() => null) as Record<string, unknown> | null
-    const code = (body?.error as Record<string, unknown>)?.code ?? body?.error ?? body?.code
-    if (code === 'refresh_token_expired' || code === 'refresh_token_reused' || code === 'refresh_token_invalidated') {
+    const body = (await res.json().catch(() => null)) as Record<
+      string,
+      unknown
+    > | null
+    const code =
+      (body?.error as Record<string, unknown>)?.code ??
+      body?.error ??
+      body?.code
+    if (
+      code === 'refresh_token_expired' ||
+      code === 'refresh_token_reused' ||
+      code === 'refresh_token_invalidated'
+    ) {
       throw new Error('Codex session expired. Run `codex` to log in again.')
     }
     throw new Error('Codex token expired. Run `codex` to log in again.')
@@ -436,11 +497,15 @@ async function refreshCodexToken(auth: CodexAuth): Promise<string | null> {
 
   if (!res.ok) return null
 
-  const body = await res.json().catch(() => null) as Record<string, unknown> | null
+  const body = (await res.json().catch(() => null)) as Record<
+    string,
+    unknown
+  > | null
   if (!body?.access_token) return null
 
   auth.tokens!.access_token = body.access_token as string
-  if (body.refresh_token) auth.tokens!.refresh_token = body.refresh_token as string
+  if (body.refresh_token)
+    auth.tokens!.refresh_token = body.refresh_token as string
   if (body.id_token) auth.tokens!.id_token = body.id_token as string
   auth.last_refresh = new Date().toISOString()
   saveCodexAuth(auth)
@@ -448,10 +513,17 @@ async function refreshCodexToken(auth: CodexAuth): Promise<string | null> {
   return auth.tokens!.access_token
 }
 
-function getResetsAtIso(nowSec: number, window?: Record<string, unknown>): string | undefined {
+function getResetsAtIso(
+  nowSec: number,
+  window?: Record<string, unknown>,
+): string | undefined {
   if (!window) return undefined
-  if (typeof window.reset_at === 'number') return new Date(window.reset_at * 1000).toISOString()
-  if (typeof window.reset_after_seconds === 'number') return new Date((nowSec + (window.reset_after_seconds as number)) * 1000).toISOString()
+  if (typeof window.reset_at === 'number')
+    return new Date(window.reset_at * 1000).toISOString()
+  if (typeof window.reset_after_seconds === 'number')
+    return new Date(
+      (nowSec + (window.reset_after_seconds as number)) * 1000,
+    ).toISOString()
   return undefined
 }
 
@@ -473,7 +545,9 @@ export async function fetchCodexUsage(): Promise<ProviderUsageResult> {
   let accessToken = auth.tokens.access_token
 
   // Refresh if stale
-  const lastRefreshMs = auth.last_refresh ? new Date(auth.last_refresh).getTime() : 0
+  const lastRefreshMs = auth.last_refresh
+    ? new Date(auth.last_refresh).getTime()
+    : 0
   if (now - lastRefreshMs > CODEX_REFRESH_AGE_MS) {
     try {
       const refreshed = await refreshCodexToken(auth)
@@ -545,7 +619,10 @@ export async function fetchCodexUsage(): Promise<ProviderUsageResult> {
     }
   }
 
-  const data = await res.json().catch(() => null) as Record<string, unknown> | null
+  const data = (await res.json().catch(() => null)) as Record<
+    string,
+    unknown
+  > | null
   if (!data) {
     return {
       provider: 'codex',
@@ -562,14 +639,26 @@ export async function fetchCodexUsage(): Promise<ProviderUsageResult> {
 
   // Parse rate limits from headers and body
   const rateLimit = data.rate_limit as Record<string, unknown> | undefined
-  const primaryWindow = rateLimit?.primary_window as Record<string, unknown> | undefined
-  const secondaryWindow = rateLimit?.secondary_window as Record<string, unknown> | undefined
-  const reviewRateLimit = data.code_review_rate_limit as Record<string, unknown> | undefined
-  const reviewWindow = reviewRateLimit?.primary_window as Record<string, unknown> | undefined
+  const primaryWindow = rateLimit?.primary_window as
+    | Record<string, unknown>
+    | undefined
+  const secondaryWindow = rateLimit?.secondary_window as
+    | Record<string, unknown>
+    | undefined
+  const reviewRateLimit = data.code_review_rate_limit as
+    | Record<string, unknown>
+    | undefined
+  const reviewWindow = reviewRateLimit?.primary_window as
+    | Record<string, unknown>
+    | undefined
 
   // Headers have the most accurate percent data
-  const headerPrimary = readNumber(res.headers.get('x-codex-primary-used-percent'))
-  const headerSecondary = readNumber(res.headers.get('x-codex-secondary-used-percent'))
+  const headerPrimary = readNumber(
+    res.headers.get('x-codex-primary-used-percent'),
+  )
+  const headerSecondary = readNumber(
+    res.headers.get('x-codex-secondary-used-percent'),
+  )
 
   if (headerPrimary !== undefined) {
     lines.push({
@@ -648,13 +737,22 @@ export async function fetchCodexUsage(): Promise<ProviderUsageResult> {
   let plan: string | undefined
   if (data.plan_type) {
     const planLabels: Record<string, string> = {
-      plus: 'Plus', pro: 'Pro', team: 'Team', enterprise: 'Enterprise', free: 'Free',
+      plus: 'Plus',
+      pro: 'Pro',
+      team: 'Team',
+      enterprise: 'Enterprise',
+      free: 'Free',
     }
     plan = planLabels[data.plan_type as string] ?? (data.plan_type as string)
   }
 
   if (lines.length === 0) {
-    lines.push({ type: 'badge', label: 'Status', value: 'No usage data', color: '#a3a3a3' })
+    lines.push({
+      type: 'badge',
+      label: 'Status',
+      value: 'No usage data',
+      color: '#a3a3a3',
+    })
   }
 
   return {
@@ -686,9 +784,13 @@ export async function fetchOpenAIUsage(): Promise<ProviderUsageResult> {
 
   // Fetch organization subscription info
   try {
-    const subRes = await fetch('https://api.openai.com/v1/organization/usage/completions?start_time=' + Math.floor((now - 86400000 * 30) / 1000), {
-      headers: { Authorization: `Bearer ${apiKey}` },
-    })
+    const subRes = await fetch(
+      'https://api.openai.com/v1/organization/usage/completions?start_time=' +
+        Math.floor((now - 86400000 * 30) / 1000),
+      {
+        headers: { Authorization: `Bearer ${apiKey}` },
+      },
+    )
 
     if (subRes.status === 401 || subRes.status === 403) {
       // Fall back to simpler approach — just report the key is valid
@@ -696,7 +798,14 @@ export async function fetchOpenAIUsage(): Promise<ProviderUsageResult> {
         provider: 'openai',
         displayName: 'OpenAI',
         status: 'ok',
-        lines: [{ type: 'badge', label: 'Status', value: 'API key active', color: '#10b981' }],
+        lines: [
+          {
+            type: 'badge',
+            label: 'Status',
+            value: 'API key active',
+            color: '#10b981',
+          },
+        ],
         updatedAt: now,
       }
     }
@@ -712,7 +821,10 @@ export async function fetchOpenAIUsage(): Promise<ProviderUsageResult> {
       }
     }
 
-    const payload = await subRes.json().catch(() => null) as Record<string, unknown> | null
+    const payload = (await subRes.json().catch(() => null)) as Record<
+      string,
+      unknown
+    > | null
     const lines: UsageLine[] = []
 
     // Parse usage buckets if available
@@ -721,11 +833,13 @@ export async function fetchOpenAIUsage(): Promise<ProviderUsageResult> {
       let totalInputTokens = 0
       let totalOutputTokens = 0
       for (const bucket of data) {
-        const results = bucket.results as Array<Record<string, unknown>> | undefined
+        const results = bucket.results as
+          | Array<Record<string, unknown>>
+          | undefined
         if (Array.isArray(results)) {
           for (const r of results) {
-            totalInputTokens += (readNumber(r.input_tokens) ?? 0)
-            totalOutputTokens += (readNumber(r.output_tokens) ?? 0)
+            totalInputTokens += readNumber(r.input_tokens) ?? 0
+            totalOutputTokens += readNumber(r.output_tokens) ?? 0
           }
         }
       }
@@ -744,7 +858,12 @@ export async function fetchOpenAIUsage(): Promise<ProviderUsageResult> {
     }
 
     if (lines.length === 0) {
-      lines.push({ type: 'badge', label: 'Status', value: 'Connected', color: '#10b981' })
+      lines.push({
+        type: 'badge',
+        label: 'Status',
+        value: 'Connected',
+        color: '#10b981',
+      })
     }
 
     return {
@@ -799,11 +918,15 @@ export async function fetchOpenRouterUsage(): Promise<ProviderUsageResult> {
       }
     }
 
-    const payload = await res.json().catch(() => ({})) as Record<string, unknown>
+    const payload = (await res.json().catch(() => ({}))) as Record<
+      string,
+      unknown
+    >
     const data = (payload?.data ?? payload) as Record<string, unknown>
     const usage = (data?.usage ?? {}) as Record<string, unknown>
 
-    const costUsd = readNumber(usage?.cost ?? data?.cost ?? data?.usage_cost) ?? 0
+    const costUsd =
+      readNumber(usage?.cost ?? data?.cost ?? data?.usage_cost) ?? 0
     const limitUsd = readNumber(data?.limit ?? data?.spend_limit)
 
     const lines: UsageLine[] = []
@@ -824,8 +947,10 @@ export async function fetchOpenRouterUsage(): Promise<ProviderUsageResult> {
       })
     }
 
-    const inputTokens = readNumber(usage?.prompt_tokens ?? usage?.input_tokens) ?? 0
-    const outputTokens = readNumber(usage?.completion_tokens ?? usage?.output_tokens) ?? 0
+    const inputTokens =
+      readNumber(usage?.prompt_tokens ?? usage?.input_tokens) ?? 0
+    const outputTokens =
+      readNumber(usage?.completion_tokens ?? usage?.output_tokens) ?? 0
     if (inputTokens > 0 || outputTokens > 0) {
       lines.push({
         type: 'text',
@@ -858,7 +983,9 @@ export async function fetchOpenRouterUsage(): Promise<ProviderUsageResult> {
 const CACHE_TTL_MS = 30_000
 let cache: { timestamp: number; payload: ProviderUsageResponse } | undefined
 
-export async function getProviderUsage(force = false): Promise<ProviderUsageResponse> {
+export async function getProviderUsage(
+  force = false,
+): Promise<ProviderUsageResponse> {
   const now = Date.now()
   if (!force && cache && now - cache.timestamp < CACHE_TTL_MS) {
     return cache.payload

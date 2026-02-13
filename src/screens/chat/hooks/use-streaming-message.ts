@@ -199,7 +199,8 @@ export function useStreamingMessage(options: UseStreamingMessageOptions = {}) {
         }
         case 'done': {
           const doneState = (payload as { state?: string }).state
-          const errorMessage = (payload as { errorMessage?: string }).errorMessage
+          const errorMessage = (payload as { errorMessage?: string })
+            .errorMessage
           if (doneState === 'error' && errorMessage) {
             markFailed(errorMessage)
             break

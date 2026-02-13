@@ -12,10 +12,14 @@ type AgentChatHeaderProps = {
 
 function getStatusClassName(statusLabel: string): string {
   const normalized = statusLabel.trim().toLowerCase()
-  if (normalized === 'failed') return 'border-red-500/45 bg-red-500/10 text-red-300'
-  if (normalized === 'queued') return 'border-primary-400/55 bg-primary-300/70 text-primary-800'
-  if (normalized === 'complete') return 'border-emerald-500/45 bg-emerald-500/10 text-emerald-300'
-  if (normalized === 'thinking') return 'border-accent-500/45 bg-accent-500/10 text-accent-300'
+  if (normalized === 'failed')
+    return 'border-red-500/45 bg-red-500/10 text-red-300'
+  if (normalized === 'queued')
+    return 'border-primary-400/55 bg-primary-300/70 text-primary-800'
+  if (normalized === 'complete')
+    return 'border-emerald-500/45 bg-emerald-500/10 text-emerald-300'
+  if (normalized === 'thinking')
+    return 'border-accent-500/45 bg-accent-500/10 text-accent-300'
   return 'border-primary-400/55 bg-primary-200/60 text-primary-800'
 }
 

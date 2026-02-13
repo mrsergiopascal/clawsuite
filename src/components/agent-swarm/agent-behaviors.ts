@@ -11,7 +11,13 @@ export type AgentActivity =
   | 'celebrating'
   | 'frustrated'
 
-export type Expression = 'neutral' | 'happy' | 'focused' | 'confused' | 'tired' | 'excited'
+export type Expression =
+  | 'neutral'
+  | 'happy'
+  | 'focused'
+  | 'confused'
+  | 'tired'
+  | 'excited'
 
 export type Point = {
   x: number
@@ -92,8 +98,20 @@ export const CHAT_MESSAGES = {
     'What do you think?',
     'Almost there!',
   ],
-  complete: ['Done! 🎉', 'Ship it!', 'All green ✅', 'Nailed it!', 'Task complete!'],
-  failed: ['Hmm...', 'Thats broken', 'Need help...', 'Something went wrong', 'Debugging...'],
+  complete: [
+    'Done! 🎉',
+    'Ship it!',
+    'All green ✅',
+    'Nailed it!',
+    'Task complete!',
+  ],
+  failed: [
+    'Hmm...',
+    'Thats broken',
+    'Need help...',
+    'Something went wrong',
+    'Debugging...',
+  ],
 } as const
 
 export function getExpression(activity: AgentActivity): Expression {
@@ -107,14 +125,23 @@ export function getRandomMessage(pool: keyof typeof CHAT_MESSAGES): string {
 }
 
 export function getBreakType(): AgentActivity {
-  const breakTypes: Array<AgentActivity> = ['water_break', 'coffee_break', 'lunch', 'meeting']
+  const breakTypes: Array<AgentActivity> = [
+    'water_break',
+    'coffee_break',
+    'lunch',
+    'meeting',
+  ]
   const index = Math.floor(Math.random() * breakTypes.length)
   return breakTypes[index]
 }
 
-export function getLocationForActivity(activity: AgentActivity, deskIndex: number): Point {
+export function getLocationForActivity(
+  activity: AgentActivity,
+  deskIndex: number,
+): Point {
   const safeDeskIndex =
-    ((deskIndex % DESK_POSITIONS.length) + DESK_POSITIONS.length) % DESK_POSITIONS.length
+    ((deskIndex % DESK_POSITIONS.length) + DESK_POSITIONS.length) %
+    DESK_POSITIONS.length
   const desk = DESK_POSITIONS[safeDeskIndex]
 
   if (activity === 'water_break') {
@@ -140,14 +167,22 @@ export function getLocationForActivity(activity: AgentActivity, deskIndex: numbe
   return { x: desk.x, y: desk.y }
 }
 
-export function lerpPosition(current: Point, target: Point, speed = 0.03): Point {
+export function lerpPosition(
+  current: Point,
+  target: Point,
+  speed = 0.03,
+): Point {
   return {
     x: current.x + (target.x - current.x) * speed,
     y: current.y + (target.y - current.y) * speed,
   }
 }
 
-export function isAtTarget(current: Point, target: Point, threshold = 1.5): boolean {
+export function isAtTarget(
+  current: Point,
+  target: Point,
+  threshold = 1.5,
+): boolean {
   const deltaX = current.x - target.x
   const deltaY = current.y - target.y
   const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY)
@@ -157,7 +192,8 @@ export function isAtTarget(current: Point, target: Point, threshold = 1.5): bool
 export function createBehaviorState(deskIndex: number): AgentBehaviorState {
   const timestamp = Date.now()
   const safeDeskIndex =
-    ((deskIndex % DESK_POSITIONS.length) + DESK_POSITIONS.length) % DESK_POSITIONS.length
+    ((deskIndex % DESK_POSITIONS.length) + DESK_POSITIONS.length) %
+    DESK_POSITIONS.length
   const desk = DESK_POSITIONS[safeDeskIndex]
   const deskPosition = { x: desk.x, y: desk.y }
 

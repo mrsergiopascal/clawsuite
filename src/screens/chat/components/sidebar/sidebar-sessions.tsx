@@ -144,7 +144,9 @@ export const SidebarSessions = memo(function SidebarSessions({
                 </>
               ) : (
                 <div className="px-2 py-2 text-xs text-primary-500">
-                  {pinnedSessions.length > 0 ? 'All sessions are pinned.' : 'No sessions yet.'}
+                  {pinnedSessions.length > 0
+                    ? 'All sessions are pinned.'
+                    : 'No sessions yet.'}
                 </div>
               )}
               {fetching && !loading && !error && sessions.length > 0 ? (

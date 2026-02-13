@@ -273,7 +273,8 @@ export function buildDemoScreenshotResponse(params?: {
 
 export async function getGatewayTabsResponse(): Promise<BrowserTabsResponse> {
   try {
-    const payload = await callGatewayRpcWithFallbackMethods(BROWSER_TABS_METHODS)
+    const payload =
+      await callGatewayRpcWithFallbackMethods(BROWSER_TABS_METHODS)
 
     const payloadRecord = isRecord(payload) ? payload : null
     const rawTabs = Array.isArray(payload)

@@ -44,9 +44,16 @@ export const Route = createFileRoute('/api/terminal-stream')({
                 rows,
               })
             } catch (error) {
-              console.error('[terminal-stream] Failed to create session:', error)
+              console.error(
+                '[terminal-stream] Failed to create session:',
+                error,
+              )
               send('error', { message: String(error) })
-              try { controller.close() } catch { /* */ }
+              try {
+                controller.close()
+              } catch {
+                /* */
+              }
               return
             }
 
@@ -64,7 +71,11 @@ export const Route = createFileRoute('/api/terminal-stream')({
               send('close', { sessionId: session.id })
               if (!isStreamActive) return
               isStreamActive = false
-              try { controller.close() } catch { /* */ }
+              try {
+                controller.close()
+              } catch {
+                /* */
+              }
             }
 
             session.emitter.on('event', handleEvent)

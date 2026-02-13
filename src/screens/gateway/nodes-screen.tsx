@@ -1,6 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
 import { HugeiconsIcon } from '@hugeicons/react'
-import { AlertDiamondIcon, ArrowTurnBackwardIcon } from '@hugeicons/core-free-icons'
+import {
+  AlertDiamondIcon,
+  ArrowTurnBackwardIcon,
+} from '@hugeicons/core-free-icons'
 
 type NodeEntry = {
   id?: string
@@ -40,7 +43,9 @@ export function NodesScreen() {
     retry: 1,
   })
 
-  const lastUpdated = query.dataUpdatedAt ? new Date(query.dataUpdatedAt).toLocaleTimeString() : null
+  const lastUpdated = query.dataUpdatedAt
+    ? new Date(query.dataUpdatedAt).toLocaleTimeString()
+    : null
   const nodes = query.data?.nodes || []
 
   return (
@@ -48,12 +53,24 @@ export function NodesScreen() {
       <div className="flex items-center justify-between px-6 py-4 border-b border-primary-200">
         <div className="flex items-center gap-3">
           <h1 className="text-[15px] font-semibold text-ink">Nodes</h1>
-          <span className="text-[11px] text-primary-500">{nodes.length} paired</span>
-          {query.isFetching && !query.isLoading ? <span className="text-[10px] text-primary-500 animate-pulse">syncing…</span> : null}
+          <span className="text-[11px] text-primary-500">
+            {nodes.length} paired
+          </span>
+          {query.isFetching && !query.isLoading ? (
+            <span className="text-[10px] text-primary-500 animate-pulse">
+              syncing…
+            </span>
+          ) : null}
         </div>
         <div className="flex items-center gap-3">
-          {lastUpdated ? <span className="text-[10px] text-primary-500">Updated {lastUpdated}</span> : null}
-          <span className={`inline-block size-2 rounded-full ${query.isError ? 'bg-red-500' : query.isSuccess ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+          {lastUpdated ? (
+            <span className="text-[10px] text-primary-500">
+              Updated {lastUpdated}
+            </span>
+          ) : null}
+          <span
+            className={`inline-block size-2 rounded-full ${query.isError ? 'bg-red-500' : query.isSuccess ? 'bg-emerald-500' : 'bg-amber-500'}`}
+          />
         </div>
       </div>
 
@@ -67,44 +84,91 @@ export function NodesScreen() {
           </div>
         ) : query.isError ? (
           <div className="flex flex-col items-center justify-center h-32 gap-3">
-            <HugeiconsIcon icon={AlertDiamondIcon} size={24} strokeWidth={1.5} className="text-red-500" />
-            <p className="text-sm text-primary-600">{query.error instanceof Error ? query.error.message : 'Failed to fetch'}</p>
-            <button type="button" onClick={() => query.refetch()} className="inline-flex items-center gap-1.5 rounded-md border border-primary-200 px-3 py-1.5 text-xs font-medium text-primary-700 hover:bg-primary-100">
-              <HugeiconsIcon icon={ArrowTurnBackwardIcon} size={14} strokeWidth={1.5} />Retry
+            <HugeiconsIcon
+              icon={AlertDiamondIcon}
+              size={24}
+              strokeWidth={1.5}
+              className="text-red-500"
+            />
+            <p className="text-sm text-primary-600">
+              {query.error instanceof Error
+                ? query.error.message
+                : 'Failed to fetch'}
+            </p>
+            <button
+              type="button"
+              onClick={() => query.refetch()}
+              className="inline-flex items-center gap-1.5 rounded-md border border-primary-200 px-3 py-1.5 text-xs font-medium text-primary-700 hover:bg-primary-100"
+            >
+              <HugeiconsIcon
+                icon={ArrowTurnBackwardIcon}
+                size={14}
+                strokeWidth={1.5}
+              />
+              Retry
             </button>
           </div>
         ) : nodes.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-32 gap-2">
             <p className="text-sm text-primary-600">No nodes paired.</p>
-            <p className="text-[11px] text-primary-400">Pair a device via the OpenClaw app to see it here.</p>
+            <p className="text-[11px] text-primary-400">
+              Pair a device via the OpenClaw app to see it here.
+            </p>
           </div>
         ) : (
           <table className="w-full text-[13px]">
             <thead>
               <tr className="border-b border-primary-200 text-left">
-                <th className="pb-2 text-[11px] font-medium text-primary-500 uppercase tracking-wider">Node</th>
-                <th className="pb-2 text-[11px] font-medium text-primary-500 uppercase tracking-wider">Platform</th>
-                <th className="pb-2 text-[11px] font-medium text-primary-500 uppercase tracking-wider">Status</th>
-                <th className="pb-2 text-[11px] font-medium text-primary-500 uppercase tracking-wider">Version</th>
-                <th className="pb-2 text-[11px] font-medium text-primary-500 uppercase tracking-wider text-right">Last Seen</th>
+                <th className="pb-2 text-[11px] font-medium text-primary-500 uppercase tracking-wider">
+                  Node
+                </th>
+                <th className="pb-2 text-[11px] font-medium text-primary-500 uppercase tracking-wider">
+                  Platform
+                </th>
+                <th className="pb-2 text-[11px] font-medium text-primary-500 uppercase tracking-wider">
+                  Status
+                </th>
+                <th className="pb-2 text-[11px] font-medium text-primary-500 uppercase tracking-wider">
+                  Version
+                </th>
+                <th className="pb-2 text-[11px] font-medium text-primary-500 uppercase tracking-wider text-right">
+                  Last Seen
+                </th>
               </tr>
             </thead>
             <tbody>
               {nodes.map((node, i) => (
-                <tr key={node.id || i} className="border-b border-primary-100 hover:bg-primary-50 transition-colors">
+                <tr
+                  key={node.id || i}
+                  className="border-b border-primary-100 hover:bg-primary-50 transition-colors"
+                >
                   <td className="py-3">
-                    <div className="font-medium text-ink">{node.name || node.id || `Node ${i + 1}`}</div>
-                    {node.id ? <div className="text-[11px] text-primary-500 font-mono">{node.id}</div> : null}
+                    <div className="font-medium text-ink">
+                      {node.name || node.id || `Node ${i + 1}`}
+                    </div>
+                    {node.id ? (
+                      <div className="text-[11px] text-primary-500 font-mono">
+                        {node.id}
+                      </div>
+                    ) : null}
                   </td>
-                  <td className="py-3 text-primary-600">{node.platform || '—'}</td>
+                  <td className="py-3 text-primary-600">
+                    {node.platform || '—'}
+                  </td>
                   <td className="py-3">
                     <span className="inline-flex items-center gap-1.5">
-                      <span className={`inline-block size-2 rounded-full ${node.status === 'online' ? 'bg-emerald-500' : 'bg-primary-400'}`} />
+                      <span
+                        className={`inline-block size-2 rounded-full ${node.status === 'online' ? 'bg-emerald-500' : 'bg-primary-400'}`}
+                      />
                       {node.status || 'unknown'}
                     </span>
                   </td>
-                  <td className="py-3 text-primary-600">{node.version || '—'}</td>
-                  <td className="py-3 text-primary-600 text-right">{timeAgo(node.lastSeen)}</td>
+                  <td className="py-3 text-primary-600">
+                    {node.version || '—'}
+                  </td>
+                  <td className="py-3 text-primary-600 text-right">
+                    {timeAgo(node.lastSeen)}
+                  </td>
                 </tr>
               ))}
             </tbody>

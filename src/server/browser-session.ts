@@ -59,7 +59,8 @@ export async function launchBrowser(): Promise<BrowserState> {
 
     contextInstance = await browserInstance.newContext({
       viewport: VIEWPORT,
-      userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
+      userAgent:
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
     })
 
     pageInstance = await contextInstance.newPage()
@@ -79,11 +80,16 @@ async function startScreencast(): Promise<void> {
   if (!pageInstance || screencastRunning) return
   try {
     cdpSession = await pageInstance.context().newCDPSession(pageInstance)
-    cdpSession.on('Page.screencastFrame', (params: { data: string; sessionId: number }) => {
-      lastScreenshot = `data:image/jpeg;base64,${params.data}`
-      // Acknowledge frame so Chrome keeps sending
-      cdpSession.send('Page.screencastFrameAck', { sessionId: params.sessionId }).catch(() => {})
-    })
+    cdpSession.on(
+      'Page.screencastFrame',
+      (params: { data: string; sessionId: number }) => {
+        lastScreenshot = `data:image/jpeg;base64,${params.data}`
+        // Acknowledge frame so Chrome keeps sending
+        cdpSession
+          .send('Page.screencastFrameAck', { sessionId: params.sessionId })
+          .catch(() => {})
+      },
+    )
     await cdpSession.send('Page.startScreencast', {
       format: 'jpeg',
       quality: 80,
@@ -109,11 +115,26 @@ async function stopScreencast(): Promise<void> {
 }
 
 // CDP input dispatch — sends real mouse/keyboard events, way more reliable than Playwright click
-export async function cdpMouseClick(x: number, y: number): Promise<BrowserState> {
+export async function cdpMouseClick(
+  x: number,
+  y: number,
+): Promise<BrowserState> {
   if (!cdpSession || !pageInstance) return clickAt(x, y)
   try {
-    await cdpSession.send('Input.dispatchMouseEvent', { type: 'mousePressed', x, y, button: 'left', clickCount: 1 })
-    await cdpSession.send('Input.dispatchMouseEvent', { type: 'mouseReleased', x, y, button: 'left', clickCount: 1 })
+    await cdpSession.send('Input.dispatchMouseEvent', {
+      type: 'mousePressed',
+      x,
+      y,
+      button: 'left',
+      clickCount: 1,
+    })
+    await cdpSession.send('Input.dispatchMouseEvent', {
+      type: 'mouseReleased',
+      x,
+      y,
+      button: 'left',
+      clickCount: 1,
+    })
     // Give page time to react
     await pageInstance.waitForTimeout(200)
     lastUrl = pageInstance.url()
@@ -127,7 +148,11 @@ export async function cdpMouseClick(x: number, y: number): Promise<BrowserState>
 export async function cdpMouseMove(x: number, y: number): Promise<void> {
   if (!cdpSession) return
   try {
-    await cdpSession.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x, y })
+    await cdpSession.send('Input.dispatchMouseEvent', {
+      type: 'mouseMoved',
+      x,
+      y,
+    })
   } catch {}
 }
 
@@ -176,7 +201,10 @@ export async function clickAt(x: number, y: number): Promise<BrowserState> {
   return getState()
 }
 
-export async function typeText(text: string, submit = false): Promise<BrowserState> {
+export async function typeText(
+  text: string,
+  submit = false,
+): Promise<BrowserState> {
   if (!pageInstance) throw new Error('Browser not running')
   await pageInstance.keyboard.type(text, { delay: 30 })
   if (submit) {
@@ -219,7 +247,10 @@ export async function refresh(): Promise<BrowserState> {
   return getState()
 }
 
-export async function scrollPage(direction: 'up' | 'down', amount = 400): Promise<BrowserState> {
+export async function scrollPage(
+  direction: 'up' | 'down',
+  amount = 400,
+): Promise<BrowserState> {
   if (!pageInstance) throw new Error('Browser not running')
   const delta = direction === 'down' ? amount : -amount
   await pageInstance.mouse.wheel(0, delta)
@@ -251,19 +282,30 @@ async function captureScreenshot(): Promise<void> {
   }
 }
 
-export async function getPageContent(): Promise<{ url: string; title: string; text: string }> {
+export async function getPageContent(): Promise<{
+  url: string
+  title: string
+  text: string
+}> {
   if (!pageInstance) return { url: '', title: '', text: '' }
   const url = pageInstance.url()
   const title = await pageInstance.title().catch(() => '')
-  const text = await pageInstance.evaluate(() => {
-    // Extract readable text content
-    const body = document.body
-    if (!body) return ''
-    // Remove scripts and styles
-    const clone = body.cloneNode(true) as HTMLElement
-    clone.querySelectorAll('script, style, noscript, svg').forEach((el) => el.remove())
-    return (clone.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 8000)
-  }).catch(() => '')
+  const text = await pageInstance
+    .evaluate(() => {
+      // Extract readable text content
+      const body = document.body
+      if (!body) return ''
+      // Remove scripts and styles
+      const clone = body.cloneNode(true) as HTMLElement
+      clone
+        .querySelectorAll('script, style, noscript, svg')
+        .forEach((el) => el.remove())
+      return (clone.textContent || '')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .slice(0, 8000)
+    })
+    .catch(() => '')
   return { url, title, text }
 }
 

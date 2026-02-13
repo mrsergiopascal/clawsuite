@@ -108,8 +108,12 @@ export function ChatScreen({
   })
   const { isMobile } = useChatMobile(queryClient)
   const isAgentViewOpen = useAgentViewStore((state) => state.isOpen)
-  const isTerminalPanelOpen = useTerminalPanelStore((state) => state.isPanelOpen)
-  const terminalPanelHeight = useTerminalPanelStore((state) => state.panelHeight)
+  const isTerminalPanelOpen = useTerminalPanelStore(
+    (state) => state.isPanelOpen,
+  )
+  const terminalPanelHeight = useTerminalPanelStore(
+    (state) => state.panelHeight,
+  )
   const {
     sessionsQuery,
     sessions,
@@ -143,20 +147,18 @@ export function ChatScreen({
   })
 
   // Wire SSE realtime stream for instant message delivery
-  const {
-    messages: realtimeMessages,
-    lastCompletedRunAt,
-  } = useRealtimeChatHistory({
-    sessionKey: resolvedSessionKey || activeCanonicalKey,
-    friendlyId: activeFriendlyId,
-    historyMessages,
-    enabled: !isNewChat && !isRedirecting,
-    onUserMessage: useCallback(() => {
-      // External message arrived (e.g. from Telegram) — show thinking indicator
-      setWaitingForResponse(true)
-      setPendingGeneration(true)
-    }, []),
-  })
+  const { messages: realtimeMessages, lastCompletedRunAt } =
+    useRealtimeChatHistory({
+      sessionKey: resolvedSessionKey || activeCanonicalKey,
+      friendlyId: activeFriendlyId,
+      historyMessages,
+      enabled: !isNewChat && !isRedirecting,
+      onUserMessage: useCallback(() => {
+        // External message arrived (e.g. from Telegram) — show thinking indicator
+        setWaitingForResponse(true)
+        setPendingGeneration(true)
+      }, []),
+    })
 
   // Use realtime-merged messages for display (SSE + history)
   // Re-apply display filter to realtime messages
@@ -175,7 +177,10 @@ export function ChatScreen({
         if (!content || !Array.isArray(content)) return false
         if (content.length === 0) return false
         const hasText = content.some(
-          (c) => c.type === 'text' && typeof c.text === 'string' && c.text.trim().length > 0
+          (c) =>
+            c.type === 'text' &&
+            typeof c.text === 'string' &&
+            c.text.trim().length > 0,
         )
         return hasText
       }
@@ -210,7 +215,9 @@ export function ChatScreen({
   }, [])
 
   useEffect(() => {
-    return () => { streamStop() }
+    return () => {
+      streamStop()
+    }
   }, [streamStop])
 
   const streamFinish = useCallback(() => {
@@ -246,7 +253,10 @@ export function ChatScreen({
   const clearTimerRef = useRef<number | null>(null)
   useEffect(() => {
     if (!waitingForResponse) {
-      if (clearTimerRef.current) { window.clearTimeout(clearTimerRef.current); clearTimerRef.current = null }
+      if (clearTimerRef.current) {
+        window.clearTimeout(clearTimerRef.current)
+        clearTimerRef.current = null
+      }
       return
     }
     // Only check if display has grown since we sent
@@ -276,7 +286,8 @@ export function ChatScreen({
     activeSession,
     messages: historyMessages,
     messageCount,
-    enabled: !isNewChat && Boolean(resolvedSessionKey) && historyQuery.isSuccess,
+    enabled:
+      !isNewChat && Boolean(resolvedSessionKey) && historyQuery.isSuccess,
   })
 
   // Phase 4.1: Smart Model Suggestions
@@ -325,7 +336,7 @@ export function ChatScreen({
   const { suggestion, dismiss, dismissForSession } = useModelSuggestions({
     currentModel, // Real model from session-status (fail closed if empty)
     sessionKey: resolvedSessionKey || 'main',
-    messages: historyMessages.map(m => ({
+    messages: historyMessages.map((m) => ({
       role: m.role as 'user' | 'assistant',
       content: textFromMessage(m),
     })) as any,
@@ -334,7 +345,7 @@ export function ChatScreen({
 
   const handleSwitchModel = useCallback(async () => {
     if (!suggestion) return
-    
+
     try {
       const res = await fetch('/api/model-switch', {
         method: 'POST',
@@ -344,7 +355,7 @@ export function ChatScreen({
           model: suggestion.suggestedModel,
         }),
       })
-      
+
       if (res.ok) {
         dismiss()
         // Optionally show success toast or update UI
@@ -388,16 +399,15 @@ export function ChatScreen({
     void sessionsQuery.refetch()
     void historyQuery.refetch()
   }, [gatewayStatusQuery, sessionsQuery, historyQuery])
-   
+
   const terminalPanelInset =
     !isMobile && isTerminalPanelOpen ? terminalPanelHeight : 0
   // Composer is in normal flex flow (shrink-0), so scroll area naturally stops above it.
   // Only add minimal bottom padding for breathing room + terminal panel offset.
   const stableContentStyle = useMemo<React.CSSProperties>(() => {
     return {
-      paddingBottom: terminalPanelInset > 0
-        ? `${terminalPanelInset + 16}px`
-        : '16px',
+      paddingBottom:
+        terminalPanelInset > 0 ? `${terminalPanelInset + 16}px` : '16px',
     }
   }, [terminalPanelInset])
 
@@ -420,7 +430,12 @@ export function ChatScreen({
       if (error) setError(null)
       return
     }
-    if (sessionsQuery.isSuccess && !activeExists && !sessionsError && !historyError) {
+    if (
+      sessionsQuery.isSuccess &&
+      !activeExists &&
+      !sessionsError &&
+      !historyError
+    ) {
       if (error) setError(null)
       return
     }
@@ -630,7 +645,8 @@ export function ChatScreen({
         sessionKey,
         friendlyId,
         message: body,
-        attachments: payloadAttachments.length > 0 ? payloadAttachments : undefined,
+        attachments:
+          payloadAttachments.length > 0 ? payloadAttachments : undefined,
         thinking: 'low',
         idempotencyKey: optimisticClientId || crypto.randomUUID(),
         clientId: optimisticClientId || undefined,
@@ -639,11 +655,17 @@ export function ChatScreen({
       .then(async (res) => {
         if (!res.ok) {
           let errorText = `HTTP ${res.status}`
-          try { errorText = await readError(res) } catch { /* ignore parse errors */ }
+          try {
+            errorText = await readError(res)
+          } catch {
+            /* ignore parse errors */
+          }
           throw new Error(errorText)
         }
         // Stream setup is separate — don't let it trigger send failure
-        try { streamStart() } catch (e) {
+        try {
+          streamStart()
+        } catch (e) {
           console.warn('[chat] streamStart error (non-fatal):', e)
         }
         setSending(false)
@@ -653,7 +675,11 @@ export function ChatScreen({
         setSending(false)
         const messageText = err instanceof Error ? err.message : String(err)
         if (isMissingGatewayAuth(messageText)) {
-          try { navigate({ to: '/connect', replace: true }) } catch { /* router not ready */ }
+          try {
+            navigate({ to: '/connect', replace: true })
+          } catch {
+            /* router not ready */
+          }
           return
         }
         // Only mark as failed for actual network/API errors
@@ -728,8 +754,10 @@ export function ChatScreen({
       )
 
       if (isNewChat) {
-        const { optimisticMessage } =
-          createOptimisticMessage(trimmedBody, attachmentPayload)
+        const { optimisticMessage } = createOptimisticMessage(
+          trimmedBody,
+          attachmentPayload,
+        )
         appendHistoryMessage(queryClient, 'new', 'new', optimisticMessage)
         setPendingGeneration(true)
         setSending(true)
@@ -808,10 +836,7 @@ export function ChatScreen({
       SEARCH_MODAL_EVENTS.TOGGLE_FILE_EXPLORER,
       handleToggleFileExplorerFromSearch,
     )
-    window.addEventListener(
-      SIDEBAR_TOGGLE_EVENT,
-      handleToggleSidebarCollapse,
-    )
+    window.addEventListener(SIDEBAR_TOGGLE_EVENT, handleToggleSidebarCollapse)
     return () => {
       window.removeEventListener(
         SEARCH_MODAL_EVENTS.TOGGLE_FILE_EXPLORER,
@@ -849,7 +874,11 @@ export function ChatScreen({
       <div
         className={cn(
           'flex-1 min-h-0 overflow-hidden',
-          compact ? 'w-full' : isMobile ? 'relative' : 'grid grid-cols-[auto_1fr] grid-rows-[minmax(0,1fr)]',
+          compact
+            ? 'w-full'
+            : isMobile
+              ? 'relative'
+              : 'grid grid-cols-[auto_1fr] grid-rows-[minmax(0,1fr)]',
         )}
       >
         {hideUi || compact ? null : isMobile ? null : (
@@ -865,7 +894,10 @@ export function ChatScreen({
             'flex min-h-0 min-w-0 flex-col overflow-hidden transition-[margin-right,margin-bottom] duration-200',
             !compact && isAgentViewOpen ? 'min-[1024px]:mr-80' : 'mr-0',
           )}
-          style={{ marginBottom: terminalPanelInset > 0 ? `${terminalPanelInset}px` : undefined }}
+          style={{
+            marginBottom:
+              terminalPanelInset > 0 ? `${terminalPanelInset}px` : undefined,
+          }}
           ref={mainRef}
         >
           {!compact && (
@@ -884,20 +916,21 @@ export function ChatScreen({
 
           <ContextBar compact={compact} />
 
-          {gatewayNotice && (
-            <div className="px-4 py-2">
-              {gatewayNotice}
-            </div>
-          )}
+          {gatewayNotice && <div className="px-4 py-2">{gatewayNotice}</div>}
 
           {hideUi ? null : (
             <ChatMessageList
               messages={finalDisplayMessages}
               loading={historyLoading}
               empty={historyEmpty}
-              emptyState={<ChatEmptyState compact={compact} onSuggestionClick={(prompt) => {
-                composerHandleRef.current?.setValue(prompt + ' ')
-              }} />}
+              emptyState={
+                <ChatEmptyState
+                  compact={compact}
+                  onSuggestionClick={(prompt) => {
+                    composerHandleRef.current?.setValue(prompt + ' ')
+                  }}
+                />
+              }
               notice={null}
               noticePosition="end"
               waitingForResponse={waitingForResponse}

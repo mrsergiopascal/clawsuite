@@ -47,7 +47,9 @@ export function ChatPanelToggle() {
                 }
               />
               <TooltipContent side="left">
-                <span>Chat <kbd className="ml-1 text-[10px] opacity-60">⌘J</kbd></span>
+                <span>
+                  Chat <kbd className="ml-1 text-[10px] opacity-60">⌘J</kbd>
+                </span>
               </TooltipContent>
             </TooltipRoot>
           </TooltipProvider>

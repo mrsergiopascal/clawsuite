@@ -115,14 +115,20 @@ export const useTerminalPanelStore = create<TerminalPanelState>()(
           ),
         }))
       },
-      setTabSessionId: function setTabSessionId(tabId: string, sessionId: string | null) {
+      setTabSessionId: function setTabSessionId(
+        tabId: string,
+        sessionId: string | null,
+      ) {
         set((state) => ({
           tabs: state.tabs.map((tab) =>
             tab.id === tabId ? { ...tab, sessionId } : tab,
           ),
         }))
       },
-      setTabStatus: function setTabStatus(tabId: string, status: TerminalTabStatus) {
+      setTabStatus: function setTabStatus(
+        tabId: string,
+        status: TerminalTabStatus,
+      ) {
         set((state) => ({
           tabs: state.tabs.map((tab) =>
             tab.id === tabId ? { ...tab, status } : tab,
@@ -151,7 +157,9 @@ export const useTerminalPanelStore = create<TerminalPanelState>()(
             state.terminalCounter += 1
             return
           }
-          const activeExists = state.tabs.some((tab) => tab.id === state.activeTabId)
+          const activeExists = state.tabs.some(
+            (tab) => tab.id === state.activeTabId,
+          )
           if (!activeExists) {
             state.activeTabId = state.tabs[0].id
           }

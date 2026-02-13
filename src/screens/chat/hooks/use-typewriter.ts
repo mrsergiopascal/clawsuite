@@ -9,7 +9,9 @@ const FRAME_INTERVAL_MS = 16 // ~60fps
  * When new text arrives that extends the current text, animates only the new portion.
  */
 export function useTypewriter(fullText: string, enabled: boolean): string {
-  const [revealedLength, setRevealedLength] = useState(enabled ? 0 : fullText.length)
+  const [revealedLength, setRevealedLength] = useState(
+    enabled ? 0 : fullText.length,
+  )
   const targetLengthRef = useRef(fullText.length)
   const frameRef = useRef<number | null>(null)
   const prevTextRef = useRef(fullText)
@@ -38,7 +40,7 @@ export function useTypewriter(fullText: string, enabled: boolean): string {
     if (revealedLength >= targetLengthRef.current) return
 
     const tick = () => {
-      setRevealedLength(prev => {
+      setRevealedLength((prev) => {
         const next = Math.min(prev + CHARS_PER_FRAME, targetLengthRef.current)
         if (next >= targetLengthRef.current) {
           frameRef.current = null

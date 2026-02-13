@@ -95,33 +95,35 @@ export function DebugPanel({
               </h4>
               {analysis.suggestedCommands.length > 0 ? (
                 <ul className="mt-2 space-y-2">
-                  {analysis.suggestedCommands.map(function mapCommand(item, index) {
-                    return (
-                      <li
-                        key={`${item.command}-${index}`}
-                        className="rounded-lg border border-primary-700/50 bg-primary-900/40 p-3"
-                      >
-                        <div className="flex items-start gap-2">
-                          <code className="min-w-0 flex-1 truncate text-xs text-primary-100 tabular-nums">
-                            {item.command}
-                          </code>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="h-7 shrink-0 border border-primary-600 px-2 text-xs text-primary-200 hover:bg-primary-800 hover:text-primary-100"
-                            onClick={function runCommand() {
-                              onRunCommand(item.command)
-                            }}
-                          >
-                            ▶ Run
-                          </Button>
-                        </div>
-                        <p className="mt-2 text-xs text-primary-400 text-pretty">
-                          {item.description}
-                        </p>
-                      </li>
-                    )
-                  })}
+                  {analysis.suggestedCommands.map(
+                    function mapCommand(item, index) {
+                      return (
+                        <li
+                          key={`${item.command}-${index}`}
+                          className="rounded-lg border border-primary-700/50 bg-primary-900/40 p-3"
+                        >
+                          <div className="flex items-start gap-2">
+                            <code className="min-w-0 flex-1 truncate text-xs text-primary-100 tabular-nums">
+                              {item.command}
+                            </code>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-7 shrink-0 border border-primary-600 px-2 text-xs text-primary-200 hover:bg-primary-800 hover:text-primary-100"
+                              onClick={function runCommand() {
+                                onRunCommand(item.command)
+                              }}
+                            >
+                              ▶ Run
+                            </Button>
+                          </div>
+                          <p className="mt-2 text-xs text-primary-400 text-pretty">
+                            {item.description}
+                          </p>
+                        </li>
+                      )
+                    },
+                  )}
                 </ul>
               ) : (
                 <p className="mt-2 text-xs text-primary-500 text-pretty">

@@ -55,7 +55,9 @@ export function readAgentAvatarPreference(): AgentAvatarPreference {
   return 'lobster'
 }
 
-export function writeAgentAvatarPreference(preference: AgentAvatarPreference): void {
+export function writeAgentAvatarPreference(
+  preference: AgentAvatarPreference,
+): void {
   if (typeof window === 'undefined') return
 
   try {
@@ -75,7 +77,9 @@ export function toggleAgentAvatarPreference(
   return nextPreference
 }
 
-export function subscribeToAgentAvatarPreference(onStoreChange: () => void): () => void {
+export function subscribeToAgentAvatarPreference(
+  onStoreChange: () => void,
+): () => void {
   if (typeof window === 'undefined') {
     return function noop() {
       return undefined
@@ -131,7 +135,10 @@ function AgentAvatar({
           }}
         >
           {preference === 'lobster' ? (
-            <span className={cn('leading-none', getEmojiSizeClassName(size))} aria-hidden="true">
+            <span
+              className={cn('leading-none', getEmojiSizeClassName(size))}
+              aria-hidden="true"
+            >
               🦞
             </span>
           ) : (

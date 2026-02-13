@@ -24,7 +24,9 @@ function isGenericTitle(title: string): boolean {
   return GENERIC_TITLE_PATTERNS.some((pattern) => pattern.test(trimmed))
 }
 
-function normalizeMessages(raw: unknown): Array<{ role: string; text: string }> {
+function normalizeMessages(
+  raw: unknown,
+): Array<{ role: string; text: string }> {
   if (!Array.isArray(raw)) return []
   const normalized: Array<{ role: string; text: string }> = []
   for (const entry of raw) {
@@ -90,18 +92,17 @@ export const Route = createFileRoute('/api/session-title')({
           >
 
           const sessionKey =
-            typeof body.sessionKey === 'string' && body.sessionKey.trim().length > 0
+            typeof body.sessionKey === 'string' &&
+            body.sessionKey.trim().length > 0
               ? body.sessionKey.trim()
               : ''
           const friendlyId =
-            typeof body.friendlyId === 'string' && body.friendlyId.trim().length > 0
+            typeof body.friendlyId === 'string' &&
+            body.friendlyId.trim().length > 0
               ? body.friendlyId.trim()
               : ''
           const messages = normalizeMessages(body.messages)
-          const maxWords = Math.max(
-            3,
-            Math.min(8, Number(body.maxWords) || 6),
-          )
+          const maxWords = Math.max(3, Math.min(8, Number(body.maxWords) || 6))
 
           if (!sessionKey && !friendlyId) {
             return json(

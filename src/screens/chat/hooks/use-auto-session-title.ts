@@ -51,7 +51,9 @@ function buildSnippet(messages: Array<GatewayMessage>) {
   return snippet
 }
 
-function requiredMessagesForTitle(snippet: Array<{ role: string; text: string }>) {
+function requiredMessagesForTitle(
+  snippet: Array<{ role: string; text: string }>,
+) {
   const firstUser = snippet.find((message) => message.role === 'user')
   if ((firstUser?.text.trim().length ?? 0) > SUBSTANTIVE_FIRST_USER_CHARS) {
     return 1
@@ -144,8 +146,12 @@ export function useAutoSessionTitle({
     if (resolvedMessageCount < minMessagesForThisSnippet) return false
     if (resolvedMessageCount > MAX_MESSAGES_FOR_TITLE) return false
     if (activeSession?.label) return false
-    if (activeSession?.title && !isGenericTitle(activeSession.title)) return false
-    if (activeSession?.derivedTitle && !isGenericTitle(activeSession.derivedTitle))
+    if (activeSession?.title && !isGenericTitle(activeSession.title))
+      return false
+    if (
+      activeSession?.derivedTitle &&
+      !isGenericTitle(activeSession.derivedTitle)
+    )
       return false
     if (titleInfo.source === 'manual' && titleInfo.title) return false
     if (

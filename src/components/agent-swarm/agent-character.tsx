@@ -6,7 +6,13 @@ import { motion } from 'motion/react'
 import { cn } from '@/lib/utils'
 import type { AgentPersona } from '@/lib/agent-personas'
 
-type AgentStatus = 'running' | 'thinking' | 'complete' | 'failed' | 'error' | 'idle'
+type AgentStatus =
+  | 'running'
+  | 'thinking'
+  | 'complete'
+  | 'failed'
+  | 'error'
+  | 'idle'
 
 type AgentCharacterProps = {
   persona: AgentPersona
@@ -33,21 +39,34 @@ const statusDot: Record<AgentStatus, string> = {
   idle: 'bg-slate-400',
 }
 
-export function AgentCharacter({ persona, status, task, style }: AgentCharacterProps) {
+export function AgentCharacter({
+  persona,
+  status,
+  task,
+  style,
+}: AgentCharacterProps) {
   const isActive = status === 'running' || status === 'thinking'
 
   return (
     <motion.div
       className="flex flex-col items-center gap-1"
       style={style}
-      animate={isActive ? {
-        y: [0, -6, 0],
-      } : {}}
-      transition={isActive ? {
-        duration: 2.5,
-        repeat: Infinity,
-        ease: 'easeInOut',
-      } : {}}
+      animate={
+        isActive
+          ? {
+              y: [0, -6, 0],
+            }
+          : {}
+      }
+      transition={
+        isActive
+          ? {
+              duration: 2.5,
+              repeat: Infinity,
+              ease: 'easeInOut',
+            }
+          : {}
+      }
     >
       {/* Thought bubble for thinking agents */}
       {status === 'thinking' && (
@@ -78,11 +97,13 @@ export function AgentCharacter({ persona, status, task, style }: AgentCharacterP
         <span className="text-2xl">{persona.emoji}</span>
 
         {/* Status dot */}
-        <div className={cn(
-          'absolute -bottom-0.5 -right-0.5 size-3.5 rounded-full border-2 border-slate-900',
-          statusDot[status],
-          isActive && 'animate-pulse',
-        )} />
+        <div
+          className={cn(
+            'absolute -bottom-0.5 -right-0.5 size-3.5 rounded-full border-2 border-slate-900',
+            statusDot[status],
+            isActive && 'animate-pulse',
+          )}
+        />
 
         {/* Complete checkmark */}
         {status === 'complete' && (
@@ -97,7 +118,9 @@ export function AgentCharacter({ persona, status, task, style }: AgentCharacterP
 
       {/* Task snippet */}
       {task && (
-        <span className="max-w-[100px] truncate text-[8px] text-slate-500">{task}</span>
+        <span className="max-w-[100px] truncate text-[8px] text-slate-500">
+          {task}
+        </span>
       )}
     </motion.div>
   )

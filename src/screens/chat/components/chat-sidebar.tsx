@@ -47,10 +47,7 @@ import { cn } from '@/lib/utils'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { OpenClawStudioIcon } from '@/components/icons/clawsuite'
 import { UserAvatar } from '@/components/avatars'
-import {
-  SEARCH_MODAL_EVENTS,
-  useSearchModal,
-} from '@/hooks/use-search-modal'
+import { SEARCH_MODAL_EVENTS, useSearchModal } from '@/hooks/use-search-modal'
 import {
   selectChatProfileAvatarDataUrl,
   selectChatProfileDisplayName,
@@ -121,7 +118,6 @@ async function fetchHasRecentIssues(): Promise<boolean> {
     return false
   }
 }
-
 
 // ── Reusable nav item ───────────────────────────────────────────────────
 
@@ -200,9 +196,9 @@ function NavItem({
           <TooltipRoot>
             <TooltipTrigger
               render={
-                <Link 
-                  to={item.to!} 
-                  onMouseUp={onSelectSession} 
+                <Link
+                  to={item.to!}
+                  onMouseUp={onSelectSession}
                   className={cls}
                   data-tour={item.dataTour}
                 >
@@ -216,9 +212,9 @@ function NavItem({
       )
     }
     return (
-      <Link 
-        to={item.to!} 
-        onMouseUp={onSelectSession} 
+      <Link
+        to={item.to!}
+        onMouseUp={onSelectSession}
         className={cls}
         data-tour={item.dataTour}
       >
@@ -494,12 +490,20 @@ function ChatSidebarComponent({
   })
 
   // Platform-aware modifier key
-  const mod = useMemo(() => typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.userAgent) ? '⌘' : 'Ctrl+', [])
+  const mod = useMemo(
+    () =>
+      typeof navigator !== 'undefined' &&
+      /Mac|iPod|iPhone|iPad/.test(navigator.userAgent)
+        ? '⌘'
+        : 'Ctrl+',
+    [],
+  )
 
   // Route active states
   const isDashboardActive = pathname === '/dashboard'
   const isAgentSwarmActive = pathname === '/agent-swarm'
-  const isNewSessionActive = pathname === '/new' || pathname.startsWith('/chat/new')
+  const isNewSessionActive =
+    pathname === '/new' || pathname.startsWith('/chat/new')
   const isBrowserActive = pathname === '/browser'
   const isTerminalActive = pathname === '/terminal'
   const isTasksActive = pathname === '/tasks'
@@ -519,8 +523,29 @@ function ChatSidebarComponent({
   const isLogsActive = pathname === '/activity' || pathname === '/logs'
 
   // Track last-visited route per section
-  const suiteRoutes = ['/dashboard', '/agent-swarm', '/new', '/browser', '/terminal', '/tasks', '/skills', '/cron', '/activity', '/logs', '/debug', '/files', '/memory']
-  const gatewayRoutes = ['/channels', '/instances', '/sessions', '/usage', '/agents', '/nodes']
+  const suiteRoutes = [
+    '/dashboard',
+    '/agent-swarm',
+    '/new',
+    '/browser',
+    '/terminal',
+    '/tasks',
+    '/skills',
+    '/cron',
+    '/activity',
+    '/logs',
+    '/debug',
+    '/files',
+    '/memory',
+  ]
+  const gatewayRoutes = [
+    '/channels',
+    '/instances',
+    '/sessions',
+    '/usage',
+    '/agents',
+    '/nodes',
+  ]
 
   useEffect(() => {
     if (suiteRoutes.includes(pathname)) setLastRoute('suite', pathname)
@@ -556,9 +581,7 @@ function ChatSidebarComponent({
 
   const [renameDialogOpen, setRenameDialogOpen] = useState(false)
   const [renameSessionKey, setRenameSessionKey] = useState<string | null>(null)
-  const [renameFriendlyId, setRenameFriendlyId] = useState<string | null>(
-    null,
-  )
+  const [renameFriendlyId, setRenameFriendlyId] = useState<string | null>(null)
   const [renameSessionTitle, setRenameSessionTitle] = useState('')
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
@@ -789,7 +812,10 @@ function ChatSidebarComponent({
       <motion.div
         layout
         transition={{ layout: transition }}
-        className={cn('flex items-center h-12 px-2', isCollapsed ? 'justify-center' : 'justify-between')}
+        className={cn(
+          'flex items-center h-12 px-2',
+          isCollapsed ? 'justify-center' : 'justify-between',
+        )}
       >
         <AnimatePresence initial={false}>
           {!isCollapsed ? (
@@ -860,24 +886,28 @@ function ChatSidebarComponent({
       {/* ── New Session button ──────────────────────────────────────── */}
       {!isCollapsed && (
         <div className="px-2 pb-1">
-          <button
-            type="button"
+          <Link
+            to="/chat/$sessionKey"
+            params={{ sessionKey: 'new' }}
             onClick={() => {
               onSelectSession?.()
-              // Force fresh navigation with cache-buster so browser always treats as new URL
-              // TanStack Router won't remount for same route pattern changes
-              window.location.href = `/chat/new?t=${Date.now()}`
             }}
             className={cn(
               buttonVariants({ variant: 'ghost', size: 'sm' }),
               'w-full justify-start gap-2.5 px-3 py-2 text-primary-900 hover:bg-primary-200',
-              isNewSessionActive && 'bg-accent-500/10 text-accent-500 hover:bg-accent-500/15',
+              isNewSessionActive &&
+                'bg-accent-500/10 text-accent-500 hover:bg-accent-500/15',
             )}
             data-tour="new-session"
           >
-            <HugeiconsIcon icon={PencilEdit02Icon} size={20} strokeWidth={1.5} className="size-5 shrink-0" />
+            <HugeiconsIcon
+              icon={PencilEdit02Icon}
+              size={20}
+              strokeWidth={1.5}
+              className="size-5 shrink-0"
+            />
             <span>New Session</span>
-          </button>
+          </Link>
         </div>
       )}
 
@@ -924,34 +954,35 @@ function ChatSidebarComponent({
 
         {/* Sessions list */}
         <div className="shrink-0 border-t border-primary-200/60 mt-1">
-        <AnimatePresence initial={false}>
-          {!isCollapsed && (
-            <motion.div
-              key="content"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={transition}
-              className="flex flex-col w-full min-h-0 h-full"
-            >
-              <div className="flex-1 min-h-0">
-                <SidebarSessions
-                  sessions={sessions}
-                  activeFriendlyId={activeFriendlyId}
-                  onSelect={onSelectSession}
-                  onRename={handleOpenRename}
-                  onDelete={handleOpenDelete}
-                  loading={sessionsLoading}
-                  fetching={sessionsFetching}
-                  error={sessionsError}
-                  onRetry={onRetrySessions}
-                />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+          <AnimatePresence initial={false}>
+            {!isCollapsed && (
+              <motion.div
+                key="content"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={transition}
+                className="flex flex-col w-full min-h-0 h-full"
+              >
+                <div className="flex-1 min-h-0">
+                  <SidebarSessions
+                    sessions={sessions}
+                    activeFriendlyId={activeFriendlyId}
+                    onSelect={onSelectSession}
+                    onRename={handleOpenRename}
+                    onDelete={handleOpenDelete}
+                    loading={sessionsLoading}
+                    fetching={sessionsFetching}
+                    error={sessionsError}
+                    onRetry={onRetrySessions}
+                  />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
-      </div>{/* end scrollable body */}
+      {/* end scrollable body */}
 
       {/* ── Footer with User Menu ─────────────────────────────────── */}
       <div className="px-2 py-2 border-t border-primary-200 bg-primary-50 dark:bg-primary-100 shrink-0 space-y-2">
@@ -991,10 +1022,16 @@ function ChatSidebarComponent({
               className="justify-between"
             >
               <span className="flex items-center gap-2">
-                <HugeiconsIcon icon={Settings01Icon} size={20} strokeWidth={1.5} />
+                <HugeiconsIcon
+                  icon={Settings01Icon}
+                  size={20}
+                  strokeWidth={1.5}
+                />
                 Settings
               </span>
-              <kbd className="ml-auto text-[10px] text-primary-500 dark:text-gray-400 font-mono">{mod},</kbd>
+              <kbd className="ml-auto text-[10px] text-primary-500 dark:text-gray-400 font-mono">
+                {mod},
+              </kbd>
             </MenuItem>
             <MenuItem
               onClick={function onOpenProviders() {
@@ -1006,7 +1043,9 @@ function ChatSidebarComponent({
                 <HugeiconsIcon icon={ApiIcon} size={20} strokeWidth={1.5} />
                 Providers
               </span>
-              <kbd className="ml-auto text-[10px] text-primary-500 dark:text-gray-400 font-mono">{mod}P</kbd>
+              <kbd className="ml-auto text-[10px] text-primary-500 dark:text-gray-400 font-mono">
+                {mod}P
+              </kbd>
             </MenuItem>
           </MenuContent>
         </MenuRoot>
@@ -1016,10 +1055,7 @@ function ChatSidebarComponent({
       </div>
 
       {/* ── Dialogs ─────────────────────────────────────────────────── */}
-      <SettingsDialog
-        open={settingsOpen}
-        onOpenChange={setSettingsOpen}
-      />
+      <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
 
       <ProvidersDialog open={providersOpen} onOpenChange={setProvidersOpen} />
 

@@ -27,7 +27,14 @@ function AssistantAvatarComponent({ size = 28, className }: AvatarProps) {
         </linearGradient>
       </defs>
       {/* Orange background */}
-      <rect x="5" y="5" width="90" height="90" rx="20" fill="url(#ava-orange)" />
+      <rect
+        x="5"
+        y="5"
+        width="90"
+        height="90"
+        rx="20"
+        fill="url(#ava-orange)"
+      />
       {/* Left claw bracket */}
       <path
         d="M 40 35 L 30 50 L 40 65"

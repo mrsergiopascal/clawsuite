@@ -28,11 +28,21 @@ type ActivityLogState = {
 }
 
 const MOCK_SESSIONS = ['main', 'devops', 'perf', 'agent-lab', 'ui']
-const MOCK_SOURCES = ['orchestrator', 'gateway', 'agent-runner', 'api', 'heartbeat']
+const MOCK_SOURCES = [
+  'orchestrator',
+  'gateway',
+  'agent-runner',
+  'api',
+  'heartbeat',
+]
 
 const LEVELS: Array<ActivityLogLevel> = ['INFO', 'WARN', 'ERROR', 'DEBUG']
 
-function buildMockMessage(level: ActivityLogLevel, source: string, session: string): string {
+function buildMockMessage(
+  level: ActivityLogLevel,
+  source: string,
+  session: string,
+): string {
   if (source === 'heartbeat') {
     return `Heartbeat acknowledged for session "${session}".`
   }

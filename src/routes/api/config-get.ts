@@ -7,11 +7,16 @@ export const Route = createFileRoute('/api/config-get')({
     handlers: {
       GET: async () => {
         try {
-          const result = await gatewayRpc<{ defaultModel?: string }>('config.get')
+          const result = await gatewayRpc<{ defaultModel?: string }>(
+            'config.get',
+          )
           return json({ ok: true, payload: result })
         } catch (err) {
           return json(
-            { ok: false, error: err instanceof Error ? err.message : String(err) },
+            {
+              ok: false,
+              error: err instanceof Error ? err.message : String(err),
+            },
             { status: 500 },
           )
         }

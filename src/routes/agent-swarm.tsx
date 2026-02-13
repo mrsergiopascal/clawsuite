@@ -3,9 +3,9 @@ import { createFileRoute } from '@tanstack/react-router'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { BotIcon, Rocket01Icon } from '@hugeicons/core-free-icons'
 import { AnimatePresence, motion } from 'motion/react'
-import type {SwarmSession} from '@/stores/agent-swarm-store';
+import type { SwarmSession } from '@/stores/agent-swarm-store'
 import { usePageTitle } from '@/hooks/use-page-title'
-import {  useSwarmStore } from '@/stores/agent-swarm-store'
+import { useSwarmStore } from '@/stores/agent-swarm-store'
 import { cn } from '@/lib/utils'
 import { assignPersona } from '@/lib/agent-personas'
 import { IsometricOffice } from '@/components/agent-swarm/isometric-office'
@@ -15,6 +15,36 @@ import { useSounds } from '@/hooks/use-sounds'
 
 export const Route = createFileRoute('/agent-swarm')({
   component: AgentSwarmRoute,
+  errorComponent: function AgentSwarmError({ error }) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full p-6 text-center bg-primary-50">
+        <h2 className="text-xl font-semibold text-primary-900 mb-3">
+          Failed to Load Agent Hub
+        </h2>
+        <p className="text-sm text-primary-600 mb-4 max-w-md">
+          {error instanceof Error
+            ? error.message
+            : 'An unexpected error occurred'}
+        </p>
+        <button
+          onClick={() => window.location.reload()}
+          className="px-4 py-2 bg-accent-500 text-white rounded-lg hover:bg-accent-600 transition-colors"
+        >
+          Reload Page
+        </button>
+      </div>
+    )
+  },
+  pendingComponent: function AgentSwarmPending() {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-center">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-accent-500 border-r-transparent mb-3" />
+          <p className="text-sm text-primary-500">Loading agent hub...</p>
+        </div>
+      </div>
+    )
+  },
 })
 
 const statusConfig = {
@@ -49,11 +79,15 @@ function formatAge(staleness: number): string {
 
 function SessionCard({ session }: { session: SwarmSession }) {
   const config = statusConfig[session.swarmStatus]
-  const tokens = session.usage?.totalTokens ?? session.totalTokens ?? session.tokenCount ?? 0
+  const tokens =
+    session.usage?.totalTokens ?? session.totalTokens ?? session.tokenCount ?? 0
   const cost = session.usage?.cost ?? session.cost ?? 0
   const kind = session.kind ?? 'session'
   const taskText = session.task ?? session.initialMessage ?? session.label ?? ''
-  const persona = assignPersona(session.key ?? session.friendlyId ?? 'unknown', taskText)
+  const persona = assignPersona(
+    session.key ?? session.friendlyId ?? 'unknown',
+    taskText,
+  )
   const name = `${persona.emoji} ${persona.name}`
   const role = persona.role
 
@@ -69,20 +103,34 @@ function SessionCard({ session }: { session: SwarmSession }) {
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <div className={cn('size-2.5 rounded-full', config.color, config.pulse && 'animate-pulse')} />
-            <span className="text-xs font-medium text-primary-500">{config.label}</span>
+            <div
+              className={cn(
+                'size-2.5 rounded-full',
+                config.color,
+                config.pulse && 'animate-pulse',
+              )}
+            />
+            <span className="text-xs font-medium text-primary-500">
+              {config.label}
+            </span>
             <span className="rounded-full border border-primary-200 bg-primary-100/60 px-2 py-0.5 text-[10px] text-primary-500">
               {kind}
             </span>
           </div>
-          <h3 className="mt-1 truncate text-sm font-semibold text-primary-900">{name}</h3>
-          <span className={cn('text-xs font-medium', persona.color)}>{role}</span>
+          <h3 className="mt-1 truncate text-sm font-semibold text-primary-900">
+            {name}
+          </h3>
+          <span className={cn('text-xs font-medium', persona.color)}>
+            {role}
+          </span>
         </div>
       </div>
 
       {/* Task */}
       {session.task && (
-        <p className="mt-2 line-clamp-2 text-xs text-primary-600">{session.task}</p>
+        <p className="mt-2 line-clamp-2 text-xs text-primary-600">
+          {session.task}
+        </p>
       )}
 
       {/* Stats */}
@@ -104,7 +152,8 @@ type ViewMode = 'office' | 'cards'
 
 function AgentSwarmRoute() {
   usePageTitle('Agent Hub')
-  const { sessions, isConnected, error, startPolling, stopPolling } = useSwarmStore()
+  const { sessions, isConnected, error, startPolling, stopPolling } =
+    useSwarmStore()
   const [viewMode, setViewMode] = useState<ViewMode>('office')
 
   // Sound notifications for agent events
@@ -115,8 +164,12 @@ function AgentSwarmRoute() {
     return () => stopPolling()
   }, [startPolling, stopPolling])
 
-  const activeSessions = sessions.filter(s => s.swarmStatus === 'running' || s.swarmStatus === 'thinking')
-  const otherSessions = sessions.filter(s => s.swarmStatus !== 'running' && s.swarmStatus !== 'thinking')
+  const activeSessions = sessions.filter(
+    (s) => s.swarmStatus === 'running' || s.swarmStatus === 'thinking',
+  )
+  const otherSessions = sessions.filter(
+    (s) => s.swarmStatus !== 'running' && s.swarmStatus !== 'thinking',
+  )
 
   return (
     <motion.div
@@ -154,7 +207,7 @@ function AgentSwarmRoute() {
                     'rounded-md px-3 py-1 text-xs font-medium transition-colors',
                     viewMode === 'office'
                       ? 'bg-accent-500 text-white'
-                      : 'text-primary-500 hover:text-primary-700'
+                      : 'text-primary-500 hover:text-primary-700',
                   )}
                 >
                   🏢 Office
@@ -165,7 +218,7 @@ function AgentSwarmRoute() {
                     'rounded-md px-3 py-1 text-xs font-medium transition-colors',
                     viewMode === 'cards'
                       ? 'bg-accent-500 text-white'
-                      : 'text-primary-500 hover:text-primary-700'
+                      : 'text-primary-500 hover:text-primary-700',
                   )}
                 >
                   📋 Cards
@@ -173,16 +226,20 @@ function AgentSwarmRoute() {
               </div>
             </div>
 
-            <div className={cn(
-              'flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium',
-              isConnected
-                ? 'border-emerald-300 bg-emerald-50 text-emerald-700'
-                : 'border-red-300 bg-red-50 text-red-700'
-            )}>
-              <div className={cn(
-                'size-2 rounded-full',
-                isConnected ? 'bg-emerald-400 animate-pulse' : 'bg-red-400'
-              )} />
+            <div
+              className={cn(
+                'flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium',
+                isConnected
+                  ? 'border-emerald-300 bg-emerald-50 text-emerald-700'
+                  : 'border-red-300 bg-red-50 text-red-700',
+              )}
+            >
+              <div
+                className={cn(
+                  'size-2 rounded-full',
+                  isConnected ? 'bg-emerald-400 animate-pulse' : 'bg-red-400',
+                )}
+              />
               {isConnected ? 'Connected' : 'Disconnected'}
             </div>
           </div>
@@ -196,10 +253,19 @@ function AgentSwarmRoute() {
           {/* Quick Stats */}
           {sessions.length > 0 && (
             <div className="mt-4 flex gap-4 text-xs text-primary-600">
-              <span className="font-medium">{sessions.length} total sessions</span>
+              <span className="font-medium">
+                {sessions.length} total sessions
+              </span>
               <span>{activeSessions.length} active</span>
               <span>
-                {formatTokens(sessions.reduce((sum, s) => sum + (s.usage?.totalTokens ?? s.totalTokens ?? 0), 0))} total tokens
+                {formatTokens(
+                  sessions.reduce(
+                    (sum, s) =>
+                      sum + (s.usage?.totalTokens ?? s.totalTokens ?? 0),
+                    0,
+                  ),
+                )}{' '}
+                total tokens
               </span>
             </div>
           )}
@@ -230,8 +296,11 @@ function AgentSwarmRoute() {
                 </h2>
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   <AnimatePresence mode="popLayout">
-                    {activeSessions.map(session => (
-                      <SessionCard key={session.key ?? session.friendlyId} session={session} />
+                    {activeSessions.map((session) => (
+                      <SessionCard
+                        key={session.key ?? session.friendlyId}
+                        session={session}
+                      />
                     ))}
                   </AnimatePresence>
                 </div>
@@ -246,8 +315,11 @@ function AgentSwarmRoute() {
                 </h2>
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   <AnimatePresence mode="popLayout">
-                    {otherSessions.map(session => (
-                      <SessionCard key={session.key ?? session.friendlyId} session={session} />
+                    {otherSessions.map((session) => (
+                      <SessionCard
+                        key={session.key ?? session.friendlyId}
+                        session={session}
+                      />
                     ))}
                   </AnimatePresence>
                 </div>

@@ -74,7 +74,9 @@ export const Route = createFileRoute('/api/send-stream')({
 
         // Create streaming response
         const encoder = new TextEncoder()
-        let conn: Awaited<ReturnType<typeof createGatewayStreamConnection>> | null = null
+        let conn: Awaited<
+          ReturnType<typeof createGatewayStreamConnection>
+        > | null = null
         let streamClosed = false
 
         const stream = new ReadableStream({
@@ -138,7 +140,11 @@ export const Route = createFileRoute('/api/send-stream')({
 
               conn.on('chat', (payload: any) => {
                 const state = payload?.state
-                if (state === 'final' || state === 'aborted' || state === 'error') {
+                if (
+                  state === 'final' ||
+                  state === 'aborted' ||
+                  state === 'error'
+                ) {
                   sendEvent('done', {
                     state,
                     errorMessage: payload?.errorMessage,

@@ -6,6 +6,12 @@ import {
   Mic01Icon,
   StopIcon,
 } from '@hugeicons/core-free-icons'
+import {
+  TooltipContent,
+  TooltipProvider,
+  TooltipRoot,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import {
@@ -107,7 +113,9 @@ function formatFileSize(size: number): string {
 function hasImageData(dt: DataTransfer | null): boolean {
   if (!dt) return false
   const items = Array.from(dt.items)
-  if (items.some((item) => item.kind === 'file' && item.type.startsWith('image/')))
+  if (
+    items.some((item) => item.kind === 'file' && item.type.startsWith('image/'))
+  )
     return true
   const files = Array.from(dt.files)
   return files.some((file) => file.type.startsWith('image/'))
@@ -171,14 +179,14 @@ function toModelOption(entry: GatewayModelCatalogEntry): ModelOption | null {
   const alias = readText(entry.alias)
   const provider = readText(entry.provider)
   const id = readText(entry.id)
-  
+
   if (!provider || !id) return null
 
   // Gateway expects provider/model format for sessions.patch
   // Always prepend provider — even if id contains "/" (e.g., openrouter models
   // have ids like "google/gemini-2.5-flash" but need "openrouter/google/gemini-2.5-flash")
   const value = `${provider}/${id}`
-  
+
   const display =
     readText(entry.label) ||
     readText(entry.displayName) ||
@@ -213,8 +221,15 @@ function shortenModelName(raw: string): string {
   if (!raw) return ''
   let name = raw
   const prefixes = [
-    'openrouter/anthropic/', 'openrouter/google/', 'openrouter/openai/', 'openrouter/',
-    'anthropic/', 'openai/', 'google-antigravity/', 'minimax/', 'moonshot/',
+    'openrouter/anthropic/',
+    'openrouter/google/',
+    'openrouter/openai/',
+    'openrouter/',
+    'anthropic/',
+    'openai/',
+    'google-antigravity/',
+    'minimax/',
+    'moonshot/',
   ]
   for (const prefix of prefixes) {
     if (name.toLowerCase().startsWith(prefix)) {
@@ -225,16 +240,13 @@ function shortenModelName(raw: string): string {
   return name
     .replace(/-(\d)/g, ' $1')
     .replace(/-/g, ' ')
-    .replace(/\b\w/g, c => c.toUpperCase())
+    .replace(/\b\w/g, (c) => c.toUpperCase())
     .replace(/\bGpt\b/g, 'GPT')
 }
 
 function isTimeoutErrorMessage(message: string): boolean {
   const normalized = message.toLowerCase()
-  return (
-    normalized.includes('timed out') ||
-    normalized.includes('timeout')
-  )
+  return normalized.includes('timed out') || normalized.includes('timeout')
 }
 
 async function readResponseError(response: Response): Promise<string> {
@@ -290,9 +302,9 @@ function ChatComposerComponent({
   focusKey,
 }: ChatComposerProps) {
   const [value, setValue] = useState('')
-  const [attachments, setAttachments] = useState<
-    Array<ChatComposerAttachment>
-  >([])
+  const [attachments, setAttachments] = useState<Array<ChatComposerAttachment>>(
+    [],
+  )
   const [isDraggingOver, setIsDraggingOver] = useState(false)
   const [focusAfterSubmitTick, setFocusAfterSubmitTick] = useState(0)
   const [isModelMenuOpen, setIsModelMenuOpen] = useState(false)
@@ -304,10 +316,10 @@ function ChatComposerComponent({
   const modelSelectorRef = useRef<HTMLDivElement | null>(null)
   const composerWrapperRef = useRef<HTMLDivElement | null>(null)
   const focusFrameRef = useRef<number | null>(null)
-  
+
   // Phase 4.2: Pinned models
   const { pinned, togglePin, isPinned } = usePinnedModels()
-  
+
   const modelsQuery = useQuery({
     queryKey: ['gateway', 'models'],
     queryFn: fetchModels,
@@ -321,31 +333,39 @@ function ChatComposerComponent({
     retry: false,
   })
 
-  const modelOptions = useMemo(function buildModelOptions(): Array<ModelOption> {
-    const rows = Array.isArray(modelsQuery.data?.models)
-      ? modelsQuery.data.models
-      : []
-    const seen = new Set<string>()
-    const options: Array<ModelOption> = []
-    for (const row of rows) {
-      const option = toModelOption(row)
-      if (!option) continue
-      if (seen.has(option.value)) continue
-      seen.add(option.value)
-      options.push(option)
-    }
-    return options
-  }, [modelsQuery.data?.models])
+  const modelOptions = useMemo(
+    function buildModelOptions(): Array<ModelOption> {
+      const rows = Array.isArray(modelsQuery.data?.models)
+        ? modelsQuery.data.models
+        : []
+      const seen = new Set<string>()
+      const options: Array<ModelOption> = []
+      for (const row of rows) {
+        const option = toModelOption(row)
+        if (!option) continue
+        if (seen.has(option.value)) continue
+        seen.add(option.value)
+        options.push(option)
+      }
+      return options
+    },
+    [modelsQuery.data?.models],
+  )
 
-  const groupedModels = useMemo(function groupModelsByProvider() {
-    const groups = new Map<string, Array<ModelOption>>()
-    for (const option of modelOptions) {
-      const existing = groups.get(option.provider) ?? []
-      existing.push(option)
-      groups.set(option.provider, existing)
-    }
-    return Array.from(groups.entries()).sort((a, b) => a[0].localeCompare(b[0]))
-  }, [modelOptions])
+  const groupedModels = useMemo(
+    function groupModelsByProvider() {
+      const groups = new Map<string, Array<ModelOption>>()
+      for (const option of modelOptions) {
+        const existing = groups.get(option.provider) ?? []
+        existing.push(option)
+        groups.set(option.provider, existing)
+      }
+      return Array.from(groups.entries()).sort((a, b) =>
+        a[0].localeCompare(b[0]),
+      )
+    },
+    [modelOptions],
+  )
 
   // Phase 4.2: Split pinned and unpinned models
   const availableModelIds = useMemo(() => {
@@ -439,9 +459,7 @@ function ChatComposerComponent({
   const modelsUnavailable = modelsQuery.isError
   const noModelsAvailable = modelsQuery.isSuccess && modelOptions.length === 0
   const isModelSwitcherDisabled =
-    disabled ||
-    modelsQuery.isLoading ||
-    modelSwitchMutation.isPending
+    disabled || modelsQuery.isLoading || modelSwitchMutation.isPending
   const currentModel = currentModelQuery.data ?? ''
   const draftStorageKey = useMemo(
     () => toDraftStorageKey(sessionKey),
@@ -452,9 +470,7 @@ function ChatComposerComponent({
     (currentModelQuery.isLoading ? '…' : 'Model')
   // Don't show "Gateway disconnected" for models query failures - it's confusing
   // since the main gateway connection might be fine. Show a subtler message instead.
-  const modelAvailabilityLabel = modelsUnavailable
-    ? 'Click to configure'
-    : null
+  const modelAvailabilityLabel = modelsUnavailable ? 'Click to configure' : null
 
   // Measure composer height and set CSS variable for scroll padding
   useLayoutEffect(() => {
@@ -466,7 +482,7 @@ function ChatComposerComponent({
       if (height > 0) {
         document.documentElement.style.setProperty(
           '--chat-composer-height',
-          `${height}px`
+          `${height}px`,
         )
       }
     }
@@ -488,16 +504,19 @@ function ChatComposerComponent({
     focusFrameRef.current = null
   }, [])
 
-  const focusPrompt = useCallback(function focusPrompt() {
-    if (typeof window === 'undefined') return
-    cancelFocusPromptFrame()
-    focusFrameRef.current = window.requestAnimationFrame(
-      function focusPromptInFrame() {
-        focusFrameRef.current = null
-        promptRef.current?.focus()
-      },
-    )
-  }, [cancelFocusPromptFrame])
+  const focusPrompt = useCallback(
+    function focusPrompt() {
+      if (typeof window === 'undefined') return
+      cancelFocusPromptFrame()
+      focusFrameRef.current = window.requestAnimationFrame(
+        function focusPromptInFrame() {
+          focusFrameRef.current = null
+          promptRef.current?.focus()
+        },
+      )
+    },
+    [cancelFocusPromptFrame],
+  )
 
   useEffect(
     function cleanupFocusPromptFrameOnUnmount() {
@@ -639,25 +658,29 @@ function ChatComposerComponent({
 
       const timestamp = Date.now()
       const prepared = await Promise.all(
-        imageFiles.map(async (file, index): Promise<ChatComposerAttachment | null> => {
-          const dataUrl = await readFileAsDataUrl(file)
-          if (!dataUrl) return null
-          const name = file.name && file.name.trim().length > 0
-            ? file.name.trim()
-            : `pasted-image-${timestamp}-${index + 1}.png`
-          return {
-            id: crypto.randomUUID(),
-            name,
-            contentType: file.type || 'image/png',
-            size: file.size,
-            dataUrl,
-            previewUrl: dataUrl,
-          }
-        }),
+        imageFiles.map(
+          async (file, index): Promise<ChatComposerAttachment | null> => {
+            const dataUrl = await readFileAsDataUrl(file)
+            if (!dataUrl) return null
+            const name =
+              file.name && file.name.trim().length > 0
+                ? file.name.trim()
+                : `pasted-image-${timestamp}-${index + 1}.png`
+            return {
+              id: crypto.randomUUID(),
+              name,
+              contentType: file.type || 'image/png',
+              size: file.size,
+              dataUrl,
+              previewUrl: dataUrl,
+            }
+          },
+        ),
       )
 
       const valid = prepared.filter(
-        (attachment): attachment is ChatComposerAttachment => attachment !== null,
+        (attachment): attachment is ChatComposerAttachment =>
+          attachment !== null,
       )
 
       if (valid.length === 0) return
@@ -754,51 +777,91 @@ function ChatComposerComponent({
     shouldRefocusAfterSendRef.current = true
     setFocusAfterSubmitTick((prev) => prev + 1)
     focusPrompt()
-  }, [attachments, clearDraft, disabled, focusPrompt, onSubmit, reset, setComposerAttachments, setComposerValue, value])
+  }, [
+    attachments,
+    clearDraft,
+    disabled,
+    focusPrompt,
+    onSubmit,
+    reset,
+    setComposerAttachments,
+    setComposerValue,
+    value,
+  ])
+
+  // Cmd+Enter to send
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
+        if (document.activeElement === promptRef.current) {
+          event.preventDefault()
+          handleSubmit()
+        }
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [handleSubmit])
 
   const submitDisabled =
     disabled || (value.trim().length === 0 && attachments.length === 0)
 
+  const hasDraft = value.trim().length > 0 || attachments.length > 0
+
+  const handleClearDraft = useCallback(() => {
+    reset()
+  }, [reset])
+
   // Voice input (tap = speech-to-text)
   const voiceInput = useVoiceInput({
-    onResult: useCallback((text: string) => {
-      if (!text.trim()) return
-      setValue(prev => {
-        const next = prev.trim().length > 0 ? `${prev} ${text}` : text
-        persistDraft(next)
-        return next
-      })
-    }, [persistDraft]),
+    onResult: useCallback(
+      (text: string) => {
+        if (!text.trim()) return
+        setValue((prev) => {
+          const next = prev.trim().length > 0 ? `${prev} ${text}` : text
+          persistDraft(next)
+          return next
+        })
+      },
+      [persistDraft],
+    ),
   })
 
   // Voice recorder (long-press = voice note)
   const voiceRecorder = useVoiceRecorder({
-    onRecorded: useCallback((blob: Blob, durationMs: number) => {
-      const ext = blob.type.includes('webm') ? 'webm' : 'mp4'
-      const name = `voice-note-${Date.now()}.${ext}`
-      const reader = new FileReader()
-      reader.onload = () => {
-        const dataUrl = typeof reader.result === 'string' ? reader.result : ''
-        if (!dataUrl) return
-        const secs = Math.round(durationMs / 1000)
-        setAttachments(prev => [...prev, {
-          id: crypto.randomUUID(),
-          name,
-          contentType: blob.type || 'audio/webm',
-          size: blob.size,
-          dataUrl,
-          previewUrl: '',
-        }])
-        // Auto-add duration caption to message
-        setValue(prev => {
-          const caption = `🎤 Voice note (${secs}s)`
-          const next = prev.trim().length > 0 ? `${prev}\n${caption}` : caption
-          persistDraft(next)
-          return next
-        })
-      }
-      reader.readAsDataURL(blob)
-    }, [persistDraft]),
+    onRecorded: useCallback(
+      (blob: Blob, durationMs: number) => {
+        const ext = blob.type.includes('webm') ? 'webm' : 'mp4'
+        const name = `voice-note-${Date.now()}.${ext}`
+        const reader = new FileReader()
+        reader.onload = () => {
+          const dataUrl = typeof reader.result === 'string' ? reader.result : ''
+          if (!dataUrl) return
+          const secs = Math.round(durationMs / 1000)
+          setAttachments((prev) => [
+            ...prev,
+            {
+              id: crypto.randomUUID(),
+              name,
+              contentType: blob.type || 'audio/webm',
+              size: blob.size,
+              dataUrl,
+              previewUrl: '',
+            },
+          ])
+          // Auto-add duration caption to message
+          setValue((prev) => {
+            const caption = `🎤 Voice note (${secs}s)`
+            const next =
+              prev.trim().length > 0 ? `${prev}\n${caption}` : caption
+            persistDraft(next)
+            return next
+          })
+        }
+        reader.readAsDataURL(blob)
+      },
+      [persistDraft],
+    ),
   })
 
   // Long-press detection for mic button
@@ -830,17 +893,20 @@ function ChatComposerComponent({
     }
   }, [voiceInput, voiceRecorder])
 
-  const handleAbort = useCallback(async function handleAbort() {
-    try {
-      await fetch('/api/chat-abort', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ sessionKey }),
-      })
-    } catch {
-      // Ignore abort errors
-    }
-  }, [sessionKey])
+  const handleAbort = useCallback(
+    async function handleAbort() {
+      try {
+        await fetch('/api/chat-abort', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ sessionKey }),
+        })
+      } catch {
+        // Ignore abort errors
+      }
+    },
+    [sessionKey],
+  )
 
   const handleOpenAttachmentPicker = useCallback(
     function handleOpenAttachmentPicker(
@@ -872,10 +938,11 @@ function ChatComposerComponent({
       if (typeof wrapperRef === 'function') {
         wrapperRef(node)
       } else if (wrapperRef && 'current' in wrapperRef) {
-        ;(wrapperRef as React.MutableRefObject<HTMLDivElement | null>).current = node
+        ;(wrapperRef as React.MutableRefObject<HTMLDivElement | null>).current =
+          node
       }
     },
-    [wrapperRef]
+    [wrapperRef],
   )
 
   return (
@@ -919,10 +986,7 @@ function ChatComposerComponent({
           <div className="px-3">
             <div className="flex flex-wrap gap-3">
               {attachments.map((attachment) => (
-                <div
-                  key={attachment.id}
-                  className="group relative w-28"
-                >
+                <div key={attachment.id} className="group relative w-28">
                   <div className="aspect-square overflow-hidden rounded-xl border border-primary-200 bg-primary-50">
                     <img
                       src={attachment.previewUrl}
@@ -940,7 +1004,11 @@ function ChatComposerComponent({
                     }}
                     className="absolute right-1 top-1 z-10 inline-flex size-6 items-center justify-center rounded-full bg-primary-900/80 text-primary-50 opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
                   >
-                    <HugeiconsIcon icon={Cancel01Icon} size={20} strokeWidth={1.5} />
+                    <HugeiconsIcon
+                      icon={Cancel01Icon}
+                      size={20}
+                      strokeWidth={1.5}
+                    />
                   </button>
                   <div className="mt-1 truncate text-xs font-medium text-primary-700">
                     {attachment.name}
@@ -955,7 +1023,7 @@ function ChatComposerComponent({
         ) : null}
 
         <PromptInputTextarea
-          placeholder="Ask anything..."
+          placeholder="Ask anything... (⌘↵ to send)"
           autoFocus
           inputRef={promptRef}
         />
@@ -973,27 +1041,65 @@ function ChatComposerComponent({
                 <HugeiconsIcon icon={Add01Icon} size={20} strokeWidth={1.5} />
               </Button>
             </PromptInputAction>
-            <div className="relative ml-1 flex items-center gap-2" ref={modelSelectorRef}>
-              <button
-                type="button"
-                onClick={(event) => {
-                  event.stopPropagation()
-                  if (isModelSwitcherDisabled) return
-                  setIsModelMenuOpen((prev) => !prev)
-                }}
-                className={cn(
-                  'inline-flex h-7 items-center gap-1 rounded-full bg-primary-100/70 px-2.5 text-[11px] font-medium text-primary-600 transition-colors hover:bg-primary-200 hover:text-primary-800',
-                  isModelSwitcherDisabled && 'cursor-not-allowed opacity-50',
-                )}
-                aria-haspopup="listbox"
-                aria-expanded={!isModelSwitcherDisabled && isModelMenuOpen}
-                aria-disabled={isModelSwitcherDisabled}
-                disabled={isModelSwitcherDisabled}
-                title={modelAvailabilityLabel ?? undefined}
-              >
-                <span className="max-w-[12rem] truncate">{modelButtonLabel}</span>
-                <HugeiconsIcon icon={ArrowDown01Icon} size={12} strokeWidth={2} className="opacity-60" />
-              </button>
+            {hasDraft && !isLoading && (
+              <PromptInputAction tooltip="Clear draft">
+                <Button
+                  size="icon-sm"
+                  variant="ghost"
+                  className="rounded-lg text-primary-400 hover:bg-primary-100 hover:text-red-600"
+                  aria-label="Clear draft"
+                  onClick={handleClearDraft}
+                >
+                  <HugeiconsIcon
+                    icon={Cancel01Icon}
+                    size={20}
+                    strokeWidth={1.5}
+                  />
+                </Button>
+              </PromptInputAction>
+            )}
+            <div
+              className="relative ml-1 flex items-center gap-2"
+              ref={modelSelectorRef}
+            >
+              <TooltipProvider>
+                <TooltipRoot>
+                  <TooltipTrigger asChild>
+                    <button
+                      type="button"
+                      onClick={(event) => {
+                        event.stopPropagation()
+                        if (isModelSwitcherDisabled) return
+                        setIsModelMenuOpen((prev) => !prev)
+                      }}
+                      className={cn(
+                        'inline-flex h-7 items-center gap-1 rounded-full bg-primary-100/70 px-2.5 text-[11px] font-medium text-primary-600 transition-colors hover:bg-primary-200 hover:text-primary-800',
+                        isModelSwitcherDisabled &&
+                          'cursor-not-allowed opacity-50',
+                      )}
+                      aria-haspopup="listbox"
+                      aria-expanded={
+                        !isModelSwitcherDisabled && isModelMenuOpen
+                      }
+                      aria-disabled={isModelSwitcherDisabled}
+                      disabled={isModelSwitcherDisabled}
+                    >
+                      <span className="max-w-[12rem] truncate">
+                        {modelButtonLabel}
+                      </span>
+                      <HugeiconsIcon
+                        icon={ArrowDown01Icon}
+                        size={12}
+                        strokeWidth={2}
+                        className="opacity-60"
+                      />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top">
+                    {currentModel || modelAvailabilityLabel || 'Select model'}
+                  </TooltipContent>
+                </TooltipRoot>
+              </TooltipProvider>
               {modelAvailabilityLabel ? (
                 <span className="text-xs text-primary-500 text-pretty">
                   {modelAvailabilityLabel}
@@ -1018,7 +1124,8 @@ function ChatComposerComponent({
                       }}
                       className={cn(
                         'rounded px-1 font-medium text-primary-700 hover:bg-primary-100',
-                        modelSwitchMutation.isPending && 'cursor-not-allowed opacity-60',
+                        modelSwitchMutation.isPending &&
+                          'cursor-not-allowed opacity-60',
                       )}
                       disabled={modelSwitchMutation.isPending}
                     >
@@ -1028,16 +1135,26 @@ function ChatComposerComponent({
                 </span>
               ) : null}
               {!isModelSwitcherDisabled && isModelMenuOpen ? (
-                <div className="absolute bottom-[calc(100%+0.5rem)] left-0 z-40 min-w-[16rem] max-w-[24rem] rounded-xl border border-primary-200 bg-surface shadow-lg">
+                <div className="absolute bottom-[calc(100%+0.5rem)] left-0 right-0 sm:right-auto z-40 min-w-[16rem] max-w-[calc(100vw-2rem)] sm:max-w-[24rem] rounded-xl border border-primary-200 bg-surface shadow-lg">
                   {groupedModels.length === 0 && modelsUnavailable ? (
                     <div className="p-4 text-center text-sm text-primary-500">
-                      <p className="font-medium text-primary-700 mb-1">Gateway not connected</p>
-                      <p className="text-xs">Make sure OpenClaw is running and the gateway URL is configured.</p>
+                      <p className="font-medium text-primary-700 mb-1">
+                        Gateway not connected
+                      </p>
+                      <p className="text-xs">
+                        Make sure OpenClaw is running and the gateway URL is
+                        configured.
+                      </p>
                     </div>
                   ) : groupedModels.length === 0 ? (
                     <div className="p-4 text-center text-sm text-primary-500">
-                      <p className="font-medium text-primary-700 mb-1">No models configured</p>
-                      <p className="text-xs mb-2">Add API keys for providers in your OpenClaw config to unlock more models.</p>
+                      <p className="font-medium text-primary-700 mb-1">
+                        No models configured
+                      </p>
+                      <p className="text-xs mb-2">
+                        Add API keys for providers in your OpenClaw config to
+                        unlock more models.
+                      </p>
                       <a
                         href="https://docs.openclaw.ai/configuration"
                         target="_blank"
@@ -1050,15 +1167,22 @@ function ChatComposerComponent({
                   ) : (
                     <div className="max-h-[20rem] overflow-y-auto p-1">
                       {/* Phase 4.2: Pinned models section */}
-                      {(pinnedModels.length > 0 || unavailablePinnedModels.length > 0) && (
+                      {(pinnedModels.length > 0 ||
+                        unavailablePinnedModels.length > 0) && (
                         <div className="mb-2">
                           <div className="px-2 py-1 text-xs font-medium uppercase tracking-wide text-primary-500">
                             📌 Pinned
                           </div>
                           {pinnedModels.map((option) => {
-                            const optionActive = isSameModel(option, currentModel)
+                            const optionActive = isSameModel(
+                              option,
+                              currentModel,
+                            )
                             return (
-                              <div key={option.value} className="group relative flex items-center">
+                              <div
+                                key={option.value}
+                                className="group relative flex items-center"
+                              >
                                 <button
                                   type="button"
                                   onClick={(event) => {
@@ -1068,15 +1192,21 @@ function ChatComposerComponent({
                                   }}
                                   className={cn(
                                     'flex flex-1 items-center gap-2 rounded-lg px-2 py-1.5 text-left text-sm text-primary-700 transition-colors hover:bg-primary-100',
-                                    optionActive && 'bg-primary-100 text-primary-900',
+                                    optionActive &&
+                                      'bg-primary-100 text-primary-900',
                                   )}
                                   role="option"
                                   aria-selected={optionActive}
                                   aria-label={`Select ${option.label}`}
                                 >
-                                  <span className="flex-1 truncate">{option.label}</span>
+                                  <span className="flex-1 truncate">
+                                    {option.label}
+                                  </span>
                                   {optionActive && (
-                                    <span className="text-primary-900" aria-label="Currently active">
+                                    <span
+                                      className="text-primary-900"
+                                      aria-label="Currently active"
+                                    >
                                       ✓
                                     </span>
                                   )}
@@ -1098,10 +1228,17 @@ function ChatComposerComponent({
                           })}
                           {/* Unavailable pinned models */}
                           {unavailablePinnedModels.map((modelId) => (
-                            <div key={modelId} className="group relative flex items-center">
+                            <div
+                              key={modelId}
+                              className="group relative flex items-center"
+                            >
                               <div className="flex flex-1 items-center gap-2 rounded-lg px-2 py-1.5 text-left text-sm text-primary-400 opacity-60">
-                                <span className="flex-1 truncate">{modelId}</span>
-                                <span className="text-xs text-red-600">Unavailable</span>
+                                <span className="flex-1 truncate">
+                                  {modelId}
+                                </span>
+                                <span className="text-xs text-red-600">
+                                  Unavailable
+                                </span>
                               </div>
                               <button
                                 type="button"
@@ -1119,7 +1256,7 @@ function ChatComposerComponent({
                           ))}
                         </div>
                       )}
-                      
+
                       {/* Regular models grouped by provider */}
                       {unpinnedGroupedModels.map(([provider, models]) => (
                         <div key={provider} className="mb-2 last:mb-0">
@@ -1127,9 +1264,15 @@ function ChatComposerComponent({
                             {provider}
                           </div>
                           {models.map((option) => {
-                            const optionActive = isSameModel(option, currentModel)
+                            const optionActive = isSameModel(
+                              option,
+                              currentModel,
+                            )
                             return (
-                              <div key={option.value} className="group relative flex items-center">
+                              <div
+                                key={option.value}
+                                className="group relative flex items-center"
+                              >
                                 <button
                                   type="button"
                                   onClick={(event) => {
@@ -1139,15 +1282,21 @@ function ChatComposerComponent({
                                   }}
                                   className={cn(
                                     'flex flex-1 items-center gap-2 rounded-lg px-2 py-1.5 text-left text-sm text-primary-700 transition-colors hover:bg-primary-100',
-                                    optionActive && 'bg-primary-100 text-primary-900',
+                                    optionActive &&
+                                      'bg-primary-100 text-primary-900',
                                   )}
                                   role="option"
                                   aria-selected={optionActive}
                                   aria-label={`Select ${option.label}`}
                                 >
-                                  <span className="flex-1 truncate">{option.label}</span>
+                                  <span className="flex-1 truncate">
+                                    {option.label}
+                                  </span>
                                   {optionActive && (
-                                    <span className="text-primary-900" aria-label="Currently active">
+                                    <span
+                                      className="text-primary-900"
+                                      aria-label="Currently active"
+                                    >
                                       ✓
                                     </span>
                                   )}
@@ -1249,7 +1398,11 @@ function ChatComposerComponent({
                   className="rounded-full"
                   aria-label="Send message"
                 >
-                  <HugeiconsIcon icon={ArrowUp02Icon} size={20} strokeWidth={1.5} />
+                  <HugeiconsIcon
+                    icon={ArrowUp02Icon}
+                    size={20}
+                    strokeWidth={1.5}
+                  />
                 </Button>
               </PromptInputAction>
             )}

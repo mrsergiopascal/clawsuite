@@ -56,7 +56,9 @@ export function useSounds(options: UseSoundsOptions = {}): UseSoundsReturn {
   const { autoPlay = true, thinkingThrottleMs = 2000 } = options
 
   // Track previous session states to detect changes
-  const prevSessionsRef = useRef<Map<string, SwarmSession['swarmStatus']>>(new Map())
+  const prevSessionsRef = useRef<Map<string, SwarmSession['swarmStatus']>>(
+    new Map(),
+  )
   const lastThinkingSoundRef = useRef<number>(0)
 
   // Subscribe to swarm store
@@ -103,7 +105,10 @@ export function useSounds(options: UseSoundsOptions = {}): UseSoundsReturn {
     }
 
     // Play thinking sound (throttled)
-    if (hasNewThinking && now - lastThinkingSoundRef.current > thinkingThrottleMs) {
+    if (
+      hasNewThinking &&
+      now - lastThinkingSoundRef.current > thinkingThrottleMs
+    ) {
       playThinking()
       lastThinkingSoundRef.current = now
     }
@@ -145,7 +150,7 @@ export function useSounds(options: UseSoundsOptions = {}): UseSoundsReturn {
       enabled: isSoundEnabled(),
       setEnabled,
     }),
-    [setVolume, setEnabled]
+    [setVolume, setEnabled],
   )
 }
 

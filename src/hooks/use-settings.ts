@@ -115,18 +115,20 @@ function initializeSettingsAppearance() {
   didInitializeSettingsAppearance = true
   applySettingsAppearance(useSettingsStore.getState().settings)
 
-  useSettingsStore.subscribe(function handleSettingsChange(state, previousState) {
-    const nextSettings = state.settings
-    const previousSettings = previousState.settings
+  useSettingsStore.subscribe(
+    function handleSettingsChange(state, previousState) {
+      const nextSettings = state.settings
+      const previousSettings = previousState.settings
 
-    if (nextSettings.theme !== previousSettings.theme) {
-      applyTheme(nextSettings.theme)
-    }
+      if (nextSettings.theme !== previousSettings.theme) {
+        applyTheme(nextSettings.theme)
+      }
 
-    if (nextSettings.accentColor !== previousSettings.accentColor) {
-      applyAccentColor(nextSettings.accentColor)
-    }
-  })
+      if (nextSettings.accentColor !== previousSettings.accentColor) {
+        applyAccentColor(nextSettings.accentColor)
+      }
+    },
+  )
 }
 
 initializeSettingsAppearance()

@@ -28,60 +28,75 @@ export function useRealtimeChatHistory({
   onUserMessage,
 }: UseRealtimeChatHistoryOptions) {
   const queryClient = useQueryClient()
-  const [lastCompletedRunAt, setLastCompletedRunAt] = useState<number | null>(null)
-  
-  const { 
-    connectionState, 
-    lastError,
-    reconnect,
-  } = useGatewayChatStream({
+  const [lastCompletedRunAt, setLastCompletedRunAt] = useState<number | null>(
+    null,
+  )
+
+  const { connectionState, lastError, reconnect } = useGatewayChatStream({
     sessionKey: sessionKey === 'new' ? undefined : sessionKey,
     enabled: enabled && sessionKey !== 'new',
-    onUserMessage: useCallback((message: GatewayMessage, source?: string) => {
-      // When we receive a user message from an external channel,
-      // append it to the query cache immediately for instant display
-      if (sessionKey && sessionKey !== 'new') {
-        appendHistoryMessage(queryClient, friendlyId, sessionKey, {
-          ...message,
-          __realtimeSource: source,
-        })
-      }
-      onUserMessage?.(message, source)
-    }, [queryClient, friendlyId, sessionKey, onUserMessage]),
-    onDone: useCallback((_state: string, eventSessionKey: string) => {
-      // Track when generation completes for this session
-      if (eventSessionKey === sessionKey || !sessionKey || sessionKey === 'new') {
-        setLastCompletedRunAt(Date.now())
-        // Refetch history after generation completes — keeps chat in sync
+    onUserMessage: useCallback(
+      (message: GatewayMessage, source?: string) => {
+        // When we receive a user message from an external channel,
+        // append it to the query cache immediately for instant display
         if (sessionKey && sessionKey !== 'new') {
-          const key = chatQueryKeys.history(friendlyId, sessionKey)
-          const prevData = queryClient.getQueryData(key) as { messages?: GatewayMessage[] } | undefined
-          const prevCount = prevData?.messages?.length ?? 0
+          appendHistoryMessage(queryClient, friendlyId, sessionKey, {
+            ...message,
+            __realtimeSource: source,
+          })
+        }
+        onUserMessage?.(message, source)
+      },
+      [queryClient, friendlyId, sessionKey, onUserMessage],
+    ),
+    onDone: useCallback(
+      (_state: string, eventSessionKey: string) => {
+        // Track when generation completes for this session
+        if (
+          eventSessionKey === sessionKey ||
+          !sessionKey ||
+          sessionKey === 'new'
+        ) {
+          setLastCompletedRunAt(Date.now())
+          // Refetch history after generation completes — keeps chat in sync
+          if (sessionKey && sessionKey !== 'new') {
+            const key = chatQueryKeys.history(friendlyId, sessionKey)
+            const prevData = queryClient.getQueryData(key) as
+              | { messages?: GatewayMessage[] }
+              | undefined
+            const prevCount = prevData?.messages?.length ?? 0
 
-          // Refetch immediately — done event message is already in realtime store
-          queryClient.invalidateQueries({ queryKey: key }).then(() => {
+            // Refetch immediately — done event message is already in realtime store
+            queryClient.invalidateQueries({ queryKey: key }).then(() => {
               // Check for compaction — significant message count drop
-              const newData = queryClient.getQueryData(key) as { messages?: GatewayMessage[] } | undefined
+              const newData = queryClient.getQueryData(key) as
+                | { messages?: GatewayMessage[] }
+                | undefined
               const newCount = newData?.messages?.length ?? 0
-              if (prevCount > 10 && newCount > 0 && newCount < prevCount * 0.6) {
-                toast('Context compacted — older messages were summarized to free up space', {
-                  type: 'info',
-                  icon: '🗜️',
-                  duration: 8000,
-                })
+              if (
+                prevCount > 10 &&
+                newCount > 0 &&
+                newCount < prevCount * 0.6
+              ) {
+                toast(
+                  'Context compacted — older messages were summarized to free up space',
+                  {
+                    type: 'info',
+                    icon: '🗜️',
+                    duration: 8000,
+                  },
+                )
               }
             })
+          }
         }
-      }
-    }, [sessionKey, friendlyId, queryClient]),
+      },
+      [sessionKey, friendlyId, queryClient],
+    ),
   })
 
-  const { 
-    getStreamingState,
-    mergeHistoryMessages,
-    clearSession,
-    lastEventAt,
-  } = useGatewayChatStore()
+  const { getStreamingState, mergeHistoryMessages, clearSession, lastEventAt } =
+    useGatewayChatStore()
 
   // Get current streaming state for this session
   const streamingState = useMemo(() => {
@@ -126,7 +141,8 @@ export function useRealtimeChatHistory({
   }, [sessionKey, clearSession])
 
   // Compute streaming UI state
-  const isRealtimeStreaming = streamingState !== null && streamingState.text.length > 0
+  const isRealtimeStreaming =
+    streamingState !== null && streamingState.text.length > 0
   const realtimeStreamingText = streamingState?.text ?? ''
   const realtimeStreamingThinking = streamingState?.thinking ?? ''
 

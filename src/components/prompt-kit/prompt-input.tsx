@@ -259,7 +259,11 @@ function PromptInputAction({
   ...props
 }: PromptInputActionProps) {
   const { disabled } = usePromptInput()
-  const trigger = React.isValidElement(children) ? children : <span>{children}</span>
+  const trigger = React.isValidElement(children) ? (
+    children
+  ) : (
+    <span>{children}</span>
+  )
 
   return (
     <TooltipRoot {...props}>

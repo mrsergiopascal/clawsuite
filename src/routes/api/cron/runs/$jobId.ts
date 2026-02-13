@@ -14,7 +14,9 @@ export const Route = createFileRoute('/api/cron/runs/$jobId')({
             : 10
 
           const segments = url.pathname.split('/')
-          const maybeJobId = decodeURIComponent(segments[segments.length - 1] ?? '')
+          const maybeJobId = decodeURIComponent(
+            segments[segments.length - 1] ?? '',
+          )
           const jobId = maybeJobId.trim()
           if (!jobId) {
             return json({ error: 'jobId is required' }, { status: 400 })

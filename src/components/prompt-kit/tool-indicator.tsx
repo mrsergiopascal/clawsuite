@@ -3,8 +3,8 @@
 import { HugeiconsIcon } from '@hugeicons/react'
 import { ArrowDown01Icon, Wrench01Icon } from '@hugeicons/core-free-icons'
 import { useLayoutEffect, useState } from 'react'
-import { Tool  } from './tool'
-import type {ToolPart} from './tool';
+import { Tool } from './tool'
+import type { ToolPart } from './tool'
 import { Button } from '@/components/ui/button'
 import {
   Collapsible,

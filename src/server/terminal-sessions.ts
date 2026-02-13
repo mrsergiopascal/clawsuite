@@ -26,9 +26,10 @@ export type TerminalSession = {
 const sessions = new Map<string, TerminalSession>()
 
 // Resolve path to pty-helper.py relative to this file
-const __dirname_resolved = typeof __dirname !== 'undefined'
-  ? __dirname
-  : dirname(fileURLToPath(import.meta.url))
+const __dirname_resolved =
+  typeof __dirname !== 'undefined'
+    ? __dirname
+    : dirname(fileURLToPath(import.meta.url))
 const PTY_HELPER = resolve(__dirname_resolved, 'pty-helper.py')
 
 export function createTerminalSession(params: {
@@ -42,7 +43,12 @@ export function createTerminalSession(params: {
   const sessionId = randomUUID()
 
   const home = process.env.HOME ?? homedir() ?? '/tmp'
-  const defaultShell = process.platform === 'win32' ? 'powershell.exe' : (process.platform === 'darwin' ? '/bin/zsh' : '/bin/bash')
+  const defaultShell =
+    process.platform === 'win32'
+      ? 'powershell.exe'
+      : process.platform === 'darwin'
+        ? '/bin/zsh'
+        : '/bin/bash'
   const shell = params.command?.[0] ?? process.env.SHELL ?? defaultShell
   let cwd = params.cwd ?? home
   if (cwd.startsWith('~')) {
@@ -77,23 +83,21 @@ export function createTerminalSession(params: {
   }
 
   // Spawn Python PTY helper
-  const proc: ChildProcess = spawn('python3', [
-    PTY_HELPER,
-    shell,
-    cwd,
-    String(cols),
-    String(rows),
-  ], {
-    env: {
-      ...process.env,
-      ...params.env,
-      TERM: 'xterm-256color',
-      COLORTERM: 'truecolor',
-      COLUMNS: String(cols),
-      LINES: String(rows),
-    } as Record<string, string>,
-    stdio: ['pipe', 'pipe', 'pipe'],
-  })
+  const proc: ChildProcess = spawn(
+    'python3',
+    [PTY_HELPER, shell, cwd, String(cols), String(rows)],
+    {
+      env: {
+        ...process.env,
+        ...params.env,
+        TERM: 'xterm-256color',
+        COLORTERM: 'truecolor',
+        COLUMNS: String(cols),
+        LINES: String(rows),
+      } as Record<string, string>,
+      stdio: ['pipe', 'pipe', 'pipe'],
+    },
+  )
 
   proc.stdout?.on('data', (data: Buffer) => {
     pushEvent({
@@ -143,7 +147,9 @@ export function createTerminalSession(params: {
         // Note: can't update env on running ChildProcess, SIGWINCH alone is sent
         try {
           process.kill(proc.pid, 'SIGWINCH')
-        } catch { /* */ }
+        } catch {
+          /* */
+        }
       }
     },
 
@@ -151,9 +157,15 @@ export function createTerminalSession(params: {
       try {
         proc.kill('SIGTERM')
         setTimeout(() => {
-          try { proc.kill('SIGKILL') } catch { /* */ }
+          try {
+            proc.kill('SIGKILL')
+          } catch {
+            /* */
+          }
         }, 2000)
-      } catch { /* */ }
+      } catch {
+        /* */
+      }
       sessions.delete(sessionId)
     },
   }

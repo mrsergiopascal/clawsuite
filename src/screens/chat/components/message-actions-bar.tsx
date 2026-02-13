@@ -1,6 +1,11 @@
 import { useState } from 'react'
 import { HugeiconsIcon } from '@hugeicons/react'
-import { Copy01Icon, Tick02Icon, Clock02Icon } from '@hugeicons/core-free-icons'
+import {
+  Copy01Icon,
+  Tick02Icon,
+  Clock02Icon,
+  RefreshIcon,
+} from '@hugeicons/core-free-icons'
 import { MessageTimestamp } from './message-timestamp'
 import {
   TooltipContent,
@@ -16,6 +21,8 @@ type MessageActionsBarProps = {
   timestamp: number
   forceVisible?: boolean
   isQueued?: boolean
+  isFailed?: boolean
+  onRetry?: () => void
 }
 
 export function MessageActionsBar({
@@ -24,6 +31,8 @@ export function MessageActionsBar({
   timestamp,
   forceVisible = false,
   isQueued = false,
+  isFailed = false,
+  onRetry,
 }: MessageActionsBarProps) {
   const [copied, setCopied] = useState(false)
 
@@ -43,10 +52,25 @@ export function MessageActionsBar({
     <div
       className={cn(
         'flex items-center gap-2 text-xs text-primary-600 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 duration-100 ease-out',
-        forceVisible || isQueued ? 'opacity-100' : 'opacity-0',
+        forceVisible || isQueued || isFailed ? 'opacity-100' : 'opacity-0',
         positionClass,
       )}
     >
+      {isFailed && onRetry && (
+        <TooltipProvider>
+          <TooltipRoot>
+            <TooltipTrigger
+              type="button"
+              onClick={onRetry}
+              className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-red-600 hover:bg-red-50 transition-colors"
+            >
+              <HugeiconsIcon icon={RefreshIcon} size={14} strokeWidth={1.6} />
+              <span className="text-[11px] font-medium">Retry</span>
+            </TooltipTrigger>
+            <TooltipContent side="top">Resend failed message</TooltipContent>
+          </TooltipRoot>
+        </TooltipProvider>
+      )}
       {isQueued && (
         <TooltipProvider>
           <TooltipRoot>

@@ -10,12 +10,18 @@ export function getStoredChatMode(): ChatMode {
   try {
     const v = localStorage.getItem(STORAGE_KEY)
     if (v === 'native' || v === 'gateway') return v
-  } catch { /* noop */ }
+  } catch {
+    /* noop */
+  }
   return 'gateway'
 }
 
 export function setStoredChatMode(mode: ChatMode) {
-  try { localStorage.setItem(STORAGE_KEY, mode) } catch { /* noop */ }
+  try {
+    localStorage.setItem(STORAGE_KEY, mode)
+  } catch {
+    /* noop */
+  }
 }
 
 function GatewayChatEmbedComponent({ className }: { className?: string }) {
@@ -43,8 +49,12 @@ function GatewayChatEmbedComponent({ className }: { className?: string }) {
       {error && (
         <div className="absolute inset-0 flex items-center justify-center bg-surface">
           <div className="flex flex-col items-center gap-2 text-center">
-            <p className="text-sm text-primary-700">Unable to connect to gateway</p>
-            <p className="text-xs text-primary-500">Make sure OpenClaw is running on port 18789</p>
+            <p className="text-sm text-primary-700">
+              Unable to connect to gateway
+            </p>
+            <p className="text-xs text-primary-500">
+              Make sure OpenClaw is running on port 18789
+            </p>
           </div>
         </div>
       )}

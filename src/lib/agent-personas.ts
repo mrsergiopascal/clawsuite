@@ -18,56 +18,147 @@ export const AGENT_PERSONAS: AgentPersona[] = [
     role: 'Frontend Developer',
     emoji: '🎨',
     color: 'text-blue-400',
-    specialties: ['react', 'css', 'tailwind', 'ui', 'ux', 'component', 'layout', 'style', 'design', 'frontend', 'page', 'landing'],
+    specialties: [
+      'react',
+      'css',
+      'tailwind',
+      'ui',
+      'ux',
+      'component',
+      'layout',
+      'style',
+      'design',
+      'frontend',
+      'page',
+      'landing',
+    ],
   },
   {
     name: 'Sally',
     role: 'Backend Architect',
     emoji: '🏗️',
     color: 'text-purple-400',
-    specialties: ['api', 'server', 'database', 'backend', 'node', 'express', 'route', 'endpoint', 'schema', 'migration', 'sql', 'rpc'],
+    specialties: [
+      'api',
+      'server',
+      'database',
+      'backend',
+      'node',
+      'express',
+      'route',
+      'endpoint',
+      'schema',
+      'migration',
+      'sql',
+      'rpc',
+    ],
   },
   {
     name: 'Bill',
     role: 'Marketing Expert',
     emoji: '📣',
     color: 'text-orange-400',
-    specialties: ['marketing', 'seo', 'content', 'copy', 'brand', 'social', 'campaign', 'analytics', 'growth'],
+    specialties: [
+      'marketing',
+      'seo',
+      'content',
+      'copy',
+      'brand',
+      'social',
+      'campaign',
+      'analytics',
+      'growth',
+    ],
   },
   {
     name: 'Ada',
     role: 'QA Engineer',
     emoji: '🔍',
     color: 'text-emerald-400',
-    specialties: ['test', 'qa', 'bug', 'fix', 'error', 'debug', 'lint', 'type', 'typescript', 'validate', 'audit'],
+    specialties: [
+      'test',
+      'qa',
+      'bug',
+      'fix',
+      'error',
+      'debug',
+      'lint',
+      'type',
+      'typescript',
+      'validate',
+      'audit',
+    ],
   },
   {
     name: 'Max',
     role: 'DevOps Specialist',
     emoji: '⚙️',
     color: 'text-amber-400',
-    specialties: ['deploy', 'docker', 'ci', 'cd', 'build', 'config', 'infra', 'server', 'monitor', 'log', 'performance'],
+    specialties: [
+      'deploy',
+      'docker',
+      'ci',
+      'cd',
+      'build',
+      'config',
+      'infra',
+      'server',
+      'monitor',
+      'log',
+      'performance',
+    ],
   },
   {
     name: 'Luna',
     role: 'Research Analyst',
     emoji: '🔬',
     color: 'text-cyan-400',
-    specialties: ['research', 'analyze', 'compare', 'report', 'data', 'insight', 'strategy', 'plan', 'review', 'audit'],
+    specialties: [
+      'research',
+      'analyze',
+      'compare',
+      'report',
+      'data',
+      'insight',
+      'strategy',
+      'plan',
+      'review',
+      'audit',
+    ],
   },
   {
     name: 'Kai',
     role: 'Full-Stack Engineer',
     emoji: '⚡',
     color: 'text-yellow-400',
-    specialties: ['fullstack', 'feature', 'implement', 'build', 'create', 'scaffold', 'refactor', 'update', 'upgrade'],
+    specialties: [
+      'fullstack',
+      'feature',
+      'implement',
+      'build',
+      'create',
+      'scaffold',
+      'refactor',
+      'update',
+      'upgrade',
+    ],
   },
   {
     name: 'Nova',
     role: 'Security Specialist',
     emoji: '🛡️',
     color: 'text-red-400',
-    specialties: ['security', 'auth', 'permission', 'encrypt', 'vulnerability', 'scan', 'protect', 'firewall', 'token'],
+    specialties: [
+      'security',
+      'auth',
+      'permission',
+      'encrypt',
+      'vulnerability',
+      'scan',
+      'protect',
+      'firewall',
+      'token',
+    ],
   },
 ]
 
@@ -92,7 +183,10 @@ const assignedPersonas = new Map<string, AgentPersona>()
  * then falls back to a deterministic hash of the session key for stable assignment.
  * Each active session gets a unique persona (up to 8 agents).
  */
-export function assignPersona(sessionKey: string, taskText?: string): AgentPersona {
+export function assignPersona(
+  sessionKey: string,
+  taskText?: string,
+): AgentPersona {
   // Return existing assignment
   const existing = assignedPersonas.get(sessionKey)
   if (existing) return existing
@@ -103,7 +197,7 @@ export function assignPersona(sessionKey: string, taskText?: string): AgentPerso
     takenNames.add(p.name)
   }
 
-  const available = AGENT_PERSONAS.filter(p => !takenNames.has(p.name))
+  const available = AGENT_PERSONAS.filter((p) => !takenNames.has(p.name))
 
   // Try keyword matching among available personas
   let bestMatch: AgentPersona | null = null
@@ -153,13 +247,19 @@ export function getPersona(sessionKey: string): AgentPersona | undefined {
 }
 
 /** Get display name for an agent session */
-export function getAgentDisplayName(sessionKey: string, taskText?: string): string {
+export function getAgentDisplayName(
+  sessionKey: string,
+  taskText?: string,
+): string {
   const persona = assignPersona(sessionKey, taskText)
   return `${persona.emoji} ${persona.name}`
 }
 
 /** Get role label for an agent session */
-export function getAgentRoleLabel(sessionKey: string, taskText?: string): string {
+export function getAgentRoleLabel(
+  sessionKey: string,
+  taskText?: string,
+): string {
   const persona = assignPersona(sessionKey, taskText)
   return persona.role
 }

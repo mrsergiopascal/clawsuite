@@ -1,6 +1,6 @@
 /**
  * Phase 4.1: Smart Model Suggestions
- * 
+ *
  * Client-side heuristics to suggest cheaper/better models
  * Opt-in only (requires settings toggle)
  */
@@ -51,13 +51,16 @@ const _AUTO_DISMISS_MS = 15 * 1000 // 15 seconds
 
 function getModelTier(modelId: string): ModelTier {
   const normalized = modelId.toLowerCase()
-  
+
   for (const tiers of Object.values(MODEL_TIERS)) {
-    if (tiers.budget.some(m => normalized.includes(m.toLowerCase()))) return 'budget'
-    if (tiers.balanced.some(m => normalized.includes(m.toLowerCase()))) return 'balanced'
-    if (tiers.premium.some(m => normalized.includes(m.toLowerCase()))) return 'premium'
+    if (tiers.budget.some((m) => normalized.includes(m.toLowerCase())))
+      return 'budget'
+    if (tiers.balanced.some((m) => normalized.includes(m.toLowerCase())))
+      return 'balanced'
+    if (tiers.premium.some((m) => normalized.includes(m.toLowerCase())))
+      return 'premium'
   }
-  
+
   return 'balanced' // default
 }
 
@@ -69,24 +72,30 @@ function getProvider(modelId: string): string | null {
   return null
 }
 
-function findModelInTier(provider: string, tier: ModelTier, availableModels: string[]): string | null {
+function findModelInTier(
+  provider: string,
+  tier: ModelTier,
+  availableModels: string[],
+): string | null {
   const providerTiers = MODEL_TIERS[provider]
   if (!providerTiers) return null
-  
+
   const candidates = providerTiers[tier] || []
   for (const candidate of candidates) {
-    const match = availableModels.find(m => m.toLowerCase().includes(candidate.toLowerCase()))
+    const match = availableModels.find((m) =>
+      m.toLowerCase().includes(candidate.toLowerCase()),
+    )
     if (match) return match
   }
-  
+
   return null
 }
 
 function isSimpleTask(messages: Message[]): boolean {
   const recent = messages.slice(-3)
   if (recent.length < 3) return false
-  
-  return recent.every(m => {
+
+  return recent.every((m) => {
     const content = String(m.content || '')
     return (
       content.length < 200 &&
@@ -135,7 +144,10 @@ function addSessionDismissal(sessionKey: string) {
   try {
     const dismissals = getSessionDismissals()
     dismissals.push({ sessionKey, timestamp: Date.now() })
-    localStorage.setItem('modelSuggestionSessionDismissals', JSON.stringify(dismissals))
+    localStorage.setItem(
+      'modelSuggestionSessionDismissals',
+      JSON.stringify(dismissals),
+    )
   } catch {
     // Ignore
   }
@@ -143,7 +155,7 @@ function addSessionDismissal(sessionKey: string) {
 
 function isSessionDismissed(sessionKey: string): boolean {
   const dismissals = getSessionDismissals()
-  return dismissals.some(d => d.sessionKey === sessionKey)
+  return dismissals.some((d) => d.sessionKey === sessionKey)
 }
 
 export function useModelSuggestions({
@@ -159,54 +171,60 @@ export function useModelSuggestions({
 }) {
   const { settings } = useSettings()
   const [suggestion, setSuggestion] = useState<Suggestion | null>(null)
-  
+
   useEffect(() => {
     // Feature disabled
     if (!settings.smartSuggestionsEnabled) {
       setSuggestion(null)
       return
     }
-    
+
     // Fail closed: no suggestions if current model unknown
     if (!currentModel || currentModel.trim() === '') {
       setSuggestion(null)
       return
     }
-    
+
     // Global cooldown active
     const lastShown = getLastShownTimestamp()
     if (Date.now() - lastShown < GLOBAL_COOLDOWN_MS) {
       return
     }
-    
+
     // Session dismissed
     if (isSessionDismissed(sessionKey)) {
       return
     }
-    
+
     // Not enough messages
     if (messages.length < 3) {
       return
     }
-    
+
     const currentTier = getModelTier(currentModel)
     const provider = getProvider(currentModel)
-    
+
     if (!provider) {
       return
     }
-    
+
     // Check for downgrade opportunity (simple tasks on expensive model)
-    if ((currentTier === 'balanced' || currentTier === 'premium') && isSimpleTask(messages)) {
+    if (
+      (currentTier === 'balanced' || currentTier === 'premium') &&
+      isSimpleTask(messages)
+    ) {
       // Phase 4.2: Prefer user's preferred budget model
       let cheaperModel: string | null = null
-      
-      if (settings.preferredBudgetModel && availableModels.includes(settings.preferredBudgetModel)) {
+
+      if (
+        settings.preferredBudgetModel &&
+        availableModels.includes(settings.preferredBudgetModel)
+      ) {
         cheaperModel = settings.preferredBudgetModel
       } else {
         cheaperModel = findModelInTier(provider, 'budget', availableModels)
       }
-      
+
       if (cheaperModel && cheaperModel !== currentModel) {
         setSuggestion({
           currentModel,
@@ -218,33 +236,39 @@ export function useModelSuggestions({
         return
       }
     }
-    
+
     // Check for upgrade opportunity (complex task on weak model)
     // Phase 4.2: Skip if "Only suggest cheaper" is enabled
     if (!settings.onlySuggestCheaper) {
       const lastMessage = messages[messages.length - 1]
       if (lastMessage && isComplexTask(lastMessage)) {
         let targetTier: ModelTier | null = null
-        
+
         if (currentTier === 'budget') targetTier = 'balanced'
         else if (currentTier === 'balanced') targetTier = 'premium'
-        
+
         if (targetTier) {
           // Phase 4.2: Prefer user's preferred premium model
           let betterModel: string | null = null
-          
-          if (settings.preferredPremiumModel && availableModels.includes(settings.preferredPremiumModel)) {
+
+          if (
+            settings.preferredPremiumModel &&
+            availableModels.includes(settings.preferredPremiumModel)
+          ) {
             betterModel = settings.preferredPremiumModel
           } else {
             betterModel = findModelInTier(provider, targetTier, availableModels)
           }
-          
+
           if (betterModel && betterModel !== currentModel) {
             setSuggestion({
               currentModel,
               suggestedModel: betterModel,
               reason: 'This looks complex',
-              costImpact: targetTier === 'premium' ? 'Better quality (2x cost)' : 'Better quality',
+              costImpact:
+                targetTier === 'premium'
+                  ? 'Better quality (2x cost)'
+                  : 'Better quality',
             })
             setLastShownTimestamp()
             return
@@ -252,17 +276,23 @@ export function useModelSuggestions({
         }
       }
     }
-  }, [currentModel, sessionKey, messages, availableModels, settings.smartSuggestionsEnabled])
-  
+  }, [
+    currentModel,
+    sessionKey,
+    messages,
+    availableModels,
+    settings.smartSuggestionsEnabled,
+  ])
+
   const dismiss = () => {
     setSuggestion(null)
   }
-  
+
   const dismissForSession = () => {
     addSessionDismissal(sessionKey)
     setSuggestion(null)
   }
-  
+
   return {
     suggestion,
     dismiss,

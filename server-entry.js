@@ -5,8 +5,11 @@ const port = parseInt(process.env.PORT || '3000', 10)
 const host = process.env.HOST || '0.0.0.0'
 
 const httpServer = createServer(async (req, res) => {
-  const url = new URL(req.url || '/', `http://${req.headers.host || 'localhost'}`)
-  
+  const url = new URL(
+    req.url || '/',
+    `http://${req.headers.host || 'localhost'}`,
+  )
+
   // Build a standard Request object
   const headers = new Headers()
   for (const [key, value] of Object.entries(req.headers)) {
@@ -31,9 +34,12 @@ const httpServer = createServer(async (req, res) => {
 
   try {
     const response = await server.fetch(request)
-    
-    res.writeHead(response.status, Object.fromEntries(response.headers.entries()))
-    
+
+    res.writeHead(
+      response.status,
+      Object.fromEntries(response.headers.entries()),
+    )
+
     if (response.body) {
       const reader = response.body.getReader()
       const pump = async () => {

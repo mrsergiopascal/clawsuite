@@ -17,7 +17,12 @@ type ContextData = {
   usedTokens: number
 }
 
-const EMPTY: ContextData = { contextPercent: 0, model: '', maxTokens: 0, usedTokens: 0 }
+const EMPTY: ContextData = {
+  contextPercent: 0,
+  model: '',
+  maxTokens: 0,
+  usedTokens: 0,
+}
 
 function formatTokens(n: number): string {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`
@@ -41,7 +46,9 @@ function ContextBarComponent({ compact: _compact }: { compact?: boolean }) {
           usedTokens: data.usedTokens ?? 0,
         })
       }
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
   }, [])
 
   useEffect(() => {
@@ -83,9 +90,17 @@ function ContextBarComponent({ compact: _compact }: { compact?: boolean }) {
   return (
     <PreviewCard>
       <PreviewCardTrigger className="block w-full cursor-pointer">
-        <div className={cn('shrink-0 w-full h-1.5 transition-colors duration-300', barBg)}>
+        <div
+          className={cn(
+            'shrink-0 w-full h-1.5 transition-colors duration-300',
+            barBg,
+          )}
+        >
           <div
-            className={cn('h-full transition-all duration-700 ease-out', barColor)}
+            className={cn(
+              'h-full transition-all duration-700 ease-out',
+              barColor,
+            )}
             style={{ width: `${Math.min(pct, 100)}%` }}
           />
         </div>
@@ -98,20 +113,31 @@ function ContextBarComponent({ compact: _compact }: { compact?: boolean }) {
       >
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-medium text-primary-900">Context Window</span>
-            <span className={cn('text-[11px] font-semibold tabular-nums', textColor)}>
+            <span className="text-[11px] font-medium text-primary-900">
+              Context Window
+            </span>
+            <span
+              className={cn(
+                'text-[11px] font-semibold tabular-nums',
+                textColor,
+              )}
+            >
               {Math.round(pct)}%
             </span>
           </div>
           <div className={cn('w-full h-2 rounded-full overflow-hidden', barBg)}>
             <div
-              className={cn('h-full rounded-full transition-all duration-500', barColor)}
+              className={cn(
+                'h-full rounded-full transition-all duration-500',
+                barColor,
+              )}
               style={{ width: `${Math.min(pct, 100)}%` }}
             />
           </div>
           <div className="flex items-center justify-between">
             <span className="text-[10px] text-primary-500 tabular-nums">
-              {formatTokens(ctx.usedTokens)} / {formatTokens(ctx.maxTokens)} tokens
+              {formatTokens(ctx.usedTokens)} / {formatTokens(ctx.maxTokens)}{' '}
+              tokens
             </span>
             {ctx.model && (
               <span className="text-[10px] text-primary-400 truncate max-w-[100px]">

@@ -20,7 +20,10 @@ interface ToastItem {
 let toastId = 0
 const listeners: Set<(t: ToastItem) => void> = new Set()
 
-export function toast(message: string, opts?: { type?: ToastType; duration?: number; icon?: string }) {
+export function toast(
+  message: string,
+  opts?: { type?: ToastType; duration?: number; icon?: string },
+) {
   const item: ToastItem = {
     id: ++toastId,
     message,
@@ -57,7 +60,9 @@ export function Toaster() {
 
   useEffect(() => {
     listeners.add(addToast)
-    return () => { listeners.delete(addToast) }
+    return () => {
+      listeners.delete(addToast)
+    }
   }, [addToast])
 
   if (!toasts.length) return null
@@ -76,7 +81,9 @@ export function Toaster() {
           <span>{t.message}</span>
           <button
             type="button"
-            onClick={() => setToasts((prev) => prev.filter((x) => x.id !== t.id))}
+            onClick={() =>
+              setToasts((prev) => prev.filter((x) => x.id !== t.id))
+            }
             className="ml-2 rounded-full p-0.5 opacity-70 hover:opacity-100 transition-opacity"
           >
             ✕

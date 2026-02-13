@@ -29,10 +29,14 @@ export const STATUS_LABELS: Record<TaskStatus, string> = {
   done: 'Done',
 }
 
-export const STATUS_ORDER: TaskStatus[] = ['backlog', 'in_progress', 'review', 'done']
+export const STATUS_ORDER: TaskStatus[] = [
+  'backlog',
+  'in_progress',
+  'review',
+  'done',
+]
 
 export const PRIORITY_ORDER: TaskPriority[] = ['P0', 'P1', 'P2', 'P3']
-
 
 /** Seed data from real Mission Control tasks */
 const SEED_TASKS: Task[] = []
@@ -68,7 +72,10 @@ type TaskStore = {
   afterSync: boolean
   syncFromApi: () => Promise<void>
   addTask: (task: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => void
-  updateTask: (id: string, updates: Partial<Omit<Task, 'id' | 'createdAt'>>) => void
+  updateTask: (
+    id: string,
+    updates: Partial<Omit<Task, 'id' | 'createdAt'>>,
+  ) => void
   moveTask: (id: string, status: TaskStatus) => void
   deleteTask: (id: string) => void
 }
@@ -86,7 +93,8 @@ export const useTaskStore = create<TaskStore>()(
 
         try {
           const response = await fetch('/api/tasks', { method: 'GET' })
-          if (!response.ok) throw new Error(`Failed to sync tasks (${response.status})`)
+          if (!response.ok)
+            throw new Error(`Failed to sync tasks (${response.status})`)
           const payload = await response.json().catch(() => ({}))
           set({
             tasks: normalizeTaskList(payload),
@@ -115,7 +123,9 @@ export const useTaskStore = create<TaskStore>()(
       updateTask: (id, updates) => {
         set((state) => ({
           tasks: state.tasks.map((t) =>
-            t.id === id ? { ...t, ...updates, updatedAt: new Date().toISOString() } : t,
+            t.id === id
+              ? { ...t, ...updates, updatedAt: new Date().toISOString() }
+              : t,
           ),
         }))
         void fetch(`/api/tasks/${id}`, {
@@ -127,7 +137,9 @@ export const useTaskStore = create<TaskStore>()(
       moveTask: (id, status) => {
         set((state) => ({
           tasks: state.tasks.map((t) =>
-            t.id === id ? { ...t, status, updatedAt: new Date().toISOString() } : t,
+            t.id === id
+              ? { ...t, status, updatedAt: new Date().toISOString() }
+              : t,
           ),
         }))
         void fetch(`/api/tasks/${id}`, {

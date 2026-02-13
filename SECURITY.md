@@ -33,6 +33,6 @@ We will acknowledge your report within 48 hours and aim to provide a fix within 
 ## Supported Versions
 
 | Version | Supported |
-|---------|-----------|
+| ------- | --------- |
 | main    | ✅        |
 | < main  | ❌        |

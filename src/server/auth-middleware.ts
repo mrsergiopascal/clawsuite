@@ -38,7 +38,9 @@ export function revokeSessionToken(token: string): void {
  * Check if password protection is enabled.
  */
 export function isPasswordProtectionEnabled(): boolean {
-  return Boolean(process.env.CLAWSUITE_PASSWORD && process.env.CLAWSUITE_PASSWORD.length > 0)
+  return Boolean(
+    process.env.CLAWSUITE_PASSWORD && process.env.CLAWSUITE_PASSWORD.length > 0,
+  )
 }
 
 /**
@@ -69,7 +71,9 @@ export function verifyPassword(password: string): boolean {
 /**
  * Extract session token from cookie header.
  */
-export function getSessionTokenFromCookie(cookieHeader: string | null): string | null {
+export function getSessionTokenFromCookie(
+  cookieHeader: string | null,
+): string | null {
   if (!cookieHeader) return null
 
   const cookies = cookieHeader.split(';').map((c) => c.trim())

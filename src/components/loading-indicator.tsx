@@ -16,7 +16,9 @@ export type LoadingIndicatorProps = {
   ariaLabel?: string
 }
 
-function getBraillePreset(loaderStyle: LoaderStyle): BrailleSpinnerPreset | null {
+function getBraillePreset(
+  loaderStyle: LoaderStyle,
+): BrailleSpinnerPreset | null {
   if (loaderStyle === 'braille-claw') return 'claw'
   if (loaderStyle === 'braille-orbit') return 'orbit'
   if (loaderStyle === 'braille-breathe') return 'breathe'
@@ -32,7 +34,13 @@ function renderLoader(loaderStyle: LoaderStyle, iconClassName?: string) {
 
   if (loaderStyle === 'lobster') {
     return (
-      <span className={cn('inline-block leading-none text-sm animate-pulse', iconClassName)} aria-hidden="true">
+      <span
+        className={cn(
+          'inline-block leading-none text-sm animate-pulse',
+          iconClassName,
+        )}
+        aria-hidden="true"
+      >
         🦞
       </span>
     )
@@ -64,7 +72,9 @@ function LoadingIndicator({
   iconClassName,
   ariaLabel = 'Assistant is streaming',
 }: LoadingIndicatorProps) {
-  const loaderStyle = useChatSettingsStore((state) => state.settings.loaderStyle)
+  const loaderStyle = useChatSettingsStore(
+    (state) => state.settings.loaderStyle,
+  )
 
   return (
     <span

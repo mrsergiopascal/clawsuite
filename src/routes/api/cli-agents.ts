@@ -112,20 +112,22 @@ function parseElapsedToSeconds(elapsed: string): number {
     return Number.parseInt(segment, 10)
   })
 
-  if (segments.some(function hasInvalid(valuePart) {
-    return !Number.isFinite(valuePart)
-  })) {
+  if (
+    segments.some(function hasInvalid(valuePart) {
+      return !Number.isFinite(valuePart)
+    })
+  ) {
     return daySeconds
   }
 
   if (segments.length === 3) {
     const [hours, minutes, seconds] = segments
-    return daySeconds + (hours * 60 * 60) + (minutes * 60) + seconds
+    return daySeconds + hours * 60 * 60 + minutes * 60 + seconds
   }
 
   if (segments.length === 2) {
     const [minutes, seconds] = segments
-    return daySeconds + (minutes * 60) + seconds
+    return daySeconds + minutes * 60 + seconds
   }
 
   if (segments.length === 1) {
@@ -135,7 +137,9 @@ function parseElapsedToSeconds(elapsed: string): number {
   return daySeconds
 }
 
-async function readRuntimeByPid(pids: Array<number>): Promise<Map<number, number>> {
+async function readRuntimeByPid(
+  pids: Array<number>,
+): Promise<Map<number, number>> {
   const runtimeByPid = new Map<number, number>()
   if (!pids.length) return runtimeByPid
 
@@ -210,7 +214,12 @@ function extractTaskFromCommand(command: string): string {
       return normalizeTask(current.slice('--prompt='.length))
     }
 
-    if (current === '--task' || current === '--prompt' || current === '-t' || current === '-p') {
+    if (
+      current === '--task' ||
+      current === '--prompt' ||
+      current === '-t' ||
+      current === '-p'
+    ) {
       const next = stripQuotes(args[i + 1] ?? '')
       if (next) return normalizeTask(next)
     }
@@ -242,7 +251,8 @@ function hashPid(pid: number): number {
 function createAgentName(pid: number): string {
   const hash = hashPid(pid)
   const adjective = NAME_ADJECTIVES[hash % NAME_ADJECTIVES.length]
-  const nounIndex = Math.floor(hash / NAME_ADJECTIVES.length) % NAME_NOUNS.length
+  const nounIndex =
+    Math.floor(hash / NAME_ADJECTIVES.length) % NAME_NOUNS.length
   const noun = NAME_NOUNS[nounIndex]
   return `${adjective}-${noun}`
 }
@@ -254,7 +264,10 @@ function resolveStatus(stat: string): CliAgentStatus {
   return 'running'
 }
 
-function toCliAgent(processEntry: AgentProcess, runtimeByPid: Map<number, number>): CliAgent {
+function toCliAgent(
+  processEntry: AgentProcess,
+  runtimeByPid: Map<number, number>,
+): CliAgent {
   return {
     pid: processEntry.pid,
     name: createAgentName(processEntry.pid),

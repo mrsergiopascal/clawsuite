@@ -64,9 +64,7 @@ function ThinkingIndicator({
         </CollapsibleTrigger>
         <CollapsiblePanel className="mt-1">
           <div className="pl-2 border-l-2 border-primary-200 py-2">
-            <p
-              className="text-sm text-primary-600 whitespace-pre-wrap text-pretty"
-            >
+            <p className="text-sm text-primary-600 whitespace-pre-wrap text-pretty">
               {content}
             </p>
           </div>

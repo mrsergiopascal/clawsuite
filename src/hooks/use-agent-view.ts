@@ -5,9 +5,7 @@ import type {
   GatewaySession,
   GatewaySessionStatusResponse,
 } from '@/lib/gateway-api'
-import {
-  fetchSessions,
-} from '@/lib/gateway-api'
+import { fetchSessions } from '@/lib/gateway-api'
 import { assignPersona } from '@/lib/agent-personas'
 
 export type AgentModel = string
@@ -183,7 +181,10 @@ function readSessionKey(session: GatewaySession): string {
 function readSessionName(session: GatewaySession): string {
   // Assign persona based on session key + task for named agent display
   const key = readSessionKey(session)
-  const taskText = readString(session.task) || readString(session.initialMessage) || readString(session.label)
+  const taskText =
+    readString(session.task) ||
+    readString(session.initialMessage) ||
+    readString(session.label)
   if (key.length > 0) {
     const persona = assignPersona(key, taskText)
     return `${persona.emoji} ${persona.name} — ${persona.role}`
@@ -304,10 +305,12 @@ function readProgress(
   status: GatewaySessionStatusResponse | null,
 ): number {
   const statusProgress = readNumber(status?.progress)
-  if (statusProgress > 0) return Math.max(1, Math.min(99, Math.round(statusProgress)))
+  if (statusProgress > 0)
+    return Math.max(1, Math.min(99, Math.round(statusProgress)))
 
   const sessionProgress = readNumber(session.progress)
-  if (sessionProgress > 0) return Math.max(1, Math.min(99, Math.round(sessionProgress)))
+  if (sessionProgress > 0)
+    return Math.max(1, Math.min(99, Math.round(sessionProgress)))
 
   const sessionStatus = readStatus(session, status)
   if (isQueuedStatus(sessionStatus)) return 5
@@ -330,7 +333,8 @@ function readStatus(
   const updatedAt = readTimestamp(session.updatedAt)
   if (updatedAt) {
     const staleness = Date.now() - updatedAt
-    const tokens = readNumber(session.totalTokens) || readNumber(session.tokenCount)
+    const tokens =
+      readNumber(session.totalTokens) || readNumber(session.tokenCount)
     if (tokens > 0 && staleness > 30_000) return 'complete'
     if (tokens === 0 && staleness > 120_000) return 'idle'
   }
@@ -381,7 +385,9 @@ function isRunningStatus(status: string): boolean {
 }
 
 function isCompletedStatus(status: string): boolean {
-  return ['complete', 'completed', 'success', 'succeeded', 'done'].includes(status)
+  return ['complete', 'completed', 'success', 'succeeded', 'done'].includes(
+    status,
+  )
 }
 
 function isFailedStatus(status: string): boolean {
@@ -507,7 +513,9 @@ export function useAgentView(): AgentViewResult {
   const [lastRefreshedMs, setLastRefreshedMs] = useState(() => Date.now())
   const [activeAgents, setActiveAgents] = useState<Array<ActiveAgent>>([])
   const [queuedAgents, setQueuedAgents] = useState<Array<QueuedAgentTask>>([])
-  const [historyAgents, setHistoryAgents] = useState<Array<AgentHistoryItem>>([])
+  const [historyAgents, setHistoryAgents] = useState<Array<AgentHistoryItem>>(
+    [],
+  )
   const [isLoading, setIsLoading] = useState(true)
   const [isDemoMode, setIsDemoMode] = useState(false)
   const [isLiveConnected, setIsLiveConnected] = useState(false)
@@ -565,7 +573,7 @@ export function useAgentView(): AgentViewResult {
         sessions.forEach(function classifySession(session) {
           if (!isAgentSession(session)) return
           const key = readSessionKey(session)
-          const status = key ? statusMap.get(key) ?? null : null
+          const status = key ? (statusMap.get(key) ?? null) : null
           const statusText = readStatus(session, status)
 
           if (isQueuedStatus(statusText)) {
@@ -599,7 +607,9 @@ export function useAgentView(): AgentViewResult {
         setHistoryAgents(createDemoHistory())
         setIsDemoMode(true)
         setIsLiveConnected(false)
-        setErrorMessage(error instanceof Error ? error.message : 'Gateway unavailable')
+        setErrorMessage(
+          error instanceof Error ? error.message : 'Gateway unavailable',
+        )
       } finally {
         if (!isDisposed) {
           setLastRefreshedMs(Date.now())

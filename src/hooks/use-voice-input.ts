@@ -39,12 +39,21 @@ function getSpeechRecognition(): SpeechRecognitionConstructor | null {
   return win.SpeechRecognition ?? win.webkitSpeechRecognition ?? null
 }
 
-export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInputReturn {
-  const { lang = 'en-US', interim = true, onResult, onInterim, onError } = options
+export function useVoiceInput(
+  options: UseVoiceInputOptions = {},
+): UseVoiceInputReturn {
+  const {
+    lang = 'en-US',
+    interim = true,
+    onResult,
+    onInterim,
+    onError,
+  } = options
   const [state, setState] = useState<VoiceInputState>('idle')
   const [transcript, setTranscript] = useState('')
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null)
-  const isSupported = typeof window !== 'undefined' && Boolean(getSpeechRecognition())
+  const isSupported =
+    typeof window !== 'undefined' && Boolean(getSpeechRecognition())
 
   // Keep callbacks fresh without re-creating recognition
   const callbacksRef = useRef({ onResult, onInterim, onError })
@@ -64,14 +73,20 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
   const start = useCallback(() => {
     const SpeechRecognition = getSpeechRecognition()
     if (!SpeechRecognition) {
-      callbacksRef.current.onError?.('Speech recognition not supported in this browser')
+      callbacksRef.current.onError?.(
+        'Speech recognition not supported in this browser',
+      )
       setState('error')
       return
     }
 
     // Stop existing
     if (recognitionRef.current) {
-      try { recognitionRef.current.stop() } catch { /* */ }
+      try {
+        recognitionRef.current.stop()
+      } catch {
+        /* */
+      }
     }
 
     const recognition = new SpeechRecognition()
@@ -140,7 +155,11 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
   useEffect(() => {
     return () => {
       if (recognitionRef.current) {
-        try { recognitionRef.current.stop() } catch { /* */ }
+        try {
+          recognitionRef.current.stop()
+        } catch {
+          /* */
+        }
       }
     }
   }, [])

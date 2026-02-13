@@ -2,10 +2,10 @@ import { create } from 'zustand'
 
 export type AgentActivity =
   | 'idle'
-  | 'reading'      // user sent a message, agent hasn't started responding
-  | 'thinking'     // waiting for first token
-  | 'responding'   // streaming response
-  | 'tool-use'     // executing a tool call
+  | 'reading' // user sent a message, agent hasn't started responding
+  | 'thinking' // waiting for first token
+  | 'responding' // streaming response
+  | 'tool-use' // executing a tool call
   | 'orchestrating' // subagents active
 
 type ChatActivityState = {
@@ -24,7 +24,10 @@ type ChatActivityState = {
   stopGatewayPoll: () => void
 }
 
-function resolveActivity(local: AgentActivity, gateway: AgentActivity): AgentActivity {
+function resolveActivity(
+  local: AgentActivity,
+  gateway: AgentActivity,
+): AgentActivity {
   // Local UI states take priority when active
   if (local !== 'idle') return local
   // Fall back to gateway-detected state
@@ -39,7 +42,9 @@ async function pollGatewayState(): Promise<AgentActivity> {
     if (!data.ok) return 'idle'
 
     // sessions.list returns { sessions: [...] } or just an array
-    const sessions: Array<Record<string, unknown>> = Array.isArray(data.data?.sessions)
+    const sessions: Array<Record<string, unknown>> = Array.isArray(
+      data.data?.sessions,
+    )
       ? data.data.sessions
       : Array.isArray(data.data)
         ? data.data
@@ -50,8 +55,10 @@ async function pollGatewayState(): Promise<AgentActivity> {
     const now = Date.now()
 
     // Find main session (not a subagent)
-    const mainSession = sessions.find((s) =>
-      typeof s === 'object' && !String(s.key ?? s.id ?? '').includes('subagent:'),
+    const mainSession = sessions.find(
+      (s) =>
+        typeof s === 'object' &&
+        !String(s.key ?? s.id ?? '').includes('subagent:'),
     )
 
     // Check for active subagents
@@ -59,7 +66,9 @@ async function pollGatewayState(): Promise<AgentActivity> {
       const key = String(s.key ?? s.id ?? '')
       if (!key.includes('subagent:')) return false
       const status = String(s.status ?? '').toLowerCase()
-      return status === 'running' || status === 'active' || status === 'thinking'
+      return (
+        status === 'running' || status === 'active' || status === 'thinking'
+      )
     })
 
     if (activeSubagents.length > 0) {
@@ -68,11 +77,12 @@ async function pollGatewayState(): Promise<AgentActivity> {
 
     // Check main session activity based on timestamps
     if (mainSession) {
-      const updatedAt = typeof mainSession.updatedAt === 'number'
-        ? mainSession.updatedAt
-        : typeof mainSession.lastMessageAt === 'number'
-          ? mainSession.lastMessageAt
-          : 0
+      const updatedAt =
+        typeof mainSession.updatedAt === 'number'
+          ? mainSession.updatedAt
+          : typeof mainSession.lastMessageAt === 'number'
+            ? mainSession.lastMessageAt
+            : 0
 
       if (updatedAt > 0) {
         const staleness = now - updatedAt
@@ -111,7 +121,10 @@ export const useChatActivityStore = create<ChatActivityState>((set, get) => ({
   setGatewayActivity: (gatewayActivity) => {
     const state = get()
     const activity = resolveActivity(state.localActivity, gatewayActivity)
-    if (state.gatewayActivity !== gatewayActivity || state.activity !== activity) {
+    if (
+      state.gatewayActivity !== gatewayActivity ||
+      state.activity !== activity
+    ) {
       set({ gatewayActivity, activity, changedAt: Date.now() })
     }
   },

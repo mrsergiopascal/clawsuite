@@ -20,7 +20,9 @@ function MemoryPreview({ path, content }: MemoryPreviewProps) {
       <header className="border-b border-primary-200 px-3 py-2.5">
         <div className="flex items-center gap-2">
           <HugeiconsIcon icon={EyeIcon} size={20} strokeWidth={1.5} />
-          <h2 className="text-sm font-medium text-balance text-primary-900">Preview</h2>
+          <h2 className="text-sm font-medium text-balance text-primary-900">
+            Preview
+          </h2>
         </div>
         <p className="text-xs text-primary-600 text-pretty tabular-nums">
           {path || 'Select a memory file to preview markdown.'}

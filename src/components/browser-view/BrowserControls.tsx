@@ -64,7 +64,9 @@ function BrowserControls({
           {refreshing ? 'Refreshing' : 'Refresh'}
         </Button>
         <div className="min-w-[240px] flex-1 rounded-xl border border-primary-200 bg-primary-50/75 px-3 py-2 text-sm text-primary-700">
-          <span className="block truncate tabular-nums">{url || 'about:blank'}</span>
+          <span className="block truncate tabular-nums">
+            {url || 'about:blank'}
+          </span>
         </div>
         {demoMode ? (
           <span className="inline-flex items-center rounded-full border border-accent-500/40 bg-accent-500/15 px-2.5 py-1 text-xs text-accent-500 tabular-nums">

@@ -1,61 +1,64 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
-import { cn } from '@/lib/utils';
-import { useModes } from '@/hooks/use-modes';
-import { RenameDialog } from './rename-mode-dialog';
-import type { Mode } from '@/hooks/use-modes';
+import { useState, useCallback, useEffect, useRef } from 'react'
+import { cn } from '@/lib/utils'
+import { useModes } from '@/hooks/use-modes'
+import { RenameDialog } from './rename-mode-dialog'
+import type { Mode } from '@/hooks/use-modes'
 
 type ManageModesModalProps = {
-  onClose: () => void;
-  availableModels: string[];
-};
+  onClose: () => void
+  availableModels: string[]
+}
 
 export function ManageModesModal({
   onClose,
   availableModels,
 }: ManageModesModalProps) {
-  const { modes, deleteMode } = useModes();
-  const [modeToRename, setModeToRename] = useState<Mode | null>(null);
-  const [modeToDelete, setModeToDelete] = useState<Mode | null>(null);
-  const modalRef = useRef<HTMLDivElement>(null);
+  const { modes, deleteMode } = useModes()
+  const [modeToRename, setModeToRename] = useState<Mode | null>(null)
+  const [modeToDelete, setModeToDelete] = useState<Mode | null>(null)
+  const modalRef = useRef<HTMLDivElement>(null)
 
   // Focus trap
   useEffect(() => {
-    const modal = modalRef.current;
-    if (!modal) return;
+    const modal = modalRef.current
+    if (!modal) return
 
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === 'Escape') {
-        onClose();
-        return;
+        onClose()
+        return
       }
 
       if (event.key === 'Tab') {
         const focusable = modal!.querySelectorAll<HTMLElement>(
-          'button, [tabindex]:not([tabindex="-1"])'
-        );
-        const first = focusable[0];
-        const last = focusable[focusable.length - 1];
+          'button, [tabindex]:not([tabindex="-1"])',
+        )
+        const first = focusable[0]
+        const last = focusable[focusable.length - 1]
 
         if (event.shiftKey && document.activeElement === first) {
-          event.preventDefault();
-          last.focus();
+          event.preventDefault()
+          last.focus()
         } else if (!event.shiftKey && document.activeElement === last) {
-          event.preventDefault();
-          first.focus();
+          event.preventDefault()
+          first.focus()
         }
       }
     }
 
-    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('keydown', handleKeyDown)
     return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [onClose]);
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [onClose])
 
-  const handleDelete = useCallback((mode: Mode) => {
-    deleteMode(mode.id);
-    setModeToDelete(null);
-  }, [deleteMode]);
+  const handleDelete = useCallback(
+    (mode: Mode) => {
+      deleteMode(mode.id)
+      setModeToDelete(null)
+    },
+    [deleteMode],
+  )
 
   if (modes.length === 0) {
     return (
@@ -90,7 +93,7 @@ export function ManageModesModal({
           </div>
         </div>
       </>
-    );
+    )
   }
 
   return (
@@ -119,8 +122,9 @@ export function ManageModesModal({
 
         <div className="mb-6 max-h-[24rem] space-y-3 overflow-y-auto">
           {modes.map((mode) => {
-            const modelUnavailable = mode.preferredModel && 
-              !availableModels.includes(mode.preferredModel);
+            const modelUnavailable =
+              mode.preferredModel &&
+              !availableModels.includes(mode.preferredModel)
 
             return (
               <div
@@ -131,7 +135,10 @@ export function ManageModesModal({
                   <h3 className="font-medium text-primary-900">
                     {mode.name}
                     {modelUnavailable && (
-                      <span className="ml-2 text-xs text-red-600" title="Model unavailable">
+                      <span
+                        className="ml-2 text-xs text-red-600"
+                        title="Model unavailable"
+                      >
                         ⚠️ Model unavailable
                       </span>
                     )}
@@ -187,7 +194,7 @@ export function ManageModesModal({
                   )}
                 </div>
               </div>
-            );
+            )
           })}
         </div>
 
@@ -231,7 +238,8 @@ export function ManageModesModal({
               Delete Mode
             </h2>
             <p className="mb-6 text-sm text-primary-600">
-              Are you sure you want to delete "{modeToDelete.name}"? This action cannot be undone.
+              Are you sure you want to delete "{modeToDelete.name}"? This action
+              cannot be undone.
             </p>
             <div className="flex justify-end gap-2">
               <button
@@ -253,5 +261,5 @@ export function ManageModesModal({
         </>
       )}
     </>
-  );
+  )
 }

@@ -1,9 +1,6 @@
 import { Editor } from '@monaco-editor/react'
 import { HugeiconsIcon } from '@hugeicons/react'
-import {
-  FloppyDiskIcon,
-  LockIcon,
-} from '@hugeicons/core-free-icons'
+import { FloppyDiskIcon, LockIcon } from '@hugeicons/core-free-icons'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 
@@ -26,7 +23,10 @@ type MemoryEditorProps = {
   onToggleReadOnly: (next: boolean) => void
 }
 
-function getStatusLabel(saveState: SaveState, lastSavedAt: string | null): string {
+function getStatusLabel(
+  saveState: SaveState,
+  lastSavedAt: string | null,
+): string {
   if (saveState === 'saving') return 'Auto-saving...'
   if (saveState === 'unsaved') return 'Unsaved changes'
   if (saveState === 'error') return 'Save failed'
@@ -70,11 +70,7 @@ function MemoryEditor({
         </div>
         <div className="flex items-center gap-3">
           <label className="inline-flex items-center gap-1.5 text-xs text-primary-700 tabular-nums">
-            <HugeiconsIcon
-              icon={LockIcon}
-              size={20}
-              strokeWidth={1.5}
-            />
+            <HugeiconsIcon icon={LockIcon} size={20} strokeWidth={1.5} />
             Read-only
             <Switch
               checked={readOnly}

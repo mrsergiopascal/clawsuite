@@ -3,7 +3,11 @@
 import { useCallback, useEffect } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { HugeiconsIcon } from '@hugeicons/react'
-import { ArrowLeft01Icon, ArrowRight01Icon, Cancel01Icon } from '@hugeicons/core-free-icons'
+import {
+  ArrowLeft01Icon,
+  ArrowRight01Icon,
+  Cancel01Icon,
+} from '@hugeicons/core-free-icons'
 import { useOnboardingStore } from '@/hooks/use-onboarding'
 import { ONBOARDING_STEPS } from './onboarding-steps'
 import { Button } from '@/components/ui/button'
@@ -11,8 +15,17 @@ import { cn } from '@/lib/utils'
 import { OpenClawStudioIcon } from '@/components/icons/clawsuite'
 
 export function OnboardingWizard() {
-  const { isOpen, currentStep, totalSteps, initialize, nextStep, prevStep, goToStep, complete, skip } =
-    useOnboardingStore()
+  const {
+    isOpen,
+    currentStep,
+    totalSteps,
+    initialize,
+    nextStep,
+    prevStep,
+    goToStep,
+    complete,
+    skip,
+  } = useOnboardingStore()
 
   // Run once on client mount — checks localStorage and opens if not completed
   useEffect(() => {
@@ -98,19 +111,27 @@ export function OnboardingWizard() {
                     transition={{ type: 'spring', damping: 15, stiffness: 300 }}
                     className={cn(
                       'mb-6 flex items-center justify-center shadow-lg',
-                      step.id === 'welcome' ? 'size-16' : 'size-20 rounded-2xl text-white',
+                      step.id === 'welcome'
+                        ? 'size-16'
+                        : 'size-20 rounded-2xl text-white',
                       step.id !== 'welcome' && step.iconBg,
                     )}
                   >
                     {step.id === 'welcome' ? (
                       <OpenClawStudioIcon className="size-16" />
                     ) : (
-                      <HugeiconsIcon icon={step.icon} className="size-10" strokeWidth={1.5} />
+                      <HugeiconsIcon
+                        icon={step.icon}
+                        className="size-10"
+                        strokeWidth={1.5}
+                      />
                     )}
                   </motion.div>
 
                   {/* Title */}
-                  <h2 className="mb-3 text-2xl font-semibold text-primary-900">{step.title}</h2>
+                  <h2 className="mb-3 text-2xl font-semibold text-primary-900">
+                    {step.title}
+                  </h2>
 
                   {/* Description */}
                   <p className="mb-8 max-w-md text-base leading-relaxed text-primary-600">
@@ -162,7 +183,11 @@ export function OnboardingWizard() {
                     <HugeiconsIcon icon={ArrowRight01Icon} className="size-5" />
                   </Button>
                 ) : (
-                  <Button variant="default" onClick={nextStep} className="gap-2">
+                  <Button
+                    variant="default"
+                    onClick={nextStep}
+                    className="gap-2"
+                  >
                     Next
                     <HugeiconsIcon icon={ArrowRight01Icon} className="size-4" />
                   </Button>

@@ -1,6 +1,10 @@
 import { memo, useCallback, useEffect, useState } from 'react'
 import { HugeiconsIcon } from '@hugeicons/react'
-import { Folder01Icon, Menu01Icon, ReloadIcon } from '@hugeicons/core-free-icons'
+import {
+  Folder01Icon,
+  Menu01Icon,
+  ReloadIcon,
+} from '@hugeicons/core-free-icons'
 import { Button } from '@/components/ui/button'
 import { UsageMeter } from '@/components/usage-meter'
 import {
@@ -91,9 +95,15 @@ function ChatHeaderComponent({
                   size="icon-sm"
                   variant="ghost"
                   className="mr-2 text-primary-800 hover:bg-primary-100"
-                  aria-label={fileExplorerCollapsed ? 'Show files' : 'Hide files'}
+                  aria-label={
+                    fileExplorerCollapsed ? 'Show files' : 'Hide files'
+                  }
                 >
-                  <HugeiconsIcon icon={Folder01Icon} size={20} strokeWidth={1.5} />
+                  <HugeiconsIcon
+                    icon={Folder01Icon}
+                    size={20}
+                    strokeWidth={1.5}
+                  />
                 </Button>
               }
             />
@@ -103,16 +113,26 @@ function ChatHeaderComponent({
           </TooltipRoot>
         </TooltipProvider>
       ) : null}
-      <div className="text-sm font-medium flex-1 text-balance" suppressHydrationWarning>{activeTitle}</div>
+      <div
+        className="text-sm font-medium flex-1 text-balance"
+        suppressHydrationWarning
+      >
+        {activeTitle}
+      </div>
       {syncLabel ? (
         <span
           className={cn(
             'mr-1 text-[11px] tabular-nums transition-colors',
             isStale ? 'text-amber-500' : 'text-primary-400',
           )}
-          title={dataUpdatedAt > 0 ? `Last synced: ${new Date(dataUpdatedAt).toLocaleTimeString()}` : undefined}
+          title={
+            dataUpdatedAt > 0
+              ? `Last synced: ${new Date(dataUpdatedAt).toLocaleTimeString()}`
+              : undefined
+          }
         >
-          {isStale ? '⚠ ' : ''}{syncLabel}
+          {isStale ? '⚠ ' : ''}
+          {syncLabel}
         </span>
       ) : null}
       {onRefresh ? (

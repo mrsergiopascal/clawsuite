@@ -34,7 +34,11 @@ export function ProvidersDialog({ open, onOpenChange }: ProvidersDialogProps) {
                 className="text-primary-500 hover:bg-primary-100 hover:text-primary-700"
                 aria-label="Close providers dialog"
               >
-                <HugeiconsIcon icon={Cancel01Icon} size={20} strokeWidth={1.5} />
+                <HugeiconsIcon
+                  icon={Cancel01Icon}
+                  size={20}
+                  strokeWidth={1.5}
+                />
               </Button>
             }
           />

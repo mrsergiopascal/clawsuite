@@ -1,14 +1,5 @@
-import {
-  memo,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
-import {
-  Robot01Icon,
-} from '@hugeicons/core-free-icons'
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Robot01Icon } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
 import {
   getMessageTimestamp,
@@ -129,10 +120,14 @@ function ChatMessageListComponent({
   }, [])
 
   // Simple scroll to bottom — find viewport and scroll
-  const scrollToBottom = useCallback(function scrollToBottom(behavior: ScrollBehavior = 'auto') {
+  const scrollToBottom = useCallback(function scrollToBottom(
+    behavior: ScrollBehavior = 'auto',
+  ) {
     const anchor = anchorRef.current
     if (!anchor) return
-    const viewport = anchor.closest('[data-chat-scroll-viewport]') as HTMLElement | null
+    const viewport = anchor.closest(
+      '[data-chat-scroll-viewport]',
+    ) as HTMLElement | null
     if (viewport) {
       viewport.scrollTo({ top: viewport.scrollHeight, behavior })
     }
@@ -199,9 +194,12 @@ function ChatMessageListComponent({
     })
   }, [messages])
 
-  const normalizedMessageSearch = useMemo(function getNormalizedMessageSearch() {
-    return messageSearchValue.trim().toLocaleLowerCase()
-  }, [messageSearchValue])
+  const normalizedMessageSearch = useMemo(
+    function getNormalizedMessageSearch() {
+      return messageSearchValue.trim().toLocaleLowerCase()
+    },
+    [messageSearchValue],
+  )
 
   const isMessageSearchActive =
     isMessageSearchOpen && normalizedMessageSearch.length > 0
@@ -248,28 +246,37 @@ function ChatMessageListComponent({
     setIsMessageSearchOpen(false)
   }, [])
 
-  const openMessageSearch = useCallback(function openMessageSearch() {
-    setIsMessageSearchOpen(true)
-    setActiveSearchMatchIndex(0)
-    focusSearchInput()
-  }, [focusSearchInput])
+  const openMessageSearch = useCallback(
+    function openMessageSearch() {
+      setIsMessageSearchOpen(true)
+      setActiveSearchMatchIndex(0)
+      focusSearchInput()
+    },
+    [focusSearchInput],
+  )
 
-  const jumpToPreviousMatch = useCallback(function jumpToPreviousMatch() {
-    if (messageSearchMatches.length === 0) return
-    setActiveSearchMatchIndex(function setPreviousMatchIndex(currentIndex) {
-      return (
-        (currentIndex - 1 + messageSearchMatches.length) %
-        messageSearchMatches.length
-      )
-    })
-  }, [messageSearchMatches.length])
+  const jumpToPreviousMatch = useCallback(
+    function jumpToPreviousMatch() {
+      if (messageSearchMatches.length === 0) return
+      setActiveSearchMatchIndex(function setPreviousMatchIndex(currentIndex) {
+        return (
+          (currentIndex - 1 + messageSearchMatches.length) %
+          messageSearchMatches.length
+        )
+      })
+    },
+    [messageSearchMatches.length],
+  )
 
-  const jumpToNextMatch = useCallback(function jumpToNextMatch() {
-    if (messageSearchMatches.length === 0) return
-    setActiveSearchMatchIndex(function setNextMatchIndex(currentIndex) {
-      return (currentIndex + 1) % messageSearchMatches.length
-    })
-  }, [messageSearchMatches.length])
+  const jumpToNextMatch = useCallback(
+    function jumpToNextMatch() {
+      if (messageSearchMatches.length === 0) return
+      setActiveSearchMatchIndex(function setNextMatchIndex(currentIndex) {
+        return (currentIndex + 1) % messageSearchMatches.length
+      })
+    },
+    [messageSearchMatches.length],
+  )
 
   const scrollToMessageById = useCallback(function scrollToMessageById(
     messageId: string,
@@ -381,20 +388,23 @@ function ChatMessageListComponent({
     messageSignatureRef.current = nextSignatures
     if (isInitialRender) {
       initialRenderRef.current = false
-      return { streamingTargets: new Set<string>(), signatureById: nextSignatures }
+      return {
+        streamingTargets: new Set<string>(),
+        signatureById: nextSignatures,
+      }
     }
 
     // Typewriter disabled — causes empty message bugs and glow artifacts
     // TODO: re-enable once animation lifecycle is more robust
     // if (lastNewAssistantId) toStream.add(lastNewAssistantId)
-    
+
     // Auto-clear streaming targets after animation completes (~8s max)
     if (toStream.size > 0) {
       setTimeout(() => {
         streamingTargetsClearRef.current?.()
       }, 8000)
     }
-    
+
     return { streamingTargets: toStream, signatureById: nextSignatures }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [displayMessages, streamingCleared])
@@ -438,7 +448,8 @@ function ChatMessageListComponent({
 
     const startIndex = Math.max(
       0,
-      Math.floor(scrollMetrics.scrollTop / VIRTUAL_ROW_HEIGHT) - VIRTUAL_OVERSCAN,
+      Math.floor(scrollMetrics.scrollTop / VIRTUAL_ROW_HEIGHT) -
+        VIRTUAL_OVERSCAN,
     )
     const visibleCount = Math.ceil(
       scrollMetrics.clientHeight / VIRTUAL_ROW_HEIGHT,
@@ -452,7 +463,8 @@ function ChatMessageListComponent({
       startIndex,
       endIndex,
       topSpacerHeight: startIndex * VIRTUAL_ROW_HEIGHT,
-      bottomSpacerHeight: (displayMessages.length - endIndex) * VIRTUAL_ROW_HEIGHT,
+      bottomSpacerHeight:
+        (displayMessages.length - endIndex) * VIRTUAL_ROW_HEIGHT,
     }
   }, [displayMessages.length, scrollMetrics, shouldVirtualize])
 
@@ -483,7 +495,8 @@ function ChatMessageListComponent({
 
     const searchMatchIndex = messageSearchMatchIndexById.get(stableId)
     const isSearchMatch = typeof searchMatchIndex === 'number'
-    const isActiveMatch = isSearchMatch && searchMatchIndex === activeSearchMatchIndex
+    const isActiveMatch =
+      isSearchMatch && searchMatchIndex === activeSearchMatchIndex
 
     return (
       <MessageItem
@@ -513,7 +526,7 @@ function ChatMessageListComponent({
   // Sync near-bottom ref to state every 500ms for button visibility
   useEffect(() => {
     const timer = window.setInterval(() => {
-      setIsNearBottom(prev => {
+      setIsNearBottom((prev) => {
         const current = isNearBottomRef.current
         return prev === current ? prev : current
       })
@@ -647,22 +660,27 @@ function ChatMessageListComponent({
   useEffect(() => {
     if (!activeSearchMatch) return
 
-    const frameId = window.requestAnimationFrame(function scrollToActiveMatch() {
-      scrollToMessageById(activeSearchMatch.stableId, 'smooth')
-    })
+    const frameId = window.requestAnimationFrame(
+      function scrollToActiveMatch() {
+        scrollToMessageById(activeSearchMatch.stableId, 'smooth')
+      },
+    )
 
     return () => {
       window.cancelAnimationFrame(frameId)
     }
   }, [activeSearchMatch, scrollToMessageById])
 
-  const handleScrollToBottom = useCallback(function handleScrollToBottom() {
-    stickToBottomRef.current = true
-    isNearBottomRef.current = true
-    setIsNearBottom(true)
-    setUnreadCount(0)
-    scrollToBottom('smooth')
-  }, [scrollToBottom])
+  const handleScrollToBottom = useCallback(
+    function handleScrollToBottom() {
+      stickToBottomRef.current = true
+      isNearBottomRef.current = true
+      setIsNearBottom(true)
+      setUnreadCount(0)
+      scrollToBottom('smooth')
+    },
+    [scrollToBottom],
+  )
 
   const scrollToBottomOverlay = useMemo(() => {
     const isVisible = !isNearBottom && displayMessages.length > 0
@@ -719,7 +737,15 @@ function ChatMessageListComponent({
               className="rounded p-1 text-primary-500 dark:text-gray-400 hover:bg-primary-200 dark:hover:bg-gray-800 hover:text-primary-700 dark:hover:text-gray-200 disabled:opacity-30"
               aria-label="Previous match"
             >
-              <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 10l4-4 4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                <path
+                  d="M4 10l4-4 4 4"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
             </button>
             <button
               type="button"
@@ -728,7 +754,15 @@ function ChatMessageListComponent({
               className="rounded p-1 text-primary-500 dark:text-gray-400 hover:bg-primary-200 dark:hover:bg-gray-800 hover:text-primary-700 dark:hover:text-gray-200 disabled:opacity-30"
               aria-label="Next match"
             >
-              <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                <path
+                  d="M4 6l4 4 4-4"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
             </button>
             <button
               type="button"
@@ -736,7 +770,14 @@ function ChatMessageListComponent({
               className="rounded p-1 text-primary-500 dark:text-gray-400 hover:bg-primary-200 dark:hover:bg-gray-800 hover:text-primary-700 dark:hover:text-gray-200"
               aria-label="Close search"
             >
-              <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                <path
+                  d="M4 4l8 8M12 4l-8 8"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                />
+              </svg>
             </button>
           </div>
         </div>
@@ -772,16 +813,39 @@ function ChatMessageListComponent({
                 className={cn(
                   'shrink-0 rounded-md border px-3 py-1.5 text-xs font-medium transition-colors',
                   expandAllToolSections
-                    ? 'border-amber-300 bg-amber-100 text-amber-700'
-                    : 'border-amber-300 bg-amber-100/80 text-amber-800 hover:bg-amber-200',
+                    ? 'border-amber-300 bg-amber-100 text-amber-700 cursor-default'
+                    : 'border-amber-300 bg-amber-100/80 text-amber-800 hover:bg-amber-200 hover:border-amber-400',
                 )}
+                aria-label={
+                  expandAllToolSections
+                    ? 'All tool sections expanded'
+                    : 'Expand all tool sections'
+                }
               >
-                Show All
+                {expandAllToolSections ? '✓ Expanded' : 'Show All'}
               </button>
             </div>
           </div>
         ) : null}
-        {empty && !notice ? (
+        {loading && displayMessages.length === 0 ? (
+          <div className="flex flex-col gap-4 animate-pulse">
+            <div className="flex gap-3">
+              <div className="size-6 rounded-full bg-primary-200" />
+              <div className="flex-1 space-y-2">
+                <div className="h-4 bg-primary-200 rounded w-3/4" />
+                <div className="h-4 bg-primary-200 rounded w-1/2" />
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <div className="size-6 rounded-full bg-primary-200" />
+              <div className="flex-1 space-y-2">
+                <div className="h-4 bg-primary-200 rounded w-2/3" />
+                <div className="h-4 bg-primary-200 rounded w-5/6" />
+                <div className="h-4 bg-primary-200 rounded w-1/3" />
+              </div>
+            </div>
+          </div>
+        ) : empty && !notice ? (
           (emptyState ?? <div aria-hidden></div>)
         ) : hasGroup ? (
           <>
@@ -832,7 +896,9 @@ function ChatMessageListComponent({
                       wrapperClassName={wrapperClassName}
                       wrapperScrollMarginTop={wrapperScrollMarginTop}
                       isStreaming={messageIsStreaming}
-                      streamingText={messageIsStreaming ? streamingText : undefined}
+                      streamingText={
+                        messageIsStreaming ? streamingText : undefined
+                      }
                       streamingThinking={
                         messageIsStreaming ? streamingThinking : undefined
                       }
@@ -866,12 +932,20 @@ function ChatMessageListComponent({
           </>
         )}
         {showTypingIndicator ? (
-          <div className="flex items-center gap-2 py-2 px-1">
-            <LoadingIndicator
-              ariaLabel="Assistant is thinking"
-              className="!ml-0"
-            />
-            <span className="text-xs text-primary-400 animate-pulse">Thinking…</span>
+          <div
+            className="flex items-center gap-3 py-2 px-1"
+            role="status"
+            aria-live="polite"
+          >
+            <div className="size-6 rounded-full bg-primary-100 flex items-center justify-center shrink-0">
+              <LoadingIndicator
+                ariaLabel="Assistant is thinking"
+                className="!ml-0"
+              />
+            </div>
+            <span className="text-xs text-primary-500 font-medium">
+              Assistant is thinking…
+            </span>
           </div>
         ) : null}
         {notice && noticePosition === 'end' ? notice : null}

@@ -1,6 +1,6 @@
 /**
  * Phase 4.1: Model Suggestion Toast
- * 
+ *
  * Non-intrusive toast notification for model suggestions
  */
 import { useEffect } from 'react'
@@ -31,7 +31,7 @@ export function ModelSuggestionToast({
     const timer = setTimeout(onDismiss, autoDismissMs)
     return () => clearTimeout(timer)
   }, [autoDismissMs, onDismiss])
-  
+
   return (
     <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-2">
       <div className="flex w-[380px] flex-col gap-3 rounded-xl border border-primary-200 bg-primary-50/95 p-4 shadow-lg backdrop-blur-xl">
@@ -44,7 +44,9 @@ export function ModelSuggestionToast({
               </p>
               <p className="mt-0.5 text-xs text-primary-600">{reason}</p>
               {costImpact && (
-                <p className="mt-1 text-xs font-medium text-emerald-700">{costImpact}</p>
+                <p className="mt-1 text-xs font-medium text-emerald-700">
+                  {costImpact}
+                </p>
               )}
             </div>
           </div>
@@ -57,13 +59,9 @@ export function ModelSuggestionToast({
             <HugeiconsIcon icon={Cancel01Icon} size={16} strokeWidth={1.5} />
           </button>
         </div>
-        
+
         <div className="flex gap-2">
-          <Button
-            size="sm"
-            onClick={onSwitch}
-            className="flex-1"
-          >
+          <Button size="sm" onClick={onSwitch} className="flex-1">
             Switch
           </Button>
           <Button
@@ -84,11 +82,11 @@ function getModelDisplayName(modelId: string): string {
   // Extract readable name from model ID
   const parts = modelId.split('/')
   const name = parts[parts.length - 1]
-  
+
   // Capitalize and format
   return name
     .replace(/-/g, ' ')
     .split(' ')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ')
 }

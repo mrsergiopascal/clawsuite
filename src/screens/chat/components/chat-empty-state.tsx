@@ -42,7 +42,10 @@ type ChatEmptyStateProps = {
   compact?: boolean
 }
 
-export function ChatEmptyState({ onSuggestionClick, compact }: ChatEmptyStateProps) {
+export function ChatEmptyState({
+  onSuggestionClick,
+  compact,
+}: ChatEmptyStateProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
@@ -65,13 +68,16 @@ export function ChatEmptyState({ onSuggestionClick, compact }: ChatEmptyStatePro
               How can I help?
             </h2>
             <p className="mb-6 max-w-sm text-sm text-primary-500 text-pretty">
-              Ask me anything — write code, research topics, analyze data, or automate tasks.
+              Ask me anything — write code, research topics, analyze data, or
+              automate tasks.
             </p>
           </>
         )}
 
         {compact && (
-          <p className="mb-4 text-sm text-primary-500 text-pretty">How can I help?</p>
+          <p className="mb-4 text-sm text-primary-500 text-pretty">
+            How can I help?
+          </p>
         )}
 
         <div className="flex flex-wrap justify-center gap-2">

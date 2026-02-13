@@ -2,12 +2,8 @@ import { randomUUID } from 'node:crypto'
 import EventEmitter from 'node:events'
 import WebSocket from 'ws'
 
-import {
-  
-  buildConnectParams,
-  getGatewayConfig
-} from './gateway'
-import type {GatewayFrame} from './gateway';
+import { buildConnectParams, getGatewayConfig } from './gateway'
+import type { GatewayFrame } from './gateway'
 
 export type GatewayStreamEvent =
   | { type: 'agent'; payload: any }

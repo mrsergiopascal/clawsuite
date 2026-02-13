@@ -20,7 +20,11 @@ function resolvedIsDark(): boolean {
   return document.documentElement.classList.contains('dark')
 }
 
-const MODES: Array<{ value: ThemeMode; icon: typeof ComputerIcon; label: string }> = [
+const MODES: Array<{
+  value: ThemeMode
+  icon: typeof ComputerIcon
+  label: string
+}> = [
   { value: 'system', icon: ComputerIcon, label: 'System' },
   { value: 'light', icon: Sun01Icon, label: 'Light' },
   { value: 'dark', icon: Moon01Icon, label: 'Dark' },
@@ -33,7 +37,9 @@ type ThemeToggleProps = {
 
 export function ThemeToggle({ variant = 'pill' }: ThemeToggleProps) {
   const { settings, updateSettings } = useChatSettingsStore()
-  const isDark = settings.theme === 'dark' || (settings.theme === 'system' && resolvedIsDark())
+  const isDark =
+    settings.theme === 'dark' ||
+    (settings.theme === 'system' && resolvedIsDark())
 
   function setTheme(theme: ThemeMode) {
     applyTheme(theme)
@@ -49,7 +55,11 @@ export function ThemeToggle({ variant = 'pill' }: ThemeToggleProps) {
         aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
         title={isDark ? 'Light mode' : 'Dark mode'}
       >
-        <HugeiconsIcon icon={isDark ? Sun01Icon : Moon01Icon} size={16} strokeWidth={1.5} />
+        <HugeiconsIcon
+          icon={isDark ? Sun01Icon : Moon01Icon}
+          size={16}
+          strokeWidth={1.5}
+        />
       </button>
     )
   }

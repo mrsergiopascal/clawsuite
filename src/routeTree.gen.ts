@@ -30,6 +30,7 @@ import { Route as BrowserRouteImport } from './routes/browser'
 import { Route as AgentsRouteImport } from './routes/agents'
 import { Route as AgentSwarmRouteImport } from './routes/agent-swarm'
 import { Route as ActivityRouteImport } from './routes/activity'
+import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SettingsIndexRouteImport } from './routes/settings/index'
 import { Route as ChatIndexRouteImport } from './routes/chat/index'
@@ -196,6 +197,11 @@ const AgentSwarmRoute = AgentSwarmRouteImport.update({
 const ActivityRoute = ActivityRouteImport.update({
   id: '/activity',
   path: '/activity',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SplatRoute = SplatRouteImport.update({
+  id: '/$',
+  path: '/$',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -512,6 +518,7 @@ const ApiCronRunsJobIdRoute = ApiCronRunsJobIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/$': typeof SplatRoute
   '/activity': typeof ActivityRoute
   '/agent-swarm': typeof AgentSwarmRoute
   '/agents': typeof AgentsRoute
@@ -597,6 +604,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/$': typeof SplatRoute
   '/activity': typeof ActivityRoute
   '/agent-swarm': typeof AgentSwarmRoute
   '/agents': typeof AgentsRoute
@@ -682,6 +690,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/$': typeof SplatRoute
   '/activity': typeof ActivityRoute
   '/agent-swarm': typeof AgentSwarmRoute
   '/agents': typeof AgentsRoute
@@ -769,6 +778,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/$'
     | '/activity'
     | '/agent-swarm'
     | '/agents'
@@ -854,6 +864,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/$'
     | '/activity'
     | '/agent-swarm'
     | '/agents'
@@ -938,6 +949,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/$'
     | '/activity'
     | '/agent-swarm'
     | '/agents'
@@ -1024,6 +1036,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  SplatRoute: typeof SplatRoute
   ActivityRoute: typeof ActivityRoute
   AgentSwarmRoute: typeof AgentSwarmRoute
   AgentsRoute: typeof AgentsRoute
@@ -1241,6 +1254,13 @@ declare module '@tanstack/react-router' {
       path: '/activity'
       fullPath: '/activity'
       preLoaderRoute: typeof ActivityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$': {
+      id: '/$'
+      path: '/$'
+      fullPath: '/$'
+      preLoaderRoute: typeof SplatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -1759,6 +1779,7 @@ const ApiSessionsRouteWithChildren = ApiSessionsRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  SplatRoute: SplatRoute,
   ActivityRoute: ActivityRoute,
   AgentSwarmRoute: AgentSwarmRoute,
   AgentsRoute: AgentsRoute,

@@ -188,7 +188,8 @@ function normalizeAgentEvent(payload: unknown): ActivityEvent {
     return createActivityEvent({
       type: 'usage',
       title: 'Usage updated',
-      detail: formatUsageDetail(sanitizedPayload) ?? formatDetail(sanitizedPayload),
+      detail:
+        formatUsageDetail(sanitizedPayload) ?? formatDetail(sanitizedPayload),
       level: 'info',
     })
   }
@@ -236,11 +237,7 @@ function normalizeChatEvent(payload: unknown): ActivityEvent {
 
   const state = readString(payloadRecord?.state)
   const level =
-    state === 'aborted'
-      ? 'warn'
-      : state === 'error'
-        ? 'error'
-        : 'info'
+    state === 'aborted' ? 'warn' : state === 'error' ? 'error' : 'info'
 
   // Build a more informative title from state and payload
   const chatPayload = toRecord(sanitizedPayload)
@@ -251,9 +248,13 @@ function normalizeChatEvent(payload: unknown): ActivityEvent {
     chatData?.sessionKey,
     chatData?.label,
   ])
-  let sessionTitle = sessionLabel ? `Session: ${sessionLabel}` : 'Session activity'
+  let sessionTitle = sessionLabel
+    ? `Session: ${sessionLabel}`
+    : 'Session activity'
   if (state.length > 0) {
-    sessionTitle = sessionLabel ? `${sessionLabel} → ${state}` : `Session ${state}`
+    sessionTitle = sessionLabel
+      ? `${sessionLabel} → ${state}`
+      : `Session ${state}`
   }
 
   return createActivityEvent({
@@ -264,14 +265,19 @@ function normalizeChatEvent(payload: unknown): ActivityEvent {
   })
 }
 
-function normalizeOtherEvent(eventName: string, payload: unknown): ActivityEvent {
+function normalizeOtherEvent(
+  eventName: string,
+  payload: unknown,
+): ActivityEvent {
   const sanitizedPayload = sanitizeValue(payload)
   const normalizedEventName = readString(eventName).toLowerCase()
 
   if (normalizedEventName.includes('error')) {
     return createActivityEvent({
       type: 'error',
-      title: extractErrorMessage(sanitizedPayload) ?? `Gateway event failed: ${eventName}`,
+      title:
+        extractErrorMessage(sanitizedPayload) ??
+        `Gateway event failed: ${eventName}`,
       detail: formatDetail(sanitizedPayload),
       level: 'error',
     })
@@ -286,7 +292,10 @@ function normalizeOtherEvent(eventName: string, payload: unknown): ActivityEvent
     })
   }
 
-  if (normalizedEventName.includes('tool') || extractToolName(sanitizedPayload)) {
+  if (
+    normalizedEventName.includes('tool') ||
+    extractToolName(sanitizedPayload)
+  ) {
     return createActivityEvent({
       type: 'tool',
       title: `Tool event: ${eventName}`,
@@ -295,11 +304,15 @@ function normalizeOtherEvent(eventName: string, payload: unknown): ActivityEvent
     })
   }
 
-  if (normalizedEventName.includes('usage') || hasUsageFields(sanitizedPayload)) {
+  if (
+    normalizedEventName.includes('usage') ||
+    hasUsageFields(sanitizedPayload)
+  ) {
     return createActivityEvent({
       type: 'usage',
       title: 'Usage updated',
-      detail: formatUsageDetail(sanitizedPayload) ?? formatDetail(sanitizedPayload),
+      detail:
+        formatUsageDetail(sanitizedPayload) ?? formatDetail(sanitizedPayload),
       level: 'info',
     })
   }
@@ -323,9 +336,7 @@ function normalizeOtherEvent(eventName: string, payload: unknown): ActivityEvent
 }
 
 function normalizeErrorEvent(error: unknown): ActivityEvent {
-  const title =
-    extractErrorMessage(error) ??
-    'Gateway error'
+  const title = extractErrorMessage(error) ?? 'Gateway error'
 
   return createActivityEvent({
     type: 'error',
@@ -396,7 +407,12 @@ function extractToolName(payload: unknown): string {
   const dataRecord = toRecord(payloadRecord?.data)
 
   if (readString(payloadRecord?.stream).toLowerCase() === 'tool') {
-    return firstString([dataRecord?.name, payloadRecord?.toolName, payloadRecord?.tool, 'Tool call'])
+    return firstString([
+      dataRecord?.name,
+      payloadRecord?.toolName,
+      payloadRecord?.tool,
+      'Tool call',
+    ])
   }
 
   return firstString([
@@ -432,13 +448,16 @@ function formatUsageDetail(payload: unknown): string | undefined {
   const dataRecord = toRecord(payloadRecord?.data)
 
   const promptTokens =
-    readNumber(payloadRecord?.promptTokens) ?? readNumber(dataRecord?.promptTokens)
+    readNumber(payloadRecord?.promptTokens) ??
+    readNumber(dataRecord?.promptTokens)
   const completionTokens =
     readNumber(payloadRecord?.completionTokens) ??
     readNumber(dataRecord?.completionTokens)
   const totalTokens =
-    readNumber(payloadRecord?.totalTokens) ?? readNumber(dataRecord?.totalTokens)
-  const costUsd = readNumber(payloadRecord?.costUsd) ?? readNumber(dataRecord?.costUsd)
+    readNumber(payloadRecord?.totalTokens) ??
+    readNumber(dataRecord?.totalTokens)
+  const costUsd =
+    readNumber(payloadRecord?.costUsd) ?? readNumber(dataRecord?.costUsd)
 
   const parts: Array<string> = []
   if (promptTokens !== null) parts.push(`Prompt: ${promptTokens}`)

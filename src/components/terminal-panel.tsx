@@ -26,17 +26,26 @@ export function TerminalPanel() {
     startHeight: number
   } | null>(null)
 
-  const handleMinimize = useCallback(function handleMinimize() {
-    setPanelOpen(false)
-  }, [setPanelOpen])
+  const handleMinimize = useCallback(
+    function handleMinimize() {
+      setPanelOpen(false)
+    },
+    [setPanelOpen],
+  )
 
-  const handleMaximize = useCallback(function handleMaximize() {
-    navigate({ to: '/terminal' })
-  }, [navigate])
+  const handleMaximize = useCallback(
+    function handleMaximize() {
+      navigate({ to: '/terminal' })
+    },
+    [navigate],
+  )
 
-  const handleClose = useCallback(function handleClose() {
-    setPanelOpen(false)
-  }, [setPanelOpen])
+  const handleClose = useCallback(
+    function handleClose() {
+      setPanelOpen(false)
+    },
+    [setPanelOpen],
+  )
 
   const handleResizeStart = useCallback(
     function handleResizeStart(event: React.MouseEvent<HTMLDivElement>) {
@@ -107,7 +116,13 @@ export function TerminalPanel() {
             aria-label="Resize terminal panel"
           />
           <div className="h-full pt-1">
-            <Suspense fallback={<div className="flex h-full items-center justify-center text-xs text-primary-500">Loading terminal…</div>}>
+            <Suspense
+              fallback={
+                <div className="flex h-full items-center justify-center text-xs text-primary-500">
+                  Loading terminal…
+                </div>
+              }
+            >
               <TerminalWorkspace
                 mode="panel"
                 panelVisible={isPanelOpen}

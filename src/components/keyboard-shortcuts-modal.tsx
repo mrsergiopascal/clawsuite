@@ -5,7 +5,8 @@ import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 
 const isMac =
-  typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.userAgent)
+  typeof navigator !== 'undefined' &&
+  /Mac|iPod|iPhone|iPad/.test(navigator.userAgent)
 const MOD = isMac ? '⌘' : 'Ctrl'
 
 const SHORTCUT_GROUPS = [
@@ -15,6 +16,7 @@ const SHORTCUT_GROUPS = [
       { keys: [`${MOD}+K`], label: 'Open Search' },
       { keys: [`${MOD}+P`], label: 'Quick Open File' },
       { keys: [`${MOD}+B`], label: 'Toggle Sidebar' },
+      { keys: [`${MOD}+J`], label: 'Toggle Chat Panel' },
       { keys: [`${MOD}+Shift+L`], label: 'Activity Log' },
       { keys: ['Ctrl+`'], label: 'Toggle Terminal' },
       { keys: ['?'], label: 'Keyboard Shortcuts' },
@@ -30,9 +32,7 @@ const SHORTCUT_GROUPS = [
   },
   {
     title: 'Editor',
-    items: [
-      { keys: [`${MOD}+S`], label: 'Save File' },
-    ],
+    items: [{ keys: [`${MOD}+S`], label: 'Save File' }],
   },
 ]
 
@@ -42,11 +42,20 @@ export function KeyboardShortcutsModal() {
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
       // Only trigger on '?' when no input/textarea is focused
-      if (event.key === '?' && !event.metaKey && !event.ctrlKey && !event.altKey) {
+      if (
+        event.key === '?' &&
+        !event.metaKey &&
+        !event.ctrlKey &&
+        !event.altKey
+      ) {
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- runtime safety
         const tag = (event.target as HTMLElement)?.tagName?.toLowerCase()
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- runtime safety
-        if (tag === 'input' || tag === 'textarea' || (event.target as HTMLElement)?.isContentEditable) {
+        if (
+          tag === 'input' ||
+          tag === 'textarea' ||
+          (event.target as HTMLElement)?.isContentEditable
+        ) {
           return
         }
         event.preventDefault()
@@ -125,7 +134,9 @@ export function KeyboardShortcutsModal() {
                         key={item.label}
                         className="flex items-center justify-between rounded-lg px-2 py-1.5"
                       >
-                        <span className="text-sm text-primary-700">{item.label}</span>
+                        <span className="text-sm text-primary-700">
+                          {item.label}
+                        </span>
                         <div className="flex items-center gap-1">
                           {item.keys.map((key) => (
                             <kbd
@@ -145,7 +156,15 @@ export function KeyboardShortcutsModal() {
 
             {/* Footer */}
             <div className="border-t border-primary-200 px-5 py-2.5 text-center text-xs text-primary-500">
-              Press <kbd className="mx-0.5 rounded border border-primary-200 bg-primary-100/80 px-1 text-[10px] font-medium">?</kbd> to toggle · <kbd className="mx-0.5 rounded border border-primary-200 bg-primary-100/80 px-1 text-[10px] font-medium">Esc</kbd> to close
+              Press{' '}
+              <kbd className="mx-0.5 rounded border border-primary-200 bg-primary-100/80 px-1 text-[10px] font-medium">
+                ?
+              </kbd>{' '}
+              to toggle ·{' '}
+              <kbd className="mx-0.5 rounded border border-primary-200 bg-primary-100/80 px-1 text-[10px] font-medium">
+                Esc
+              </kbd>{' '}
+              to close
             </div>
           </motion.div>
         </motion.div>

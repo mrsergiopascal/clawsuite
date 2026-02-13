@@ -104,16 +104,67 @@ const NOISE_PREFIXES =
   /^(?:hey|hi|hello|ok(?:ay)?|so|well|please|kindly|um|uh|can you|could you|would you|will you|i want(?: to)?|i need(?: to)?|help me(?: with)?|let'?s|lets|also|just)\b[\s,:-]*/i
 
 const STOP_WORDS = new Set([
-  'a', 'an', 'the', 'and', 'or', 'but', 'if', 'then', 'else',
-  'for', 'to', 'of', 'in', 'on', 'at', 'with', 'from', 'by',
-  'this', 'that', 'these', 'those', 'it', 'its',
-  'is', 'are', 'was', 'were', 'be', 'been', 'being',
-  'i', 'me', 'my', 'we', 'our', 'you', 'your',
-  'he', 'she', 'they', 'them',
-  'can', 'could', 'would', 'should', 'will',
-  'do', 'does', 'did',
-  'just', 'also', 'please', 'need', 'want',
-  'some', 'any', 'very', 'really', 'so', 'too',
+  'a',
+  'an',
+  'the',
+  'and',
+  'or',
+  'but',
+  'if',
+  'then',
+  'else',
+  'for',
+  'to',
+  'of',
+  'in',
+  'on',
+  'at',
+  'with',
+  'from',
+  'by',
+  'this',
+  'that',
+  'these',
+  'those',
+  'it',
+  'its',
+  'is',
+  'are',
+  'was',
+  'were',
+  'be',
+  'been',
+  'being',
+  'i',
+  'me',
+  'my',
+  'we',
+  'our',
+  'you',
+  'your',
+  'he',
+  'she',
+  'they',
+  'them',
+  'can',
+  'could',
+  'would',
+  'should',
+  'will',
+  'do',
+  'does',
+  'did',
+  'just',
+  'also',
+  'please',
+  'need',
+  'want',
+  'some',
+  'any',
+  'very',
+  'really',
+  'so',
+  'too',
 ])
 
 const UPPERCASE_TOKENS = new Set([
@@ -137,19 +188,64 @@ const TOKEN_OVERRIDES: Record<string, string> = {
 }
 
 const ACTION_PATTERNS: Array<{ pattern: RegExp; verb: string }> = [
-  { pattern: /\b(?:fix|fixing|fixed|bug|bugs|error|errors|resolve|resolved|resolving)\b/, verb: 'Fix' },
-  { pattern: /\b(?:debug|debugging|debugged|diagnose|diagnosing|diagnosed)\b/, verb: 'Debug' },
-  { pattern: /\b(?:refactor|refactoring|refactored|cleanup|cleaning|cleaned)\b/, verb: 'Refactor' },
-  { pattern: /\b(?:optimize|optimizing|optimized|optimise|optimising|performance)\b/, verb: 'Optimize' },
-  { pattern: /\b(?:implement|implementing|implemented|build|building|create|creating|add|adding|write|writing)\b/, verb: 'Build' },
-  { pattern: /\b(?:update|updating|updated|upgrade|upgrading|upgraded)\b/, verb: 'Update' },
-  { pattern: /\b(?:test|testing|tested|verify|verifying|validate|validating|validated)\b/, verb: 'Test' },
-  { pattern: /\b(?:analyze|analyzing|analyzed|analyse|analysing|analysis|evaluate|evaluating|investigate|investigating|review|reviewing)\b/, verb: 'Analyze' },
+  {
+    pattern:
+      /\b(?:fix|fixing|fixed|bug|bugs|error|errors|resolve|resolved|resolving)\b/,
+    verb: 'Fix',
+  },
+  {
+    pattern: /\b(?:debug|debugging|debugged|diagnose|diagnosing|diagnosed)\b/,
+    verb: 'Debug',
+  },
+  {
+    pattern: /\b(?:refactor|refactoring|refactored|cleanup|cleaning|cleaned)\b/,
+    verb: 'Refactor',
+  },
+  {
+    pattern:
+      /\b(?:optimize|optimizing|optimized|optimise|optimising|performance)\b/,
+    verb: 'Optimize',
+  },
+  {
+    pattern:
+      /\b(?:implement|implementing|implemented|build|building|create|creating|add|adding|write|writing)\b/,
+    verb: 'Build',
+  },
+  {
+    pattern: /\b(?:update|updating|updated|upgrade|upgrading|upgraded)\b/,
+    verb: 'Update',
+  },
+  {
+    pattern:
+      /\b(?:test|testing|tested|verify|verifying|validate|validating|validated)\b/,
+    verb: 'Test',
+  },
+  {
+    pattern:
+      /\b(?:analyze|analyzing|analyzed|analyse|analysing|analysis|evaluate|evaluating|investigate|investigating|review|reviewing)\b/,
+    verb: 'Analyze',
+  },
   { pattern: /\b(?:compare|comparing|comparison)\b/, verb: 'Compare' },
-  { pattern: /\b(?:research|researching|search|searching|find|finding|lookup|look up)\b/, verb: 'Research' },
-  { pattern: /\b(?:configure|config|configuration|setup|set up|install|deploy|deploying|deployed)\b/, verb: 'Configure' },
-  { pattern: /\b(?:summarize|summarizing|summarized|summarise|summarising|summarised|summary)\b/, verb: 'Summarize' },
-  { pattern: /\b(?:draft|drafting|drafted|brainstorm|brainstorming|rewrite|rewriting|name|naming)\b/, verb: 'Draft' },
+  {
+    pattern:
+      /\b(?:research|researching|search|searching|find|finding|lookup|look up)\b/,
+    verb: 'Research',
+  },
+  {
+    pattern:
+      /\b(?:configure|config|configuration|setup|set up|install|deploy|deploying|deployed)\b/,
+    verb: 'Configure',
+  },
+  {
+    pattern:
+      /\b(?:summarize|summarizing|summarized|summarise|summarising|summarised|summary)\b/,
+    verb: 'Summarize',
+  },
+  {
+    pattern:
+      /\b(?:draft|drafting|drafted|brainstorm|brainstorming|rewrite|rewriting|name|naming)\b/,
+    verb: 'Draft',
+  },
   { pattern: /\b(?:explain|explaining|walkthrough)\b/, verb: 'Explain' },
 ]
 
@@ -338,7 +434,10 @@ function scoreContextTokens(snippet: SessionTitleSnippet): Array<string> {
     .map(([token]) => token)
 }
 
-function detectAction(snippet: SessionTitleSnippet, category: SessionCategory): string {
+function detectAction(
+  snippet: SessionTitleSnippet,
+  category: SessionCategory,
+): string {
   const firstUser = snippet.find((message) => message.role === 'user')
   const firstUserText = firstUser ? cleanText(firstUser.text).toLowerCase() : ''
   const userText = snippet
@@ -395,7 +494,11 @@ export function generateSessionTitle(
   const contextTokens = scoreContextTokens(snippet)
   const action = detectAction(snippet, category)
   const maxFocusTokens = Math.max(1, maxWords - 1)
-  const focusTokens = selectFocusTokens(titleTokens, contextTokens, maxFocusTokens)
+  const focusTokens = selectFocusTokens(
+    titleTokens,
+    contextTokens,
+    maxFocusTokens,
+  )
   const subjectTokens =
     focusTokens.length > 0
       ? focusTokens

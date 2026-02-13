@@ -28,12 +28,16 @@ export async function resolveSessionKey({
 
   const trimmedFriendly = friendlyId?.trim() ?? ''
   if (trimmedFriendly.length > 0) {
-    const resolved = await gatewayRpc<SessionsResolveResponse>('sessions.resolve', {
-      key: trimmedFriendly,
-      includeUnknown: true,
-      includeGlobal: true,
-    })
-    const resolvedKey = typeof resolved.key === 'string' ? resolved.key.trim() : ''
+    const resolved = await gatewayRpc<SessionsResolveResponse>(
+      'sessions.resolve',
+      {
+        key: trimmedFriendly,
+        includeUnknown: true,
+        includeGlobal: true,
+      },
+    )
+    const resolvedKey =
+      typeof resolved.key === 'string' ? resolved.key.trim() : ''
     if (resolvedKey.length === 0) {
       throw new Error('session not found')
     }

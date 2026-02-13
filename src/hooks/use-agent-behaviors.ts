@@ -58,12 +58,16 @@ export type AgentBehaviorView = AgentBehaviorState & {
   isWalking: boolean
 }
 
-export function useAgentBehaviors(sessions: Array<SwarmSession>): Map<string, AgentBehaviorView> {
+export function useAgentBehaviors(
+  sessions: Array<SwarmSession>,
+): Map<string, AgentBehaviorView> {
   const statesRef = useRef<Map<string, AgentBehaviorState>>(new Map())
   const deskAssignments = useRef<Map<string, number>>(new Map())
   const nextDesk = useRef(0)
   const lastChatVisit = useRef(Date.now())
-  const nextChatVisitAt = useRef(Date.now() + randomBetween(CHAT_VISIT_MIN_MS, CHAT_VISIT_MAX_MS))
+  const nextChatVisitAt = useRef(
+    Date.now() + randomBetween(CHAT_VISIT_MIN_MS, CHAT_VISIT_MAX_MS),
+  )
   const [, setTick] = useState(0) // Force re-render
 
   const getOrCreateState = useCallback((key: string): AgentBehaviorState => {
@@ -103,7 +107,9 @@ export function useAgentBehaviors(sessions: Array<SwarmSession>): Map<string, Ag
   useEffect(() => {
     const interval = setInterval(() => {
       const now = Date.now()
-      const activeKeys = new Set(sessions.map(s => s.key ?? s.friendlyId ?? ''))
+      const activeKeys = new Set(
+        sessions.map((s) => s.key ?? s.friendlyId ?? ''),
+      )
 
       // Clean up stale agents + release their personas
       for (const key of statesRef.current.keys()) {
@@ -124,19 +130,29 @@ export function useAgentBehaviors(sessions: Array<SwarmSession>): Map<string, Ag
         const elapsed = now - state.activityStartTime
 
         // Handle swarmStatus transitions
-        if (session.swarmStatus === 'complete' && state.activity !== 'celebrating') {
+        if (
+          session.swarmStatus === 'complete' &&
+          state.activity !== 'celebrating'
+        ) {
           state.activity = 'celebrating'
           state.activityStartTime = now
           state.chatMessage = getRandomMessage('complete')
           state.expression = getExpression('celebrating')
           state.targetPosition = { ...state.deskPosition }
-        } else if (session.swarmStatus === 'failed' && state.activity !== 'frustrated') {
+        } else if (
+          session.swarmStatus === 'failed' &&
+          state.activity !== 'frustrated'
+        ) {
           state.activity = 'frustrated'
           state.activityStartTime = now
           state.chatMessage = getRandomMessage('failed')
           state.expression = getExpression('frustrated')
           state.targetPosition = { ...state.deskPosition }
-        } else if (session.swarmStatus === 'thinking' && state.activity !== 'thinking' && state.activity !== 'walking') {
+        } else if (
+          session.swarmStatus === 'thinking' &&
+          state.activity !== 'thinking' &&
+          state.activity !== 'walking'
+        ) {
           state.activity = 'thinking'
           state.activityStartTime = now
           state.chatMessage = '💭 thinking...'
@@ -150,7 +166,10 @@ export function useAgentBehaviors(sessions: Array<SwarmSession>): Map<string, Ag
             state.targetPosition = { ...state.deskPosition }
             state.activityStartTime = now
             state.chatMessage = null
-          } else if (state.activity === 'coding' && elapsed > randomBetween(CODING_MIN_MS, CODING_MAX_MS)) {
+          } else if (
+            state.activity === 'coding' &&
+            elapsed > randomBetween(CODING_MIN_MS, CODING_MAX_MS)
+          ) {
             // Time for a break
             const breakType = getBreakType()
             state.activity = 'walking'
@@ -198,7 +217,11 @@ export function useAgentBehaviors(sessions: Array<SwarmSession>): Map<string, Ag
 
         // Walking — move toward target
         if (state.activity === 'walking') {
-          state.position = lerpPosition(state.position, state.targetPosition, LERP_SPEED)
+          state.position = lerpPosition(
+            state.position,
+            state.targetPosition,
+            LERP_SPEED,
+          )
 
           if (isAtTarget(state.position, state.targetPosition, 2)) {
             // Arrived at destination
@@ -215,7 +238,8 @@ export function useAgentBehaviors(sessions: Array<SwarmSession>): Map<string, Ag
               state.chatMessage = null
             } else {
               // At break location
-              const breakType = (state.chatTarget as AgentActivity) ?? 'water_break'
+              const breakType =
+                (state.chatTarget as AgentActivity) ?? 'water_break'
               state.activity = breakType
               state.expression = getExpression(breakType)
               state.activityStartTime = now
@@ -231,7 +255,11 @@ export function useAgentBehaviors(sessions: Array<SwarmSession>): Map<string, Ag
         // Clear chat bubbles after timeout
         if (state.chatMessage) {
           // Auto-clear after 4s for non-persistent messages
-          if (state.activity !== 'thinking' && state.activity !== 'celebrating' && state.activity !== 'frustrated') {
+          if (
+            state.activity !== 'thinking' &&
+            state.activity !== 'celebrating' &&
+            state.activity !== 'frustrated'
+          ) {
             if (elapsed > CHAT_BUBBLE_MS && state.activity !== 'walking') {
               // Only clear if it's been showing for a while
             }
@@ -241,7 +269,9 @@ export function useAgentBehaviors(sessions: Array<SwarmSession>): Map<string, Ag
 
       // Cross-agent chat visits
       if (now > nextChatVisitAt.current) {
-        const runningSessions = sessions.filter(s => s.swarmStatus === 'running')
+        const runningSessions = sessions.filter(
+          (s) => s.swarmStatus === 'running',
+        )
         if (runningSessions.length >= 2) {
           const idx1 = Math.floor(Math.random() * runningSessions.length)
           let idx2 = Math.floor(Math.random() * (runningSessions.length - 1))
@@ -255,19 +285,34 @@ export function useAgentBehaviors(sessions: Array<SwarmSession>): Map<string, Ag
             const state1 = statesRef.current.get(key1)
             const state2 = statesRef.current.get(key2)
 
-            if (state1 && state2 && state1.activity === 'coding' && state2.activity === 'coding') {
-              const persona2 = assignPersona(key2, session2.task ?? session2.label ?? '')
+            if (
+              state1 &&
+              state2 &&
+              state1.activity === 'coding' &&
+              state2.activity === 'coding'
+            ) {
+              const persona2 = assignPersona(
+                key2,
+                session2.task ?? session2.label ?? '',
+              )
               // Agent 1 walks to agent 2's desk
               state1.activity = 'walking'
-              state1.targetPosition = { x: state2.deskPosition.x + 5, y: state2.deskPosition.y + 3 }
+              state1.targetPosition = {
+                x: state2.deskPosition.x + 5,
+                y: state2.deskPosition.y + 3,
+              }
               state1.chatTarget = key2
               state1.activityStartTime = now
 
               // Both get chat bubbles
-              const msg = getRandomMessage('chatting').replace('{name}', persona2.name)
+              const msg = getRandomMessage('chatting').replace(
+                '{name}',
+                persona2.name,
+              )
               state1.chatMessage = msg
-              state2.chatMessage = getRandomMessage('chatting').replace('{name}',
-                assignPersona(key1, session1.task ?? session1.label ?? '').name
+              state2.chatMessage = getRandomMessage('chatting').replace(
+                '{name}',
+                assignPersona(key1, session1.task ?? session1.label ?? '').name,
               )
 
               // Clear bubbles after delay
@@ -289,11 +334,12 @@ export function useAgentBehaviors(sessions: Array<SwarmSession>): Map<string, Ag
           }
         }
         lastChatVisit.current = now
-        nextChatVisitAt.current = now + randomBetween(CHAT_VISIT_MIN_MS, CHAT_VISIT_MAX_MS)
+        nextChatVisitAt.current =
+          now + randomBetween(CHAT_VISIT_MIN_MS, CHAT_VISIT_MAX_MS)
       }
 
       // Force re-render
-      setTick(t => t + 1)
+      setTick((t) => t + 1)
     }, TICK_MS)
 
     return () => clearInterval(interval)
@@ -306,11 +352,16 @@ export function useAgentBehaviors(sessions: Array<SwarmSession>): Map<string, Ag
     if (!key) continue
 
     const state = statesRef.current.get(key) ?? getOrCreateState(key)
-    const persona = assignPersona(key, session.task ?? session.initialMessage ?? session.label ?? '')
+    const persona = assignPersona(
+      key,
+      session.task ?? session.initialMessage ?? session.label ?? '',
+    )
 
     const dx = state.targetPosition.x - state.position.x
     const direction: 'left' | 'right' = dx < -0.5 ? 'left' : 'right'
-    const isWalking = state.activity === 'walking' && !isAtTarget(state.position, state.targetPosition, 2)
+    const isWalking =
+      state.activity === 'walking' &&
+      !isAtTarget(state.position, state.targetPosition, 2)
 
     viewMap.set(key, {
       ...state,

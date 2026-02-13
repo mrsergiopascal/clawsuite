@@ -6,7 +6,11 @@ import { AgentChatMessages } from './AgentChatMessages'
 import type { AgentChatMessage } from './AgentChatMessages'
 import type { GatewayMessage } from '@/screens/chat/types'
 import { DialogContent, DialogRoot } from '@/components/ui/dialog'
-import { getMessageTimestamp, readError, textFromMessage } from '@/screens/chat/utils'
+import {
+  getMessageTimestamp,
+  readError,
+  textFromMessage,
+} from '@/screens/chat/utils'
 
 type AgentChatModalProps = {
   open: boolean
@@ -38,7 +42,9 @@ function readMessageText(message: GatewayMessage): string {
   return ''
 }
 
-function toChatMessages(messages: Array<GatewayMessage>): Array<AgentChatMessage> {
+function toChatMessages(
+  messages: Array<GatewayMessage>,
+): Array<AgentChatMessage> {
   return messages
     .map(function mapMessage(message, index) {
       const text = readMessageText(message)
@@ -57,9 +63,7 @@ function toChatMessages(messages: Array<GatewayMessage>): Array<AgentChatMessage
         timestamp: getMessageTimestamp(message),
       } satisfies AgentChatMessage
     })
-    .filter(function filterNull(
-      message,
-    ): message is AgentChatMessage {
+    .filter(function filterNull(message): message is AgentChatMessage {
       return message !== null
     })
 }
@@ -90,60 +94,68 @@ export function AgentChatModal({
   messagesRef.current = messages
   isDemoModeRef.current = isDemoMode
 
-  const agentMessageCount = useMemo(function getAgentMessageCount() {
-    return messages.filter(function onlyAgent(message) {
-      return message.role === 'agent'
-    }).length
-  }, [messages])
+  const agentMessageCount = useMemo(
+    function getAgentMessageCount() {
+      return messages.filter(function onlyAgent(message) {
+        return message.role === 'agent'
+      }).length
+    },
+    [messages],
+  )
 
-  const loadHistory = useCallback(async function loadHistory() {
-    if (!open || isDemoModeRef.current) return
+  const loadHistory = useCallback(
+    async function loadHistory() {
+      if (!open || isDemoModeRef.current) return
 
-    try {
-      setIsLoadingHistory((current) => (messagesRef.current.length === 0 ? true : current))
-      const query = new URLSearchParams({ sessionKey, limit: '150' })
-      const response = await fetch(`/api/history?${query.toString()}`)
-      if (!response.ok) {
-        throw new Error(await readError(response))
+      try {
+        setIsLoadingHistory((current) =>
+          messagesRef.current.length === 0 ? true : current,
+        )
+        const query = new URLSearchParams({ sessionKey, limit: '150' })
+        const response = await fetch(`/api/history?${query.toString()}`)
+        if (!response.ok) {
+          throw new Error(await readError(response))
+        }
+
+        const payload = (await response.json()) as HistoryPayload
+        const nextMessages = Array.isArray(payload.messages)
+          ? toChatMessages(payload.messages)
+          : []
+
+        setMessages(nextMessages)
+        setErrorMessage(null)
+
+        const expectedAgentCount = typingExpectedAgentCountRef.current
+        if (
+          expectedAgentCount !== null &&
+          nextMessages.filter(function onlyAgent(message) {
+            return message.role === 'agent'
+          }).length >= expectedAgentCount
+        ) {
+          setIsTyping(false)
+          typingExpectedAgentCountRef.current = null
+        }
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : 'Unable to load chat history'
+        setErrorMessage(message)
+        if (messagesRef.current.length === 0) {
+          setIsDemoMode(true)
+          setMessages([
+            {
+              id: `demo-intro-${sessionKey}`,
+              role: 'agent',
+              text: 'Gateway unavailable. Running in demo mode with simulated responses.',
+              timestamp: Date.now(),
+            },
+          ])
+        }
+      } finally {
+        setIsLoadingHistory(false)
       }
-
-      const payload = (await response.json()) as HistoryPayload
-      const nextMessages = Array.isArray(payload.messages)
-        ? toChatMessages(payload.messages)
-        : []
-
-      setMessages(nextMessages)
-      setErrorMessage(null)
-
-      const expectedAgentCount = typingExpectedAgentCountRef.current
-      if (
-        expectedAgentCount !== null &&
-        nextMessages.filter(function onlyAgent(message) {
-          return message.role === 'agent'
-        }).length >= expectedAgentCount
-      ) {
-        setIsTyping(false)
-        typingExpectedAgentCountRef.current = null
-      }
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : 'Unable to load chat history'
-      setErrorMessage(message)
-      if (messagesRef.current.length === 0) {
-        setIsDemoMode(true)
-        setMessages([
-          {
-            id: `demo-intro-${sessionKey}`,
-            role: 'agent',
-            text: 'Gateway unavailable. Running in demo mode with simulated responses.',
-            timestamp: Date.now(),
-          },
-        ])
-      }
-    } finally {
-      setIsLoadingHistory(false)
-    }
-  }, [open, sessionKey])
+    },
+    [open, sessionKey],
+  )
 
   // Stable ref for loadHistory to avoid effect dependency loops
   const loadHistoryRef = useRef(loadHistory)

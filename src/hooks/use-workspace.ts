@@ -110,16 +110,19 @@ export function useWorkspace() {
     }
   }, [])
 
-  const setWorkspace = useCallback((workspacePath: string, displayName: string) => {
-    saveWorkspace(workspacePath)
-    setState({
-      path: workspacePath,
-      folderName: displayName,
-      isLoading: false,
-      error: null,
-      source: 'manual',
-    })
-  }, [])
+  const setWorkspace = useCallback(
+    (workspacePath: string, displayName: string) => {
+      saveWorkspace(workspacePath)
+      setState({
+        path: workspacePath,
+        folderName: displayName,
+        isLoading: false,
+        error: null,
+        source: 'manual',
+      })
+    },
+    [],
+  )
 
   const clearWorkspace = useCallback(() => {
     clearSavedWorkspace()

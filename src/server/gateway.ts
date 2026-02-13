@@ -12,7 +12,13 @@ export type GatewayFrame =
       error?: { code: string; message: string; details?: unknown }
     }
   | { type: 'event'; event: string; payload?: unknown; seq?: number }
-  | { type: 'evt'; event: string; payload?: unknown; payloadJSON?: string; seq?: number }
+  | {
+      type: 'evt'
+      event: string
+      payload?: unknown
+      payloadJSON?: string
+      seq?: number
+    }
 
 type ConnectParams = {
   minProtocol: number
@@ -64,7 +70,10 @@ export function getGatewayConfig() {
   return { url, token, password }
 }
 
-export function buildConnectParams(token: string, password: string): ConnectParams {
+export function buildConnectParams(
+  token: string,
+  password: string,
+): ConnectParams {
   return {
     minProtocol: 3,
     maxProtocol: 3,
@@ -103,10 +112,15 @@ class GatewayClient {
 
   onEvent(handler: GatewayEventHandler): () => void {
     this.eventListeners.add(handler)
-    return () => { this.eventListeners.delete(handler) }
+    return () => {
+      this.eventListeners.delete(handler)
+    }
   }
 
-  async request<TPayload = unknown>(method: string, params?: unknown): Promise<TPayload> {
+  async request<TPayload = unknown>(
+    method: string,
+    params?: unknown,
+  ): Promise<TPayload> {
     if (this.destroyed) {
       throw new Error('Gateway client is shut down')
     }
@@ -182,7 +196,7 @@ class GatewayClient {
       try {
         if (attempt > 0) {
           // Wait a bit before retry (WebSocket Race Condition mitigation)
-          await new Promise(resolve => setTimeout(resolve, 500 * attempt))
+          await new Promise((resolve) => setTimeout(resolve, 500 * attempt))
         }
 
         const { url, token, password } = getGatewayConfig()
@@ -313,7 +327,11 @@ class GatewayClient {
     this.authenticated = false
     this.stopHeartbeat()
 
-    if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) {
+    if (
+      ws &&
+      (ws.readyState === WebSocket.OPEN ||
+        ws.readyState === WebSocket.CONNECTING)
+    ) {
       try {
         ws.terminate()
       } catch {
@@ -332,7 +350,11 @@ class GatewayClient {
   }
 
   private flushQueue() {
-    if (!this.authenticated || !this.ws || this.ws.readyState !== WebSocket.OPEN) {
+    if (
+      !this.authenticated ||
+      !this.ws ||
+      this.ws.readyState !== WebSocket.OPEN
+    ) {
       return
     }
 
@@ -463,7 +485,10 @@ class GatewayClient {
   }
 
   private closeSocket(ws: WebSocket): Promise<void> {
-    if (ws.readyState === WebSocket.CLOSED || ws.readyState === WebSocket.CLOSING) {
+    if (
+      ws.readyState === WebSocket.CLOSED ||
+      ws.readyState === WebSocket.CLOSING
+    ) {
       return Promise.resolve()
     }
 
@@ -500,7 +525,8 @@ function nextReconnectDelayMs(attempt: number) {
     return RECONNECT_DELAYS_MS[attempt]
   }
 
-  const doubled = RECONNECT_DELAYS_MS[RECONNECT_DELAYS_MS.length - 1] * 2 ** (attempt - 2)
+  const doubled =
+    RECONNECT_DELAYS_MS[RECONNECT_DELAYS_MS.length - 1] * 2 ** (attempt - 2)
   return Math.min(doubled, MAX_RECONNECT_DELAY_MS)
 }
 

@@ -1,10 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { HugeiconsIcon } from '@hugeicons/react'
 import {
   Add01Icon,
@@ -72,8 +66,7 @@ const TERMINAL_BG = '#0d0d0d'
 function toDebugAnalysis(value: unknown): DebugAnalysis | null {
   if (!value || typeof value !== 'object') return null
   const entry = value as Record<string, unknown>
-  const summary =
-    typeof entry.summary === 'string' ? entry.summary.trim() : ''
+  const summary = typeof entry.summary === 'string' ? entry.summary.trim() : ''
   const rootCause =
     typeof entry.rootCause === 'string' ? entry.rootCause.trim() : ''
   const rawCommands = Array.isArray(entry.suggestedCommands)
@@ -95,9 +88,10 @@ function toDebugAnalysis(value: unknown): DebugAnalysis | null {
       if (!commandText || !descriptionText) return null
       return { command: commandText, description: descriptionText }
     })
-    .filter(function removeNulls(
-      command,
-    ): command is { command: string; description: string } {
+    .filter(function removeNulls(command): command is {
+      command: string
+      description: string
+    } {
       return Boolean(command)
     })
 
@@ -129,7 +123,9 @@ export function TerminalWorkspace({
   const closeAllTabs = useTerminalPanelStore((state) => state.closeAllTabs)
   const setActiveTab = useTerminalPanelStore((state) => state.setActiveTab)
   const renameTab = useTerminalPanelStore((state) => state.renameTab)
-  const setTabSessionId = useTerminalPanelStore((state) => state.setTabSessionId)
+  const setTabSessionId = useTerminalPanelStore(
+    (state) => state.setTabSessionId,
+  )
   const setTabStatus = useTerminalPanelStore((state) => state.setTabStatus)
 
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null)
@@ -153,9 +149,14 @@ export function TerminalWorkspace({
     [activeTabId, tabs],
   )
 
-  const sendInput = useCallback(async function sendInput(tabId: string, data: string) {
+  const sendInput = useCallback(async function sendInput(
+    tabId: string,
+    data: string,
+  ) {
     // Look up session ID from store at call time (not stale closure)
-    const currentTab = useTerminalPanelStore.getState().tabs.find((t) => t.id === tabId)
+    const currentTab = useTerminalPanelStore
+      .getState()
+      .tabs.find((t) => t.id === tabId)
     if (!currentTab?.sessionId) return
     await fetch('/api/terminal-input', {
       method: 'POST',
@@ -166,8 +167,13 @@ export function TerminalWorkspace({
     })
   }, [])
 
-  const resizeSession = useCallback(async function resizeSession(tabId: string, terminal: Terminal) {
-    const currentTab = useTerminalPanelStore.getState().tabs.find((t) => t.id === tabId)
+  const resizeSession = useCallback(async function resizeSession(
+    tabId: string,
+    terminal: Terminal,
+  ) {
+    const currentTab = useTerminalPanelStore
+      .getState()
+      .tabs.find((t) => t.id === tabId)
     if (!currentTab?.sessionId) return
     await fetch('/api/terminal-resize', {
       method: 'POST',
@@ -266,7 +272,10 @@ export function TerminalWorkspace({
     [activeTab],
   )
 
-  const closeTabResources = useCallback(async function closeTabResources(tabId: string, sessionId: string | null) {
+  const closeTabResources = useCallback(async function closeTabResources(
+    tabId: string,
+    sessionId: string | null,
+  ) {
     const reader = readerMapRef.current.get(tabId)
     readerMapRef.current.delete(tabId)
     if (reader) {
@@ -335,7 +344,6 @@ export function TerminalWorkspace({
         return null
       })
 
-
       if (!response || !response.ok || !response.body) {
         terminal.writeln('\r\n[terminal] failed to connect\r\n')
         connectedRef.current.delete(tab.id)
@@ -381,7 +389,6 @@ export function TerminalWorkspace({
           }
           if (!eventName || eventName === 'ping') continue
 
-
           if (eventName === 'session' && eventData) {
             const payload = JSON.parse(eventData) as TerminalSessionResponse
             if (payload.sessionId) {
@@ -401,8 +408,13 @@ export function TerminalWorkspace({
           }
 
           if (eventName === 'exit' && eventData) {
-            const payload = JSON.parse(eventData) as { exitCode?: number; signal?: number }
-            terminal.writeln(`\r\n[process exited${payload.exitCode != null ? ` code=${payload.exitCode}` : ''}]\r\n`)
+            const payload = JSON.parse(eventData) as {
+              exitCode?: number
+              signal?: number
+            }
+            terminal.writeln(
+              `\r\n[process exited${payload.exitCode != null ? ` code=${payload.exitCode}` : ''}]\r\n`,
+            )
             continue
           }
 
@@ -441,7 +453,10 @@ export function TerminalWorkspace({
       if (!xtermLoaded) {
         void ensureXterm().then(() => {
           // Re-trigger after load
-          if (!terminalMapRef.current.has(tab.id) && containerMapRef.current.has(tab.id)) {
+          if (
+            !terminalMapRef.current.has(tab.id) &&
+            containerMapRef.current.has(tab.id)
+          ) {
             ensureTerminalForTab(tab)
           }
         })
@@ -622,17 +637,25 @@ export function TerminalWorkspace({
                 }}
                 onContextMenu={function onContextMenu(event) {
                   event.preventDefault()
-                  setContextMenu({ tabId: tab.id, x: event.clientX, y: event.clientY })
+                  setContextMenu({
+                    tabId: tab.id,
+                    x: event.clientX,
+                    y: event.clientY,
+                  })
                 }}
                 className={cn(
                   'group relative flex h-8 max-w-[220px] items-center gap-2 px-3 text-xs text-primary-700 transition-colors',
-                  isActive ? 'bg-primary-50 text-primary-900' : 'hover:bg-primary-200/70',
+                  isActive
+                    ? 'bg-primary-50 text-primary-900'
+                    : 'hover:bg-primary-200/70',
                 )}
               >
                 <span
                   className={cn(
                     'size-2 rounded-full',
-                    isActive || tab.status === 'active' ? 'bg-emerald-400' : 'bg-primary-500',
+                    isActive || tab.status === 'active'
+                      ? 'bg-emerald-400'
+                      : 'bg-primary-500',
                   )}
                 />
                 <HugeiconsIcon
@@ -641,7 +664,9 @@ export function TerminalWorkspace({
                   strokeWidth={1.5}
                   className="shrink-0"
                 />
-                <span className="truncate text-left tabular-nums">{tab.title}</span>
+                <span className="truncate text-left tabular-nums">
+                  {tab.title}
+                </span>
                 {tabs.length > 1 ? (
                   <span
                     role="button"
@@ -658,7 +683,11 @@ export function TerminalWorkspace({
                     }}
                     className="hidden rounded p-0.5 text-primary-600 hover:bg-primary-300 hover:text-primary-900 group-hover:inline-flex"
                   >
-                    <HugeiconsIcon icon={Cancel01Icon} size={20} strokeWidth={1.5} />
+                    <HugeiconsIcon
+                      icon={Cancel01Icon}
+                      size={20}
+                      strokeWidth={1.5}
+                    />
                   </span>
                 ) : null}
                 <span
@@ -698,7 +727,11 @@ export function TerminalWorkspace({
                 onClick={onMinimizePanel}
                 aria-label="Minimize terminal panel"
               >
-                <HugeiconsIcon icon={SidebarLeft01Icon} size={20} strokeWidth={1.5} />
+                <HugeiconsIcon
+                  icon={SidebarLeft01Icon}
+                  size={20}
+                  strokeWidth={1.5}
+                />
               </Button>
               <Button
                 size="icon-sm"
@@ -706,7 +739,11 @@ export function TerminalWorkspace({
                 onClick={onMaximizePanel}
                 aria-label="Maximize terminal panel"
               >
-                <HugeiconsIcon icon={ArrowRight01Icon} size={20} strokeWidth={1.5} />
+                <HugeiconsIcon
+                  icon={ArrowRight01Icon}
+                  size={20}
+                  strokeWidth={1.5}
+                />
               </Button>
               <Button
                 size="icon-sm"
@@ -714,7 +751,11 @@ export function TerminalWorkspace({
                 onClick={handleClosePanel}
                 aria-label="Close terminal panel"
               >
-                <HugeiconsIcon icon={Cancel01Icon} size={20} strokeWidth={1.5} />
+                <HugeiconsIcon
+                  icon={Cancel01Icon}
+                  size={20}
+                  strokeWidth={1.5}
+                />
               </Button>
             </>
           ) : null}
@@ -774,7 +815,10 @@ export function TerminalWorkspace({
               const menuTab = tabs.find((tab) => tab.id === contextMenu.tabId)
               setContextMenu(null)
               if (!menuTab) return
-              const nextName = window.prompt('Rename terminal tab', menuTab.title)
+              const nextName = window.prompt(
+                'Rename terminal tab',
+                menuTab.title,
+              )
               if (!nextName) return
               renameTab(menuTab.id, nextName)
             }}

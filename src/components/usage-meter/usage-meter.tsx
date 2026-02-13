@@ -4,7 +4,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { UsageDetailsModal } from './usage-details-modal'
 import { ContextAlertModal } from './context-alert-modal'
 import { DialogContent, DialogRoot } from '@/components/ui/dialog'
-import { MenuContent, MenuItem, MenuRoot, MenuTrigger } from '@/components/ui/menu'
+import {
+  MenuContent,
+  MenuItem,
+  MenuRoot,
+  MenuTrigger,
+} from '@/components/ui/menu'
 import { cn } from '@/lib/utils'
 import { toast } from '@/components/ui/toast'
 import { SEARCH_MODAL_EVENTS } from '@/hooks/use-search-modal'
@@ -30,14 +35,18 @@ function getStoredPreferredProvider(): string | null {
   if (typeof window === 'undefined') return null
   try {
     return window.localStorage.getItem(PREFERRED_PROVIDER_KEY)
-  } catch { return null }
+  } catch {
+    return null
+  }
 }
 
 function savePreferredProvider(provider: string) {
   if (typeof window === 'undefined') return
   try {
     window.localStorage.setItem(PREFERRED_PROVIDER_KEY, provider)
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
 }
 
 function getStoredStatsView(): StatsView {
@@ -47,7 +56,9 @@ function getStoredStatsView(): StatsView {
     if (stored && ['session', 'provider', 'cost', 'agents'].includes(stored)) {
       return stored as StatsView
     }
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
   return 'session'
 }
 
@@ -55,7 +66,9 @@ function saveStatsView(view: StatsView) {
   if (typeof window === 'undefined') return
   try {
     window.localStorage.setItem(STATS_VIEW_STORAGE_KEY, view)
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
 }
 
 const MODEL_PRICING: Record<string, { input: number; output: number }> = {
@@ -145,7 +158,9 @@ function readPercent(value: unknown): number {
   return num
 }
 
-function resolvePricing(model: string): { input: number; output: number } | null {
+function resolvePricing(
+  model: string,
+): { input: number; output: number } | null {
   const key = model.trim().toLowerCase()
   return MODEL_PRICING[key] ?? null
 }
@@ -169,22 +184,22 @@ function normalizeModelUsage(raw: unknown): Array<ModelUsage> {
     return raw
       .map((entry) => {
         if (!entry || typeof entry !== 'object') return null
-        const model = String((entry).model ?? (entry).id ?? '')
+        const model = String(entry.model ?? entry.id ?? '')
         if (!model) return null
         const inputTokens = readNumber(
-          (entry).inputTokens ??
-            (entry).input_tokens ??
-            (entry).promptTokens ??
-            (entry).prompt_tokens,
+          entry.inputTokens ??
+            entry.input_tokens ??
+            entry.promptTokens ??
+            entry.prompt_tokens,
         )
         const outputTokens = readNumber(
-          (entry).outputTokens ??
-            (entry).output_tokens ??
-            (entry).completionTokens ??
-            (entry).completion_tokens,
+          entry.outputTokens ??
+            entry.output_tokens ??
+            entry.completionTokens ??
+            entry.completion_tokens,
         )
         const costProvided = readNumber(
-          (entry).costUsd ?? (entry).cost ?? (entry).usd,
+          entry.costUsd ?? entry.cost ?? entry.usd,
         )
         const costUsd =
           costProvided > 0
@@ -231,45 +246,39 @@ function normalizeSessions(raw: unknown): Array<SessionUsage> {
   return raw
     .map((entry) => {
       if (!entry || typeof entry !== 'object') return null
-      const model = String((entry).model ?? (entry).provider ?? '')
+      const model = String(entry.model ?? entry.provider ?? '')
       const id = String(
-        (entry).id ??
-          (entry).key ??
-          (entry).sessionId ??
-          (entry).sessionKey ??
-          '',
+        entry.id ?? entry.key ?? entry.sessionId ?? entry.sessionKey ?? '',
       )
       if (!id && !model) return null
       const inputTokens = readNumber(
-        (entry).inputTokens ??
-          (entry).input_tokens ??
-          (entry).promptTokens ??
-          (entry).prompt_tokens,
+        entry.inputTokens ??
+          entry.input_tokens ??
+          entry.promptTokens ??
+          entry.prompt_tokens,
       )
       const outputTokens = readNumber(
-        (entry).outputTokens ??
-          (entry).output_tokens ??
-          (entry).completionTokens ??
-          (entry).completion_tokens,
+        entry.outputTokens ??
+          entry.output_tokens ??
+          entry.completionTokens ??
+          entry.completion_tokens,
       )
-      const costProvided = readNumber(
-        (entry).costUsd ?? (entry).cost ?? (entry).usd,
-      )
+      const costProvided = readNumber(entry.costUsd ?? entry.cost ?? entry.usd)
       const costUsd =
         costProvided > 0
           ? costProvided
           : calculateCost(model, inputTokens, outputTokens)
       const startedAt = readNumber(
-        (entry).startedAt ??
-          (entry).started_at ??
-          (entry).createdAt ??
-          (entry).created_at,
+        entry.startedAt ??
+          entry.started_at ??
+          entry.createdAt ??
+          entry.created_at,
       )
       const updatedAt = readNumber(
-        (entry).updatedAt ??
-          (entry).updated_at ??
-          (entry).lastUpdated ??
-          (entry).last_updated,
+        entry.updatedAt ??
+          entry.updated_at ??
+          entry.lastUpdated ??
+          entry.last_updated,
       )
       return {
         id: id || model || 'session',
@@ -286,12 +295,7 @@ function normalizeSessions(raw: unknown): Array<SessionUsage> {
 
 function parseSessionStatus(payload: unknown): UsageSummary {
   const root = payload && typeof payload === 'object' ? (payload as any) : {}
-  const usage =
-    root.today ??
-    root.usage ??
-    root.summary ??
-    root.totals ??
-    root
+  const usage = root.today ?? root.usage ?? root.summary ?? root.totals ?? root
 
   const tokensRoot = usage?.tokens ?? usage?.tokenUsage ?? usage
   const inputTokens = readNumber(
@@ -416,7 +420,10 @@ function getAlertState() {
   }
 }
 
-function saveAlertState(state: { date: string; sent: Record<number, boolean> }) {
+function saveAlertState(state: {
+  date: string
+  sent: Record<number, boolean>
+}) {
   if (typeof window === 'undefined') return
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
 }
@@ -432,9 +439,13 @@ export function UsageMeter() {
     parseSessionStatus(null),
   )
   const [error, setError] = useState<string | null>(null)
-  const [providerUsage, setProviderUsage] = useState<Array<ProviderUsageEntry>>([])
+  const [providerUsage, setProviderUsage] = useState<Array<ProviderUsageEntry>>(
+    [],
+  )
   const [providerError, setProviderError] = useState<string | null>(null)
-  const [providerUpdatedAt, setProviderUpdatedAt] = useState<number | null>(null)
+  const [providerUpdatedAt, setProviderUpdatedAt] = useState<number | null>(
+    null,
+  )
   const [open, setOpen] = useState(false)
   const [statsView, setStatsView] = useState<StatsView>(getStoredStatsView)
   const [agentActivity] = useState<AgentActivity>({
@@ -442,14 +453,17 @@ export function UsageMeter() {
     totalSpawned: 0,
     totalAgentCost: 0,
   })
-  const [contextAlert, setContextAlert] = useState<{ open: boolean; threshold: number }>({ open: false, threshold: 0 })
+  const [contextAlert, setContextAlert] = useState<{
+    open: boolean
+    threshold: number
+  }>({ open: false, threshold: 0 })
   const alertStateRef = useRef(getAlertState())
 
   const refresh = useCallback(async () => {
     try {
       const res = await fetch('/api/session-status')
       if (!res.ok) {
-        const data = (await res.json().catch(() => null))
+        const data = await res.json().catch(() => null)
         throw new Error(
           data?.error || data?.message || res.statusText || 'Request failed',
         )
@@ -571,22 +585,32 @@ export function UsageMeter() {
   }, [])
 
   // Find the preferred provider for the status bar display
-  const [preferredProvider, setPreferredProvider] = useState<string | null>(getStoredPreferredProvider)
+  const [preferredProvider, setPreferredProvider] = useState<string | null>(
+    getStoredPreferredProvider,
+  )
   const primaryProvider = useMemo(() => {
     if (preferredProvider) {
-      const preferred = providerUsage.find(p => p.provider === preferredProvider && p.status === 'ok' && p.lines.length > 0)
+      const preferred = providerUsage.find(
+        (p) =>
+          p.provider === preferredProvider &&
+          p.status === 'ok' &&
+          p.lines.length > 0,
+      )
       if (preferred) return preferred
     }
-    return providerUsage.find(p => p.status === 'ok' && p.lines.length > 0)
+    return providerUsage.find((p) => p.status === 'ok' && p.lines.length > 0)
   }, [providerUsage, preferredProvider])
-  const providerProgressLines = primaryProvider?.lines.filter(l => l.type === 'progress') ?? []
+  const providerProgressLines =
+    primaryProvider?.lines.filter((l) => l.type === 'progress') ?? []
 
   // Aggregate provider tokens
   const providerTokens = useMemo(() => {
     const byProvider: Record<string, { input: number; output: number }> = {}
-    providerUsage.forEach(p => {
+    providerUsage.forEach((p) => {
       if (p.status !== 'ok') return
-      const tokenLines = p.lines.filter(l => l.format === 'tokens' && l.used !== undefined)
+      const tokenLines = p.lines.filter(
+        (l) => l.format === 'tokens' && l.used !== undefined,
+      )
       const total = tokenLines.reduce((sum, l) => sum + (l.used ?? 0), 0)
       if (total > 0) {
         byProvider[p.displayName.split(' ')[0]] = { input: total, output: 0 }
@@ -598,13 +622,23 @@ export function UsageMeter() {
   // Compute pill color based on context percent or agent activity
   const alertTone = (() => {
     if (statsView === 'agents') {
-      if (agentActivity.activeAgents > 5) return 'text-amber-600 bg-amber-100 border-amber-200'
-      if (agentActivity.activeAgents > 0) return 'text-emerald-600 bg-emerald-100 border-emerald-200'
+      if (agentActivity.activeAgents > 5)
+        return 'text-amber-600 bg-amber-100 border-amber-200'
+      if (agentActivity.activeAgents > 0)
+        return 'text-emerald-600 bg-emerald-100 border-emerald-200'
       return 'text-primary-600 bg-primary-50 border-primary-200'
     }
     if (statsView === 'provider' && primaryProvider) {
-      const allProgress = primaryProvider.lines.filter(l => l.type === 'progress' && l.format === 'percent' && l.used !== undefined)
-      const maxPct = allProgress.reduce((max, l) => Math.max(max, l.used ?? 0), 0)
+      const allProgress = primaryProvider.lines.filter(
+        (l) =>
+          l.type === 'progress' &&
+          l.format === 'percent' &&
+          l.used !== undefined,
+      )
+      const maxPct = allProgress.reduce(
+        (max, l) => Math.max(max, l.used ?? 0),
+        0,
+      )
       if (maxPct >= 75) return 'text-red-600 bg-red-100 border-red-200'
       if (maxPct >= 50) return 'text-amber-600 bg-amber-100 border-amber-200'
       return 'text-emerald-600 bg-emerald-100 border-emerald-200'
@@ -631,7 +665,16 @@ export function UsageMeter() {
       preferredProvider,
       onSetPreferredProvider: handleSetPreferredProvider,
     }),
-    [error, providerError, providerUpdatedAt, providerUsage, usage, refreshProviders, preferredProvider, handleSetPreferredProvider],
+    [
+      error,
+      providerError,
+      providerUpdatedAt,
+      providerUsage,
+      usage,
+      refreshProviders,
+      preferredProvider,
+      handleSetPreferredProvider,
+    ],
   )
 
   const handleStatsViewChange = (view: StatsView) => {
@@ -646,19 +689,27 @@ export function UsageMeter() {
         return (
           <>
             <div className="flex items-center gap-1">
-              <span className="text-[10px] uppercase tracking-wide text-primary-600">In</span>
+              <span className="text-[10px] uppercase tracking-wide text-primary-600">
+                In
+              </span>
               <span>{formatTokens(usage.inputTokens)}</span>
             </div>
             <div className="flex items-center gap-1">
-              <span className="text-[10px] uppercase tracking-wide text-primary-600">Out</span>
+              <span className="text-[10px] uppercase tracking-wide text-primary-600">
+                Out
+              </span>
               <span>{formatTokens(usage.outputTokens)}</span>
             </div>
             <div className="flex items-center gap-1">
-              <span className="text-[10px] uppercase tracking-wide text-primary-600">Ctx</span>
+              <span className="text-[10px] uppercase tracking-wide text-primary-600">
+                Ctx
+              </span>
               <span>{Math.round(usage.contextPercent)}%</span>
             </div>
             <div className="flex items-center gap-1">
-              <span className="text-[10px] uppercase tracking-wide text-primary-600">Cost</span>
+              <span className="text-[10px] uppercase tracking-wide text-primary-600">
+                Cost
+              </span>
               <span>{formatCurrency(usage.dailyCost)}</span>
             </div>
           </>
@@ -673,18 +724,28 @@ export function UsageMeter() {
                   {primaryProvider.displayName.split(' ')[0]}
                 </span>
                 {primaryProvider.plan && (
-                  <span className="text-[9px] uppercase text-primary-500">{primaryProvider.plan}</span>
+                  <span className="text-[9px] uppercase text-primary-500">
+                    {primaryProvider.plan}
+                  </span>
                 )}
               </div>
               {providerProgressLines.slice(0, 3).map((line, i) => (
-                <div key={`${line.label}-${i}`} className="flex items-center gap-1">
+                <div
+                  key={`${line.label}-${i}`}
+                  className="flex items-center gap-1"
+                >
                   <span className="text-[10px] uppercase tracking-wide text-primary-600">
-                    {line.label.replace('Session (5h)', 'Sess').replace('Weekly', 'Wk').replace('Sonnet', 'Son')}
+                    {line.label
+                      .replace('Session (5h)', 'Sess')
+                      .replace('Weekly', 'Wk')
+                      .replace('Sonnet', 'Son')}
                   </span>
                   <span>
                     {line.format === 'dollars' && line.used !== undefined
                       ? `$${line.used >= 1000 ? `${(line.used / 1000).toFixed(1)}k` : line.used.toFixed(0)}`
-                      : line.used !== undefined ? `${Math.round(line.used)}%` : '—'}
+                      : line.used !== undefined
+                        ? `${Math.round(line.used)}%`
+                        : '—'}
                   </span>
                 </div>
               ))}
@@ -698,38 +759,51 @@ export function UsageMeter() {
             <>
               {providers.slice(0, 3).map(([name, tokens]) => (
                 <div key={name} className="flex items-center gap-1">
-                  <span className="text-[10px] uppercase tracking-wide text-primary-600">{name}</span>
+                  <span className="text-[10px] uppercase tracking-wide text-primary-600">
+                    {name}
+                  </span>
                   <span>{formatTokens(tokens.input)}</span>
                 </div>
               ))}
             </>
           )
         }
-        return <span className="text-[10px] text-primary-500">No provider data</span>
+        return (
+          <span className="text-[10px] text-primary-500">No provider data</span>
+        )
       }
 
       case 'cost': {
         if (usage.models.length > 0) {
-          const sortedModels = [...usage.models].sort((a, b) => b.costUsd - a.costUsd)
+          const sortedModels = [...usage.models].sort(
+            (a, b) => b.costUsd - a.costUsd,
+          )
           return (
             <>
               {sortedModels.slice(0, 3).map((model) => (
                 <div key={model.model} className="flex items-center gap-1">
                   <span className="text-[10px] uppercase tracking-wide text-primary-600">
-                    {model.model.replace('claude-', '').replace('gpt-', '').slice(0, 8)}
+                    {model.model
+                      .replace('claude-', '')
+                      .replace('gpt-', '')
+                      .slice(0, 8)}
                   </span>
                   <span>{formatCurrency(model.costUsd)}</span>
                 </div>
               ))}
               {usage.models.length > 3 && (
-                <span className="text-[10px] text-primary-500">+{usage.models.length - 3}</span>
+                <span className="text-[10px] text-primary-500">
+                  +{usage.models.length - 3}
+                </span>
               )}
             </>
           )
         }
         return (
           <div className="flex items-center gap-1">
-            <span className="text-[10px] uppercase tracking-wide text-primary-600">Total</span>
+            <span className="text-[10px] uppercase tracking-wide text-primary-600">
+              Total
+            </span>
             <span>{formatCurrency(usage.dailyCost)}</span>
           </div>
         )
@@ -739,15 +813,21 @@ export function UsageMeter() {
         return (
           <>
             <div className="flex items-center gap-1">
-              <span className="text-[10px] uppercase tracking-wide text-primary-600">Active</span>
+              <span className="text-[10px] uppercase tracking-wide text-primary-600">
+                Active
+              </span>
               <span>{agentActivity.activeAgents}</span>
             </div>
             <div className="flex items-center gap-1">
-              <span className="text-[10px] uppercase tracking-wide text-primary-600">Spawned</span>
+              <span className="text-[10px] uppercase tracking-wide text-primary-600">
+                Spawned
+              </span>
               <span>{agentActivity.totalSpawned}</span>
             </div>
             <div className="flex items-center gap-1">
-              <span className="text-[10px] uppercase tracking-wide text-primary-600">Cost</span>
+              <span className="text-[10px] uppercase tracking-wide text-primary-600">
+                Cost
+              </span>
               <span>{formatCurrency(agentActivity.totalAgentCost)}</span>
             </div>
           </>
@@ -760,55 +840,51 @@ export function UsageMeter() {
 
   return (
     <>
-    <MenuRoot>
-      <MenuTrigger
-        className={cn(
-          'ml-auto rounded-full border px-3 py-1 text-xs font-medium',
-          'flex items-center gap-3 transition hover:bg-primary-100 cursor-pointer',
-          alertTone,
-        )}
-        data-tour="usage-meter"
-      >
-        <span className="text-[9px] uppercase tracking-widest text-primary-500 opacity-75">
-          {STATS_VIEW_LABELS[statsView].split(' ')[0]}
-        </span>
-        <span className="text-primary-300">|</span>
-        {renderPillContent()}
-      </MenuTrigger>
-      <MenuContent align="end" className="min-w-[180px]">
-        {(['session', 'provider', 'cost', 'agents'] as const).map((view) => (
-          <MenuItem
-            key={view}
-            onClick={() => handleStatsViewChange(view)}
-            className={cn(
-              statsView === view && 'bg-amber-100 text-amber-800',
-            )}
-          >
-            <span className="flex-1">{STATS_VIEW_LABELS[view]}</span>
-            {statsView === view && (
-              <span className="text-amber-600">✓</span>
-            )}
-          </MenuItem>
-        ))}
-        <div className="my-1 h-px bg-primary-100" />
-        <MenuItem onClick={() => setOpen(true)}>
-          View Details…
-        </MenuItem>
-      </MenuContent>
-    </MenuRoot>
+      <MenuRoot>
+        <MenuTrigger
+          className={cn(
+            'ml-auto rounded-full border px-3 py-1 text-xs font-medium',
+            'flex items-center gap-3 transition hover:bg-primary-100 cursor-pointer',
+            alertTone,
+          )}
+          data-tour="usage-meter"
+        >
+          <span className="text-[9px] uppercase tracking-widest text-primary-500 opacity-75">
+            {STATS_VIEW_LABELS[statsView].split(' ')[0]}
+          </span>
+          <span className="text-primary-300">|</span>
+          {renderPillContent()}
+        </MenuTrigger>
+        <MenuContent align="end" className="min-w-[180px]">
+          {(['session', 'provider', 'cost', 'agents'] as const).map((view) => (
+            <MenuItem
+              key={view}
+              onClick={() => handleStatsViewChange(view)}
+              className={cn(
+                statsView === view && 'bg-amber-100 text-amber-800',
+              )}
+            >
+              <span className="flex-1">{STATS_VIEW_LABELS[view]}</span>
+              {statsView === view && <span className="text-amber-600">✓</span>}
+            </MenuItem>
+          ))}
+          <div className="my-1 h-px bg-primary-100" />
+          <MenuItem onClick={() => setOpen(true)}>View Details…</MenuItem>
+        </MenuContent>
+      </MenuRoot>
 
-    <DialogRoot open={open} onOpenChange={setOpen}>
-      <DialogContent className="w-[min(720px,94vw)]">
-        <UsageDetailsModal {...detailProps} />
-      </DialogContent>
-    </DialogRoot>
+      <DialogRoot open={open} onOpenChange={setOpen}>
+        <DialogContent className="w-[min(720px,94vw)]">
+          <UsageDetailsModal {...detailProps} />
+        </DialogContent>
+      </DialogRoot>
 
-    <ContextAlertModal
-      open={contextAlert.open}
-      onClose={() => setContextAlert({ open: false, threshold: 0 })}
-      threshold={contextAlert.threshold}
-      contextPercent={usage.contextPercent}
-    />
+      <ContextAlertModal
+        open={contextAlert.open}
+        onClose={() => setContextAlert({ open: false, threshold: 0 })}
+        threshold={contextAlert.threshold}
+        contextPercent={usage.contextPercent}
+      />
     </>
   )
 }

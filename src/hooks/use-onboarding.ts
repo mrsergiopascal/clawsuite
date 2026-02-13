@@ -1,5 +1,8 @@
 import { create } from 'zustand'
-import { STORAGE_KEY, ONBOARDING_STEPS } from '@/components/onboarding/onboarding-steps'
+import {
+  STORAGE_KEY,
+  ONBOARDING_STEPS,
+} from '@/components/onboarding/onboarding-steps'
 
 type OnboardingState = {
   isOpen: boolean

@@ -52,11 +52,15 @@ export function CronJobCard({
     >
       <header className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h3 className="line-clamp-1 text-base font-medium text-ink text-balance">{job.name}</h3>
+          <h3 className="line-clamp-1 text-base font-medium text-ink text-balance">
+            {job.name}
+          </h3>
           <p className="mt-1 line-clamp-1 text-sm text-primary-600 text-pretty">
             {formatCronHuman(job.schedule)}
           </p>
-          <p className="mt-1 truncate text-xs text-primary-600 tabular-nums">{job.schedule}</p>
+          <p className="mt-1 truncate text-xs text-primary-600 tabular-nums">
+            {job.schedule}
+          </p>
         </div>
 
         <span
@@ -145,7 +149,9 @@ export function CronJobCard({
           }}
           className="w-full justify-between border border-primary-200 bg-primary-100/50 text-primary-800"
         >
-          <span className="tabular-nums">{expanded ? 'Hide Details' : 'View Details & History'}</span>
+          <span className="tabular-nums">
+            {expanded ? 'Hide Details' : 'View Details & History'}
+          </span>
           <HugeiconsIcon
             icon={expanded ? ArrowUp01Icon : ArrowDown01Icon}
             size={20}
@@ -154,7 +160,9 @@ export function CronJobCard({
         </Button>
       </div>
 
-      <AnimatePresence initial={false}>{expanded ? children : null}</AnimatePresence>
+      <AnimatePresence initial={false}>
+        {expanded ? children : null}
+      </AnimatePresence>
     </motion.article>
   )
 }

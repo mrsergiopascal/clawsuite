@@ -59,10 +59,15 @@ const statusDotColor: Record<string, string> = {
 
 function AgentRosterItem({ session }: { session: SwarmSession }) {
   const key = session.key ?? session.friendlyId ?? ''
-  const persona = assignPersona(key, session.task ?? session.initialMessage ?? session.label ?? '')
+  const persona = assignPersona(
+    key,
+    session.task ?? session.initialMessage ?? session.label ?? '',
+  )
   const colors = PERSONA_COLORS[persona.name]
-  const tokens = session.usage?.totalTokens ?? session.totalTokens ?? session.tokenCount ?? 0
-  const isActive = session.swarmStatus === 'running' || session.swarmStatus === 'thinking'
+  const tokens =
+    session.usage?.totalTokens ?? session.totalTokens ?? session.tokenCount ?? 0
+  const isActive =
+    session.swarmStatus === 'running' || session.swarmStatus === 'thinking'
 
   return (
     <motion.div
@@ -75,7 +80,9 @@ function AgentRosterItem({ session }: { session: SwarmSession }) {
       {/* Color dot avatar */}
       <div
         className="flex size-8 shrink-0 items-center justify-center rounded-full text-sm"
-        style={{ backgroundColor: colors?.body ? `${colors.body}30` : '#6b728030' }}
+        style={{
+          backgroundColor: colors?.body ? `${colors.body}30` : '#6b728030',
+        }}
       >
         {persona.emoji}
       </div>
@@ -83,8 +90,16 @@ function AgentRosterItem({ session }: { session: SwarmSession }) {
       {/* Info */}
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5">
-          <span className={cn('text-xs font-semibold', persona.color)}>{persona.name}</span>
-          <div className={cn('size-1.5 rounded-full', statusDotColor[session.swarmStatus], isActive && 'animate-pulse')} />
+          <span className={cn('text-xs font-semibold', persona.color)}>
+            {persona.name}
+          </span>
+          <div
+            className={cn(
+              'size-1.5 rounded-full',
+              statusDotColor[session.swarmStatus],
+              isActive && 'animate-pulse',
+            )}
+          />
         </div>
         <p className="truncate text-[10px] text-slate-500">{persona.role}</p>
       </div>
@@ -92,16 +107,28 @@ function AgentRosterItem({ session }: { session: SwarmSession }) {
       {/* Stats */}
       <div className="shrink-0 text-right">
         <div className="text-[10px] text-slate-400">{formatTokens(tokens)}</div>
-        <div className="text-[10px] text-slate-500">{formatAge(session.staleness)}</div>
+        <div className="text-[10px] text-slate-500">
+          {formatAge(session.staleness)}
+        </div>
       </div>
     </motion.div>
   )
 }
 
-function ActivityFeedItem({ session, index }: { session: SwarmSession; index: number }) {
+function ActivityFeedItem({
+  session,
+  index,
+}: {
+  session: SwarmSession
+  index: number
+}) {
   const key = session.key ?? session.friendlyId ?? ''
-  const persona = assignPersona(key, session.task ?? session.initialMessage ?? session.label ?? '')
-  const task = session.task ?? session.initialMessage ?? session.label ?? 'Working...'
+  const persona = assignPersona(
+    key,
+    session.task ?? session.initialMessage ?? session.label ?? '',
+  )
+  const task =
+    session.task ?? session.initialMessage ?? session.label ?? 'Working...'
 
   return (
     <motion.div
@@ -110,32 +137,44 @@ function ActivityFeedItem({ session, index }: { session: SwarmSession; index: nu
       transition={{ delay: index * 0.05 }}
       className="flex gap-2 py-1.5"
     >
-      <span className="shrink-0 text-xs">{statusIcon[session.swarmStatus]}</span>
+      <span className="shrink-0 text-xs">
+        {statusIcon[session.swarmStatus]}
+      </span>
       <div className="min-w-0 flex-1">
-        <span className={cn('text-[11px] font-semibold', persona.color)}>{persona.name}</span>
+        <span className={cn('text-[11px] font-semibold', persona.color)}>
+          {persona.name}
+        </span>
         <span className="text-[11px] text-slate-500"> — </span>
         <span className={cn('text-[11px]', statusColor[session.swarmStatus])}>
           {session.swarmStatus === 'running' ? 'working' : session.swarmStatus}
         </span>
         <p className="truncate text-[10px] text-slate-500 mt-0.5">{task}</p>
       </div>
-      <span className="shrink-0 text-[9px] text-slate-600">{formatAge(session.staleness)}</span>
+      <span className="shrink-0 text-[9px] text-slate-600">
+        {formatAge(session.staleness)}
+      </span>
     </motion.div>
   )
 }
 
 export function ActivityPanel({ sessions, className }: ActivityPanelProps) {
   const totalTokens = useMemo(
-    () => sessions.reduce((sum, s) => sum + (s.usage?.totalTokens ?? s.totalTokens ?? 0), 0),
+    () =>
+      sessions.reduce(
+        (sum, s) => sum + (s.usage?.totalTokens ?? s.totalTokens ?? 0),
+        0,
+      ),
     [sessions],
   )
   const totalCost = useMemo(
     () => sessions.reduce((sum, s) => sum + (s.usage?.cost ?? s.cost ?? 0), 0),
     [sessions],
   )
-  const active = sessions.filter(s => s.swarmStatus === 'running' || s.swarmStatus === 'thinking')
-  const completed = sessions.filter(s => s.swarmStatus === 'complete')
-  const failed = sessions.filter(s => s.swarmStatus === 'failed')
+  const active = sessions.filter(
+    (s) => s.swarmStatus === 'running' || s.swarmStatus === 'thinking',
+  )
+  const completed = sessions.filter((s) => s.swarmStatus === 'complete')
+  const failed = sessions.filter((s) => s.swarmStatus === 'failed')
 
   // Recent activity: sorted by staleness (most recent first)
   const recentActivity = useMemo(
@@ -144,7 +183,12 @@ export function ActivityPanel({ sessions, className }: ActivityPanelProps) {
   )
 
   return (
-    <div className={cn('flex h-full flex-col gap-3 overflow-y-auto bg-[#0d1117] p-3 text-white', className)}>
+    <div
+      className={cn(
+        'flex h-full flex-col gap-3 overflow-y-auto bg-[#0d1117] p-3 text-white',
+        className,
+      )}
+    >
       {/* Stats Grid */}
       <div className="grid grid-cols-2 gap-2">
         <div className="rounded-lg border border-blue-500/20 bg-blue-500/10 px-3 py-2 text-center">
@@ -152,15 +196,21 @@ export function ActivityPanel({ sessions, className }: ActivityPanelProps) {
           <div className="text-[10px] text-blue-300/70">Active</div>
         </div>
         <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-center">
-          <div className="text-lg font-bold text-emerald-400">{completed.length}</div>
+          <div className="text-lg font-bold text-emerald-400">
+            {completed.length}
+          </div>
           <div className="text-[10px] text-emerald-300/70">Done</div>
         </div>
         <div className="rounded-lg border border-accent-500/20 bg-accent-500/10 px-3 py-2 text-center">
-          <div className="text-lg font-bold text-accent-400">{formatTokens(totalTokens)}</div>
+          <div className="text-lg font-bold text-accent-400">
+            {formatTokens(totalTokens)}
+          </div>
           <div className="text-[10px] text-accent-300/70">Tokens</div>
         </div>
         <div className="rounded-lg border border-slate-500/20 bg-slate-500/10 px-3 py-2 text-center">
-          <div className="text-lg font-bold text-slate-300">{formatCost(totalCost)}</div>
+          <div className="text-lg font-bold text-slate-300">
+            {formatCost(totalCost)}
+          </div>
           <div className="text-[10px] text-slate-400">Cost</div>
         </div>
       </div>
@@ -169,12 +219,17 @@ export function ActivityPanel({ sessions, className }: ActivityPanelProps) {
       <div>
         <h3 className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-slate-300">
           <span>👥</span> Agent Roster
-          <span className="ml-auto rounded-full bg-slate-700/50 px-1.5 text-[10px] text-slate-400">{sessions.length}</span>
+          <span className="ml-auto rounded-full bg-slate-700/50 px-1.5 text-[10px] text-slate-400">
+            {sessions.length}
+          </span>
         </h3>
         <div className="space-y-1.5">
           <AnimatePresence mode="popLayout">
-            {sessions.slice(0, 8).map(session => (
-              <AgentRosterItem key={session.key ?? session.friendlyId} session={session} />
+            {sessions.slice(0, 8).map((session) => (
+              <AgentRosterItem
+                key={session.key ?? session.friendlyId}
+                session={session}
+              />
             ))}
           </AnimatePresence>
           {sessions.length === 0 && (
@@ -209,10 +264,13 @@ export function ActivityPanel({ sessions, className }: ActivityPanelProps) {
           <div className="flex items-center gap-1.5 text-xs font-semibold text-red-400">
             ⚠️ {failed.length} Failed
           </div>
-          {failed.map(s => {
+          {failed.map((s) => {
             const p = assignPersona(s.key ?? '', s.task ?? '')
             return (
-              <div key={s.key ?? s.friendlyId} className="mt-1 text-[10px] text-red-300/70">
+              <div
+                key={s.key ?? s.friendlyId}
+                className="mt-1 text-[10px] text-red-300/70"
+              >
                 {p.name}: {s.task?.slice(0, 50) ?? 'Unknown task'}
               </div>
             )

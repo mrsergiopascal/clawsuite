@@ -15,7 +15,12 @@ import {
   getPageContent,
   cdpMouseClick,
 } from '../../server/browser-session'
-import { startProxy, stopProxy, getProxyUrl, getCurrentTarget } from '../../server/browser-proxy'
+import {
+  startProxy,
+  stopProxy,
+  getProxyUrl,
+  getCurrentTarget,
+} from '../../server/browser-proxy'
 import { startBrowserStream } from '../../server/browser-stream'
 
 export const Route = createFileRoute('/api/browser')({
@@ -27,22 +32,36 @@ export const Route = createFileRoute('/api/browser')({
 
         if (action === 'status' || action === 'proxy-status') {
           try {
-            return json({ ok: true, proxyUrl: getProxyUrl(), target: getCurrentTarget() })
+            return json({
+              ok: true,
+              proxyUrl: getProxyUrl(),
+              target: getCurrentTarget(),
+            })
           } catch (err) {
             return json(
-              { ok: false, error: err instanceof Error ? err.message : String(err) },
+              {
+                ok: false,
+                error: err instanceof Error ? err.message : String(err),
+              },
               { status: 500 },
             )
           }
         }
 
-        return json({ error: `Unsupported GET action: ${action}` }, { status: 400 })
+        return json(
+          { error: `Unsupported GET action: ${action}` },
+          { status: 400 },
+        )
       },
 
       POST: async ({ request }) => {
         try {
-          const body = (await request.json().catch(() => ({}))) as Record<string, unknown>
-          const action = typeof body.action === 'string' ? body.action.trim() : ''
+          const body = (await request.json().catch(() => ({}))) as Record<
+            string,
+            unknown
+          >
+          const action =
+            typeof body.action === 'string' ? body.action.trim() : ''
 
           switch (action) {
             case 'launch': {
@@ -57,7 +76,8 @@ export const Route = createFileRoute('/api/browser')({
 
             case 'navigate': {
               const url = typeof body.url === 'string' ? body.url.trim() : ''
-              if (!url) return json({ error: 'url is required' }, { status: 400 })
+              if (!url)
+                return json({ error: 'url is required' }, { status: 400 })
               const state = await navigate(url)
               return json({ ok: true, ...state })
             }
@@ -78,7 +98,8 @@ export const Route = createFileRoute('/api/browser')({
 
             case 'press': {
               const key = typeof body.key === 'string' ? body.key : ''
-              if (!key) return json({ error: 'key is required' }, { status: 400 })
+              if (!key)
+                return json({ error: 'key is required' }, { status: 400 })
               const state = await pressKey(key)
               return json({ ok: true, ...state })
             }
@@ -130,28 +151,50 @@ export const Route = createFileRoute('/api/browser')({
               const url = typeof body.url === 'string' ? body.url.trim() : ''
               if (!url) return json({ error: 'url required' }, { status: 400 })
               let normalizedUrl = url
-              if (!normalizedUrl.match(/^https?:\/\//)) normalizedUrl = `https://${normalizedUrl}`
+              if (!normalizedUrl.match(/^https?:\/\//))
+                normalizedUrl = `https://${normalizedUrl}`
               // Navigate the proxy
               const proxyUrl = getProxyUrl()
-              await fetch(`${proxyUrl}/__proxy__/navigate?url=${encodeURIComponent(normalizedUrl)}`)
-              return json({ ok: true, proxyUrl, iframeSrc: `${proxyUrl}/?url=${encodeURIComponent(normalizedUrl)}`, url: normalizedUrl })
+              await fetch(
+                `${proxyUrl}/__proxy__/navigate?url=${encodeURIComponent(normalizedUrl)}`,
+              )
+              return json({
+                ok: true,
+                proxyUrl,
+                iframeSrc: `${proxyUrl}/?url=${encodeURIComponent(normalizedUrl)}`,
+                url: normalizedUrl,
+              })
             }
 
             case 'proxy-status': {
-              return json({ ok: true, proxyUrl: getProxyUrl(), target: getCurrentTarget() })
+              return json({
+                ok: true,
+                proxyUrl: getProxyUrl(),
+                target: getCurrentTarget(),
+              })
             }
 
             case 'stream-start': {
               const result = await startBrowserStream()
-              return json({ ok: true, wsUrl: `ws://localhost:${result.port}`, ...result })
+              return json({
+                ok: true,
+                wsUrl: `ws://localhost:${result.port}`,
+                ...result,
+              })
             }
 
             default:
-              return json({ error: `Unknown action: ${action}` }, { status: 400 })
+              return json(
+                { error: `Unknown action: ${action}` },
+                { status: 400 },
+              )
           }
         } catch (err) {
           return json(
-            { ok: false, error: err instanceof Error ? err.message : String(err) },
+            {
+              ok: false,
+              error: err instanceof Error ? err.message : String(err),
+            },
             { status: 500 },
           )
         }

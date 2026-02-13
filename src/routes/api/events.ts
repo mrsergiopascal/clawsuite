@@ -1,5 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { ensureActivityStreamStarted, getActivityStreamStatus } from '../../server/activity-stream'
+import {
+  ensureActivityStreamStarted,
+  getActivityStreamStatus,
+} from '../../server/activity-stream'
 import { offEvent, onEvent } from '../../server/activity-events'
 import type { ActivityEvent } from '../../types/activity-event'
 

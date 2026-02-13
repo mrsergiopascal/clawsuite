@@ -247,9 +247,9 @@ export function buildUsageSummary(
     .map(function mapPercent(provider) {
       return provider.percentUsed
     })
-    .filter(function hasPercent(
-      percent,
-    ): percent is NonNullable<UsageProviderSummary['percentUsed']> {
+    .filter(function hasPercent(percent): percent is NonNullable<
+      UsageProviderSummary['percentUsed']
+    > {
       return typeof percent === 'number' && Number.isFinite(percent)
     })
 
@@ -258,7 +258,9 @@ export function buildUsageSummary(
     total: {
       ...totals,
       percentUsed:
-        percentCandidates.length > 0 ? Math.max(...percentCandidates) : undefined,
+        percentCandidates.length > 0
+          ? Math.max(...percentCandidates)
+          : undefined,
     },
     byProvider,
   }

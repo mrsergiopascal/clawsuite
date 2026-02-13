@@ -51,19 +51,29 @@ export function DashboardGlassCard({
       aria-label={title}
       className={cn(
         'group flex h-full flex-col overflow-hidden rounded-xl border transition-colors',
-        tier === 'primary' && 'border-primary-200 bg-primary-50 px-4 py-3.5 hover:border-primary-300 dark:bg-primary-50/95 md:px-5 md:py-4',
-        tier === 'secondary' && 'border-primary-200 bg-primary-50/90 px-3.5 py-3 hover:border-primary-300 dark:bg-primary-50/95 md:px-4 md:py-3',
-        tier === 'tertiary' && 'border-primary-200/80 bg-primary-50/70 px-3 py-2.5 hover:border-primary-200 dark:bg-primary-50/80 md:px-3.5 md:py-2.5',
+        tier === 'primary' &&
+          'border-primary-200 bg-primary-50 px-4 py-3.5 hover:border-primary-300 dark:bg-primary-50/95 md:px-5 md:py-4',
+        tier === 'secondary' &&
+          'border-primary-200 bg-primary-50/90 px-3.5 py-3 hover:border-primary-300 dark:bg-primary-50/95 md:px-4 md:py-3',
+        tier === 'tertiary' &&
+          'border-primary-200/80 bg-primary-50/70 px-3 py-2.5 hover:border-primary-200 dark:bg-primary-50/80 md:px-3.5 md:py-2.5',
         className,
       )}
     >
       <header className="mb-2 flex shrink-0 items-center justify-between gap-2">
         <div className="flex min-w-0 items-center gap-2">
-          <HugeiconsIcon icon={icon} size={15} strokeWidth={1.5} className="shrink-0 text-primary-400" />
+          <HugeiconsIcon
+            icon={icon}
+            size={15}
+            strokeWidth={1.5}
+            className="shrink-0 text-primary-400"
+          />
           <h2 className="truncate text-xs font-medium uppercase tracking-wide text-primary-500">
             {title}
             {titleAccessory ? (
-              <span className="ml-1.5 inline-flex align-middle normal-case tracking-normal">{titleAccessory}</span>
+              <span className="ml-1.5 inline-flex align-middle normal-case tracking-normal">
+                {titleAccessory}
+              </span>
             ) : null}
             {badge ? (
               <span className="ml-1.5 rounded bg-amber-100 px-1 py-px text-[10px] font-medium normal-case tracking-normal text-amber-700 dark:bg-amber-900/50 dark:text-amber-400">
@@ -91,13 +101,20 @@ export function DashboardGlassCard({
                 aria-label="Widget options"
                 title="Widget options"
               >
-                <HugeiconsIcon icon={MoreVerticalIcon} size={16} strokeWidth={1.5} />
+                <HugeiconsIcon
+                  icon={MoreVerticalIcon}
+                  size={16}
+                  strokeWidth={1.5}
+                />
               </button>
               {menuOpen ? (
                 <div className="absolute right-0 top-full z-50 mt-1 w-48 rounded-lg border border-primary-200 bg-primary-50 py-1 shadow-lg dark:bg-primary-100">
                   <button
                     type="button"
-                    onClick={() => { onRemove(); setMenuOpen(false) }}
+                    onClick={() => {
+                      onRemove()
+                      setMenuOpen(false)
+                    }}
                     className="w-full px-3 py-1.5 text-left text-xs text-primary-600 hover:bg-primary-100 dark:hover:bg-primary-200/50"
                   >
                     Remove from dashboard

@@ -21,7 +21,7 @@ setInterval(() => {
 export function rateLimit(
   key: string,
   maxRequests: number,
-  windowMs: number
+  windowMs: number,
 ): boolean {
   const now = Date.now()
   let entry = store.get(key)
@@ -59,7 +59,7 @@ export function rateLimitResponse(): Response {
     {
       status: 429,
       headers: { 'Content-Type': 'application/json' },
-    }
+    },
   )
 }
 

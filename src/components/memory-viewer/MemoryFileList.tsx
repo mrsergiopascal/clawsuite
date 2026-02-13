@@ -75,7 +75,9 @@ function MemoryFileList({
         <div className="mb-2 flex items-center justify-between gap-2">
           <div className="flex min-w-0 items-center gap-2">
             <HugeiconsIcon icon={BrainIcon} size={20} strokeWidth={1.5} />
-            <h2 className="truncate text-sm font-medium text-balance">Memory Files</h2>
+            <h2 className="truncate text-sm font-medium text-balance">
+              Memory Files
+            </h2>
           </div>
           <div className="flex items-center gap-1">
             <Button
@@ -133,7 +135,11 @@ function MemoryFileList({
               ) : null}
               <div className="rounded-lg border border-primary-200 bg-primary-50/70 p-1">
                 <div className="flex items-center gap-2 px-2 py-1.5 text-xs font-medium text-primary-700 tabular-nums">
-                  <HugeiconsIcon icon={Folder01Icon} size={20} strokeWidth={1.5} />
+                  <HugeiconsIcon
+                    icon={Folder01Icon}
+                    size={20}
+                    strokeWidth={1.5}
+                  />
                   <span className="truncate">memory/</span>
                 </div>
                 {groups.length === 0 ? (
@@ -210,7 +216,9 @@ function MemoryRow({
       </div>
       <div className="mt-1 grid grid-cols-2 gap-x-2 text-[11px] text-primary-600 tabular-nums">
         <span className="truncate">{formatSize(file.size)}</span>
-        <span className="truncate text-right">{formatModifiedAt(file.modifiedAt)}</span>
+        <span className="truncate text-right">
+          {formatModifiedAt(file.modifiedAt)}
+        </span>
       </div>
     </button>
   )

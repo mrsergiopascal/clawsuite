@@ -62,7 +62,11 @@ export function formatRelativeTimestamp(timestamp: number): string {
   return `${days}d ago`
 }
 
-export const ActivityEventRow = memo(function ActivityEventRow({ event }: { event: ActivityEvent }) {
+export const ActivityEventRow = memo(function ActivityEventRow({
+  event,
+}: {
+  event: ActivityEvent
+}) {
   return (
     <article
       className={cn(
@@ -79,7 +83,11 @@ export const ActivityEventRow = memo(function ActivityEventRow({ event }: { even
         />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-1.5">
-            <HugeiconsIcon icon={getEventIcon(event.type)} size={20} strokeWidth={1.5} />
+            <HugeiconsIcon
+              icon={getEventIcon(event.type)}
+              size={20}
+              strokeWidth={1.5}
+            />
             <span className="rounded-md border border-primary-200 bg-primary-100/70 px-1.5 py-0.5 text-[11px] text-primary-700 tabular-nums">
               {getTypeLabel(event.type)}
             </span>

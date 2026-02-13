@@ -23,13 +23,10 @@ export const Route = createFileRoute('/api/usage')({
         try {
           const configuredProviders = getConfiguredProviderNames()
 
-          const sessionsUsagePayload = await gatewayRpc(
-            'sessions.usage',
-            {
-              limit: 1000,
-              includeContextWeight: true,
-            },
-          )
+          const sessionsUsagePayload = await gatewayRpc('sessions.usage', {
+            limit: 1000,
+            includeContextWeight: true,
+          })
 
           let usageStatusPayload: unknown
           try {

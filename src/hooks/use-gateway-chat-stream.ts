@@ -17,7 +17,9 @@ type UseGatewayChatStreamOptions = {
   onDone?: (state: string, sessionKey: string) => void
 }
 
-export function useGatewayChatStream(options: UseGatewayChatStreamOptions = {}) {
+export function useGatewayChatStream(
+  options: UseGatewayChatStreamOptions = {},
+) {
   const {
     sessionKey,
     enabled = true,
@@ -27,8 +29,9 @@ export function useGatewayChatStream(options: UseGatewayChatStreamOptions = {}) 
     onDone,
   } = options
 
-  const { connectionState, setConnectionState, processEvent, lastError } = useGatewayChatStore()
-  
+  const { connectionState, setConnectionState, processEvent, lastError } =
+    useGatewayChatStore()
+
   const eventSourceRef = useRef<EventSource | null>(null)
   const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const reconnectAttempts = useRef(0)
@@ -36,24 +39,24 @@ export function useGatewayChatStream(options: UseGatewayChatStreamOptions = {}) 
 
   const connect = useCallback(() => {
     if (!enabled || !mountedRef.current) return
-    
+
     // Clean up existing connection
     if (eventSourceRef.current) {
       eventSourceRef.current.close()
       eventSourceRef.current = null
     }
-    
+
     if (reconnectTimeoutRef.current) {
       clearTimeout(reconnectTimeoutRef.current)
       reconnectTimeoutRef.current = null
     }
 
     setConnectionState('connecting')
-    
+
     const url = sessionKey
       ? `/api/chat-events?sessionKey=${encodeURIComponent(sessionKey)}`
       : '/api/chat-events'
-    
+
     const eventSource = new EventSource(url)
     eventSourceRef.current = eventSource
 
@@ -71,7 +74,7 @@ export function useGatewayChatStream(options: UseGatewayChatStreamOptions = {}) 
 
     eventSource.addEventListener('error', () => {
       if (!mountedRef.current) return
-      
+
       if (eventSource.readyState === EventSource.CLOSED) {
         setConnectionState('disconnected')
         scheduleReconnect()
@@ -88,7 +91,11 @@ export function useGatewayChatStream(options: UseGatewayChatStreamOptions = {}) 
     eventSource.addEventListener('chunk', (event) => {
       if (!mountedRef.current) return
       try {
-        const data = JSON.parse(event.data) as { text: string; runId?: string; sessionKey: string }
+        const data = JSON.parse(event.data) as {
+          text: string
+          runId?: string
+          sessionKey: string
+        }
         processEvent({ type: 'chunk', ...data })
         onChunk?.(data.text, data.sessionKey)
       } catch {
@@ -99,7 +106,11 @@ export function useGatewayChatStream(options: UseGatewayChatStreamOptions = {}) 
     eventSource.addEventListener('thinking', (event) => {
       if (!mountedRef.current) return
       try {
-        const data = JSON.parse(event.data) as { text: string; runId?: string; sessionKey: string }
+        const data = JSON.parse(event.data) as {
+          text: string
+          runId?: string
+          sessionKey: string
+        }
         processEvent({ type: 'thinking', ...data })
         onThinking?.(data.text, data.sessionKey)
       } catch {
@@ -172,18 +183,27 @@ export function useGatewayChatStream(options: UseGatewayChatStreamOptions = {}) 
     eventSource.addEventListener('state', () => {
       // State changes (started, thinking) - used for UI indicators
     })
-  }, [enabled, sessionKey, setConnectionState, processEvent, onUserMessage, onChunk, onThinking, onDone])
+  }, [
+    enabled,
+    sessionKey,
+    setConnectionState,
+    processEvent,
+    onUserMessage,
+    onChunk,
+    onThinking,
+    onDone,
+  ])
 
   const scheduleReconnect = useCallback(() => {
     if (!mountedRef.current || !enabled) return
-    
+
     if (reconnectTimeoutRef.current) {
       clearTimeout(reconnectTimeoutRef.current)
     }
-    
+
     const attempts = reconnectAttempts.current
     const delay = Math.min(1000 * Math.pow(2, attempts), 30000) // Exponential backoff, max 30s
-    
+
     reconnectTimeoutRef.current = setTimeout(() => {
       if (!mountedRef.current) return
       reconnectAttempts.current++
@@ -196,12 +216,12 @@ export function useGatewayChatStream(options: UseGatewayChatStreamOptions = {}) 
       eventSourceRef.current.close()
       eventSourceRef.current = null
     }
-    
+
     if (reconnectTimeoutRef.current) {
       clearTimeout(reconnectTimeoutRef.current)
       reconnectTimeoutRef.current = null
     }
-    
+
     setConnectionState('disconnected')
   }, [setConnectionState])
 
@@ -213,11 +233,11 @@ export function useGatewayChatStream(options: UseGatewayChatStreamOptions = {}) 
 
   useEffect(() => {
     mountedRef.current = true
-    
+
     if (enabled) {
       connect()
     }
-    
+
     return () => {
       mountedRef.current = false
       disconnect()

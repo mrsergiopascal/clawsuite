@@ -67,7 +67,11 @@ const CACHE_TTL_MS = 5 * 60 * 1000
 const HOME_DIR = os.homedir()
 const WORKSPACE_ROOT = path.join(HOME_DIR, '.openclaw', 'workspace')
 const INSTALLED_ROOT = path.join(WORKSPACE_ROOT, 'skills')
-const MARKETPLACE_ROOT = path.join(WORKSPACE_ROOT, 'openclaw-skills-registry', 'skills')
+const MARKETPLACE_ROOT = path.join(
+  WORKSPACE_ROOT,
+  'openclaw-skills-registry',
+  'skills',
+)
 
 const KNOWN_CATEGORIES = [
   'All',
@@ -110,7 +114,10 @@ const FEATURED_SKILLS: Array<{ id: string; group: string }> = [
   { id: 'saesak/openclaw-skill-gastown', group: 'New This Week' },
   { id: 'vvardhan14/pokerpal', group: 'New This Week' },
   { id: 'okoddcat/clawops', group: 'Developer Tools' },
-  { id: 'veeramanikandanr48/docker-containerization', group: 'Developer Tools' },
+  {
+    id: 'veeramanikandanr48/docker-containerization',
+    group: 'Developer Tools',
+  },
   { id: 'veeramanikandanr48/azure-auth', group: 'Developer Tools' },
   { id: 'dbalve/fastio-skills', group: 'Productivity' },
   { id: 'gillberto1/moltwallet', group: 'Productivity' },
@@ -185,7 +192,10 @@ function parseScalar(input: string): unknown {
   return value
 }
 
-function collectIndentedBlock(lines: Array<string>, startIndex: number): {
+function collectIndentedBlock(
+  lines: Array<string>,
+  startIndex: number,
+): {
   block: Array<string>
   nextIndex: number
 } {
@@ -224,7 +234,13 @@ function parseIndentedMap(block: Array<string>): Record<string, unknown> {
     const key = entryMatch[1]
     const value = entryMatch[2]
 
-    if (value === '' || value === '|' || value === '|-' || value === '>' || value === '>-') {
+    if (
+      value === '' ||
+      value === '|' ||
+      value === '|-' ||
+      value === '>' ||
+      value === '>-'
+    ) {
       const nested: Array<string> = []
       let nestedIndex = index + 1
       while (nestedIndex < block.length) {
@@ -299,7 +315,10 @@ function splitFrontmatter(markdown: string): {
 
   return {
     frontmatter: lines.slice(index + 1, end).join('\n'),
-    content: lines.slice(end + 1).join('\n').trim(),
+    content: lines
+      .slice(end + 1)
+      .join('\n')
+      .trim(),
   }
 }
 
@@ -336,7 +355,10 @@ function parseFrontmatter(frontmatter: string): ParsedFrontmatter {
 
     if (value === '') {
       const { block, nextIndex } = collectIndentedBlock(lines, index + 1)
-      if (block.length > 0 && block.some((item) => item.trim().startsWith('- '))) {
+      if (
+        block.length > 0 &&
+        block.some((item) => item.trim().startsWith('- '))
+      ) {
         parsed[key] = block
           .map((item) => item.match(/^\s*-\s+(.*)$/)?.[1] ?? '')
           .map((item) => stripQuotes(item))
@@ -354,7 +376,11 @@ function parseFrontmatter(frontmatter: string): ParsedFrontmatter {
 
   const metadataRaw = parsed.metadata
   let metadata: Record<string, unknown> = {}
-  if (metadataRaw && typeof metadataRaw === 'object' && !Array.isArray(metadataRaw)) {
+  if (
+    metadataRaw &&
+    typeof metadataRaw === 'object' &&
+    !Array.isArray(metadataRaw)
+  ) {
     metadata = metadataRaw as Record<string, unknown>
   }
 
@@ -421,45 +447,83 @@ function findTags(metadata: Record<string, unknown>): Array<string> {
   return Array.from(tags).slice(0, 4)
 }
 
-function deriveCategory(metadata: Record<string, unknown>, searchableText: string): string {
+function deriveCategory(
+  metadata: Record<string, unknown>,
+  searchableText: string,
+): string {
   const metadataCategory =
     typeof metadata.category === 'string' ? metadata.category.toLowerCase() : ''
   const lowerText = searchableText.toLowerCase()
 
-  if (metadataCategory.includes('frontend') || /react|vue|svelte|css|tailwind|next\.js|nextjs/.test(lowerText)) {
+  if (
+    metadataCategory.includes('frontend') ||
+    /react|vue|svelte|css|tailwind|next\.js|nextjs/.test(lowerText)
+  ) {
     return 'Web & Frontend'
   }
-  if (metadataCategory.includes('devops') || /docker|kubernetes|terraform|aws|gcp|azure|ci\/cd|k8s/.test(lowerText)) {
+  if (
+    metadataCategory.includes('devops') ||
+    /docker|kubernetes|terraform|aws|gcp|azure|ci\/cd|k8s/.test(lowerText)
+  ) {
     return 'DevOps & Cloud'
   }
-  if (metadataCategory.includes('git') || /git|github|gitlab|pull request|workflow/.test(lowerText)) {
+  if (
+    metadataCategory.includes('git') ||
+    /git|github|gitlab|pull request|workflow/.test(lowerText)
+  ) {
     return 'Git & GitHub'
   }
-  if (metadataCategory.includes('automation') || /browser|playwright|puppeteer|automation|scrape|selenium/.test(lowerText)) {
+  if (
+    metadataCategory.includes('automation') ||
+    /browser|playwright|puppeteer|automation|scrape|selenium/.test(lowerText)
+  ) {
     return 'Browser & Automation'
   }
-  if (metadataCategory.includes('image') || /image|video|photo|ffmpeg|render|media/.test(lowerText)) {
+  if (
+    metadataCategory.includes('image') ||
+    /image|video|photo|ffmpeg|render|media/.test(lowerText)
+  ) {
     return 'Image & Video'
   }
-  if (metadataCategory.includes('research') || /search|research|docs|knowledge|rag|summari/.test(lowerText)) {
+  if (
+    metadataCategory.includes('research') ||
+    /search|research|docs|knowledge|rag|summari/.test(lowerText)
+  ) {
     return 'Search & Research'
   }
-  if (metadataCategory.includes('ai') || /llm|agent|prompt|model|openai|anthropic|mcp/.test(lowerText)) {
+  if (
+    metadataCategory.includes('ai') ||
+    /llm|agent|prompt|model|openai|anthropic|mcp/.test(lowerText)
+  ) {
     return 'AI & LLMs'
   }
-  if (metadataCategory.includes('marketing') || /sales|crm|campaign|lead|seo|outreach/.test(lowerText)) {
+  if (
+    metadataCategory.includes('marketing') ||
+    /sales|crm|campaign|lead|seo|outreach/.test(lowerText)
+  ) {
     return 'Marketing & Sales'
   }
-  if (metadataCategory.includes('communication') || /slack|discord|email|notion|telegram|chat/.test(lowerText)) {
+  if (
+    metadataCategory.includes('communication') ||
+    /slack|discord|email|notion|telegram|chat/.test(lowerText)
+  ) {
     return 'Communication'
   }
-  if (metadataCategory.includes('finance') || /wallet|crypto|trading|payment|invoice|ledger/.test(lowerText)) {
+  if (
+    metadataCategory.includes('finance') ||
+    /wallet|crypto|trading|payment|invoice|ledger/.test(lowerText)
+  ) {
     return 'Finance & Crypto'
   }
-  if (metadataCategory.includes('data') || /analytics|dashboard|metric|sql|data/.test(lowerText)) {
+  if (
+    metadataCategory.includes('data') ||
+    /analytics|dashboard|metric|sql|data/.test(lowerText)
+  ) {
     return 'Data & Analytics'
   }
-  if (/coding|codegen|developer|build|lint|test|typescript|python/.test(lowerText)) {
+  if (
+    /coding|codegen|developer|build|lint|test|typescript|python/.test(lowerText)
+  ) {
     return 'Coding Agents'
   }
   return 'Productivity'
@@ -473,7 +537,10 @@ function deriveDescription(rawDescription: string, content: string): string {
   const candidate = content
     .split(/\r?\n/)
     .map((line) => line.trim())
-    .find((line) => line.length > 0 && !line.startsWith('#') && !line.startsWith('>'))
+    .find(
+      (line) =>
+        line.length > 0 && !line.startsWith('#') && !line.startsWith('>'),
+    )
 
   if (!candidate) {
     return 'No description provided.'
@@ -490,7 +557,9 @@ async function collectInstalledSkillEntries(): Promise<
     return entries
   }
 
-  async function collectSkillFoldersRecursively(basePath: string): Promise<Array<string>> {
+  async function collectSkillFoldersRecursively(
+    basePath: string,
+  ): Promise<Array<string>> {
     const folders: Array<string> = []
     const stack: Array<string> = [basePath]
 
@@ -503,7 +572,9 @@ async function collectInstalledSkillEntries(): Promise<
         folders.push(current)
       }
 
-      const nestedDirs = await fs.readdir(current, { withFileTypes: true }).catch(() => [])
+      const nestedDirs = await fs
+        .readdir(current, { withFileTypes: true })
+        .catch(() => [])
       for (const nested of nestedDirs) {
         if (!nested.isDirectory() || nested.name.startsWith('.')) continue
         stack.push(path.join(current, nested.name))
@@ -677,7 +748,10 @@ async function buildSkillsIndex(
       content,
       sourcePath: entry.folderPath,
       folderPath: entry.folderPath,
-      enabled: tab === 'installed' ? !(await pathExists(path.join(entry.folderPath, '.disabled'))) : true,
+      enabled:
+        tab === 'installed'
+          ? !(await pathExists(path.join(entry.folderPath, '.disabled')))
+          : true,
     })
   }
 
@@ -728,7 +802,10 @@ function matchesSearch(skill: SkillIndexRecord, search: string): boolean {
   return haystack.includes(search.toLowerCase())
 }
 
-function sortSkills(items: Array<SkillIndexRecord>, sort: SkillsSort): Array<SkillIndexRecord> {
+function sortSkills(
+  items: Array<SkillIndexRecord>,
+  sort: SkillsSort,
+): Array<SkillIndexRecord> {
   const cloned = [...items]
   if (sort === 'category') {
     cloned.sort((a, b) => {
@@ -745,35 +822,72 @@ function sortSkills(items: Array<SkillIndexRecord>, sort: SkillsSort): Array<Ski
 
 // ── Security Scanner ──────────────────────────────────────────────────────
 
-const SECURITY_PATTERNS: Array<{ pattern: RegExp; flag: string; weight: number }> = [
+const SECURITY_PATTERNS: Array<{
+  pattern: RegExp
+  flag: string
+  weight: number
+}> = [
   // High risk
   { pattern: /\bsudo\b/i, flag: 'Uses sudo/root access', weight: 30 },
   { pattern: /\brm\s+-rf?\b/i, flag: 'Deletes files (rm)', weight: 25 },
   { pattern: /\beval\b.*\(/i, flag: 'Uses eval()', weight: 25 },
   { pattern: /\bexec\b.*\(/i, flag: 'Executes shell commands', weight: 20 },
   { pattern: /\bchild_process\b/i, flag: 'Spawns child processes', weight: 20 },
-  { pattern: /\bProcess\.Start\b/i, flag: 'Starts system processes', weight: 20 },
+  {
+    pattern: /\bProcess\.Start\b/i,
+    flag: 'Starts system processes',
+    weight: 20,
+  },
   { pattern: /\bos\.system\b/i, flag: 'Runs OS commands', weight: 20 },
   { pattern: /\bsubprocess\b/i, flag: 'Runs subprocesses', weight: 20 },
   // Medium risk
-  { pattern: /\bcurl\b.*https?:/i, flag: 'Makes HTTP requests (curl)', weight: 15 },
+  {
+    pattern: /\bcurl\b.*https?:/i,
+    flag: 'Makes HTTP requests (curl)',
+    weight: 15,
+  },
   { pattern: /\bwget\b/i, flag: 'Downloads files (wget)', weight: 15 },
   { pattern: /\bfetch\s*\(/i, flag: 'Makes network requests', weight: 10 },
-  { pattern: /\brequests?\.(get|post|put|delete)\b/i, flag: 'Makes HTTP requests', weight: 10 },
+  {
+    pattern: /\brequests?\.(get|post|put|delete)\b/i,
+    flag: 'Makes HTTP requests',
+    weight: 10,
+  },
   { pattern: /\bapi[_-]?key\b/i, flag: 'Handles API keys', weight: 10 },
-  { pattern: /\b(secret|token|password|credential)\b/i, flag: 'Handles secrets/credentials', weight: 10 },
-  { pattern: /\bfs\.(write|unlink|rm|rmdir)\b/i, flag: 'Writes/deletes files', weight: 10 },
+  {
+    pattern: /\b(secret|token|password|credential)\b/i,
+    flag: 'Handles secrets/credentials',
+    weight: 10,
+  },
+  {
+    pattern: /\bfs\.(write|unlink|rm|rmdir)\b/i,
+    flag: 'Writes/deletes files',
+    weight: 10,
+  },
   { pattern: /\bchmod\b/i, flag: 'Changes file permissions', weight: 10 },
   // Low risk
-  { pattern: /\bfs\.(read|readFile|readdir)\b/i, flag: 'Reads files', weight: 3 },
-  { pattern: /\benv\b.*\b(HOME|PATH|USER)\b/i, flag: 'Reads environment variables', weight: 3 },
+  {
+    pattern: /\bfs\.(read|readFile|readdir)\b/i,
+    flag: 'Reads files',
+    weight: 3,
+  },
+  {
+    pattern: /\benv\b.*\b(HOME|PATH|USER)\b/i,
+    flag: 'Reads environment variables',
+    weight: 3,
+  },
   { pattern: /\binstall\b/i, flag: 'Installs packages', weight: 5 },
   { pattern: /\bnpm\b.*\binstall\b/i, flag: 'Runs npm install', weight: 5 },
   { pattern: /\bpip\b.*\binstall\b/i, flag: 'Runs pip install', weight: 5 },
 ]
 
-function scanSkillSecurity(content: string, allFileContents?: string): SecurityRisk {
-  const textToScan = allFileContents ? `${content}\n${allFileContents}` : content
+function scanSkillSecurity(
+  content: string,
+  allFileContents?: string,
+): SecurityRisk {
+  const textToScan = allFileContents
+    ? `${content}\n${allFileContents}`
+    : content
   const flags: Array<string> = []
   let score = 0
   const seen = new Set<string>()
@@ -794,16 +908,31 @@ function scanSkillSecurity(content: string, allFileContents?: string): SecurityR
   return { level, flags, score }
 }
 
-async function scanSkillFolder(folderPath: string, skillContent: string): Promise<SecurityRisk> {
+async function scanSkillFolder(
+  folderPath: string,
+  skillContent: string,
+): Promise<SecurityRisk> {
   // Scan SKILL.md content + all script files in the folder
   let allContent = ''
   try {
     const stack = [folderPath]
-    const scriptExtensions = new Set(['.sh', '.py', '.js', '.ts', '.mjs', '.ps1', '.bat', '.cmd', '.rb'])
+    const scriptExtensions = new Set([
+      '.sh',
+      '.py',
+      '.js',
+      '.ts',
+      '.mjs',
+      '.ps1',
+      '.bat',
+      '.cmd',
+      '.rb',
+    ])
     while (stack.length > 0) {
       const dir = stack.pop()
       if (!dir) break
-      const entries = await fs.readdir(dir, { withFileTypes: true }).catch(() => [])
+      const entries = await fs
+        .readdir(dir, { withFileTypes: true })
+        .catch(() => [])
       for (const entry of entries) {
         if (entry.name.startsWith('.')) continue
         const fullPath = path.join(dir, entry.name)
@@ -811,9 +940,16 @@ async function scanSkillFolder(folderPath: string, skillContent: string): Promis
           stack.push(fullPath)
         } else if (entry.isFile()) {
           const ext = path.extname(entry.name).toLowerCase()
-          if (scriptExtensions.has(ext) || entry.name === 'Makefile' || entry.name === 'Dockerfile') {
-            const fileContent = await fs.readFile(fullPath, 'utf8').catch(() => '')
-            if (fileContent.length < 50_000) { // Skip huge files
+          if (
+            scriptExtensions.has(ext) ||
+            entry.name === 'Makefile' ||
+            entry.name === 'Dockerfile'
+          ) {
+            const fileContent = await fs
+              .readFile(fullPath, 'utf8')
+              .catch(() => '')
+            if (fileContent.length < 50_000) {
+              // Skip huge files
               allContent += `\n${fileContent}`
             }
           }
@@ -840,10 +976,11 @@ async function inflateSkillSummaries(
     const fileCount = includeFileCount
       ? await countFilesInFolder(item.folderPath)
       : 0
-    const installed = installedLookup.has(item.name.toLowerCase())
-      || installedLookup.has(item.slug.toLowerCase())
-      || installedLookup.has(item.id.toLowerCase())
-      || installedLookup.has(path.basename(item.id).toLowerCase())
+    const installed =
+      installedLookup.has(item.name.toLowerCase()) ||
+      installedLookup.has(item.slug.toLowerCase()) ||
+      installedLookup.has(item.id.toLowerCase()) ||
+      installedLookup.has(path.basename(item.id).toLowerCase())
 
     const security = await scanSkillFolder(item.folderPath, item.content)
 
@@ -926,14 +1063,19 @@ async function installMarketplaceSkill(skillId: string) {
   let destinationPath = path.join(INSTALLED_ROOT, destinationBase)
   let sequence = 2
   while (await pathExists(destinationPath)) {
-    destinationPath = path.join(INSTALLED_ROOT, `${destinationBase}-${sequence}`)
+    destinationPath = path.join(
+      INSTALLED_ROOT,
+      `${destinationBase}-${sequence}`,
+    )
     sequence += 1
   }
 
   await fs.cp(sourcePath, destinationPath, { recursive: true })
 }
 
-async function resolveInstalledSkillPath(skillId: string): Promise<string | null> {
+async function resolveInstalledSkillPath(
+  skillId: string,
+): Promise<string | null> {
   const normalizedSkillId = skillId.trim().toLowerCase()
   if (!normalizedSkillId) return null
 
@@ -1056,7 +1198,8 @@ export const Route = createFileRoute('/api/skills')({
           const filtered = sortSkills(
             sourceItems.filter((skill) => {
               if (!matchesSearch(skill, rawSearch)) return false
-              if (category !== 'All' && skill.category !== category) return false
+              if (category !== 'All' && skill.category !== category)
+                return false
               return true
             }),
             sort,
@@ -1066,11 +1209,9 @@ export const Route = createFileRoute('/api/skills')({
           const start = (page - 1) * limit
           const paged = filtered.slice(start, start + limit)
 
-          const skills = await inflateSkillSummaries(
-            paged,
-            installedLookup,
-            { includeFileCount: summaryMode !== 'search' },
-          )
+          const skills = await inflateSkillSummaries(paged, installedLookup, {
+            includeFileCount: summaryMode !== 'search',
+          })
 
           return json({
             skills,

@@ -13,7 +13,8 @@ export function createOptimisticMessage(
   const clientId = crypto.randomUUID()
   const optimisticId = `opt-${clientId}`
   const timestamp = Date.now()
-  const textContent = body.length > 0 ? [{ type: 'text' as const, text: body }] : []
+  const textContent =
+    body.length > 0 ? [{ type: 'text' as const, text: body }] : []
 
   const optimisticMessage: GatewayMessage = {
     role: 'user',

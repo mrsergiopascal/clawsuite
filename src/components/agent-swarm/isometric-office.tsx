@@ -7,7 +7,10 @@ import { motion, AnimatePresence } from 'motion/react'
 import { useMemo } from 'react'
 import { PERSONA_COLORS, PixelAvatar } from './pixel-avatar'
 import { DESK_POSITIONS, LOCATIONS } from './agent-behaviors'
-import { useAgentBehaviors, type AgentBehaviorView } from '@/hooks/use-agent-behaviors'
+import {
+  useAgentBehaviors,
+  type AgentBehaviorView,
+} from '@/hooks/use-agent-behaviors'
 import { assignPersona } from '@/lib/agent-personas'
 import type { SwarmSession } from '@/stores/agent-swarm-store'
 import { cn } from '@/lib/utils'
@@ -33,7 +36,7 @@ function CheckeredFloor() {
           width="50"
           height="50"
           fill={isDark ? '#1a1a2e' : '#16213e'}
-        />
+        />,
       )
     }
   }
@@ -45,7 +48,11 @@ function Desk({ x, y }: { x: number; y: number }) {
   return (
     <div
       className="absolute flex flex-col items-center"
-      style={{ left: `${x}%`, top: `${y}%`, transform: 'translate(-50%, -50%)' }}
+      style={{
+        left: `${x}%`,
+        top: `${y}%`,
+        transform: 'translate(-50%, -50%)',
+      }}
     >
       {/* Monitor */}
       <div className="h-8 w-10 rounded-t-sm border border-blue-500/40 bg-slate-800/60">
@@ -104,7 +111,10 @@ function WaterCooler() {
   return (
     <div
       className="absolute flex flex-col items-center"
-      style={{ left: `${LOCATIONS.waterCooler.x}%`, top: `${LOCATIONS.waterCooler.y}%` }}
+      style={{
+        left: `${LOCATIONS.waterCooler.x}%`,
+        top: `${LOCATIONS.waterCooler.y}%`,
+      }}
     >
       <div className="h-5 w-3 rounded-t-sm bg-sky-300/60" />
       <div className="h-8 w-4 rounded-b-sm bg-slate-400/40" />
@@ -117,7 +127,10 @@ function CoffeeMachine() {
   return (
     <div
       className="absolute flex flex-col items-center"
-      style={{ left: `${LOCATIONS.coffeeMachine.x}%`, top: `${LOCATIONS.coffeeMachine.y}%` }}
+      style={{
+        left: `${LOCATIONS.coffeeMachine.x}%`,
+        top: `${LOCATIONS.coffeeMachine.y}%`,
+      }}
     >
       <div className="h-6 w-5 rounded-t-sm bg-amber-800/60 shadow-sm" />
       <div className="h-2 w-6 rounded-b-sm bg-amber-700/40" />
@@ -130,7 +143,10 @@ function LunchArea() {
   return (
     <div
       className="absolute flex flex-col items-center"
-      style={{ left: `${LOCATIONS.lunchArea.x}%`, top: `${LOCATIONS.lunchArea.y}%` }}
+      style={{
+        left: `${LOCATIONS.lunchArea.x}%`,
+        top: `${LOCATIONS.lunchArea.y}%`,
+      }}
     >
       <div className="h-3 w-10 rounded-sm bg-slate-500/30" />
       <div className="flex gap-1 mt-0.5">
@@ -165,15 +181,26 @@ function Clock() {
   const minutes = now.getMinutes().toString().padStart(2, '0')
   return (
     <div className="absolute right-[8%] top-[10%] rounded bg-slate-800/70 px-2 py-1 border border-slate-600/30">
-      <span className="font-mono text-[10px] text-green-400/80">{hours}:{minutes}</span>
+      <span className="font-mono text-[10px] text-green-400/80">
+        {hours}:{minutes}
+      </span>
     </div>
   )
 }
 
 /* ── Chat Connection Line ── */
-function ChatLine({ from, to }: { from: { x: number; y: number }; to: { x: number; y: number } }) {
+function ChatLine({
+  from,
+  to,
+}: {
+  from: { x: number; y: number }
+  to: { x: number; y: number }
+}) {
   return (
-    <svg className="pointer-events-none absolute inset-0 h-full w-full" style={{ zIndex: 5 }}>
+    <svg
+      className="pointer-events-none absolute inset-0 h-full w-full"
+      style={{ zIndex: 5 }}
+    >
       <line
         x1={`${from.x}%`}
         y1={`${from.y}%`}
@@ -199,7 +226,10 @@ function AnimatedAgent({
     behavior.sessionKey,
     session.task ?? session.initialMessage ?? session.label ?? '',
   )
-  const colors = PERSONA_COLORS[persona.name] ?? { body: '#6b7280', accent: '#9ca3af' }
+  const colors = PERSONA_COLORS[persona.name] ?? {
+    body: '#6b7280',
+    accent: '#9ca3af',
+  }
 
   return (
     <motion.div
@@ -251,7 +281,10 @@ function AnimatedAgent({
 
       {/* Name */}
       <span
-        className={cn('mt-0.5 text-[10px] font-bold drop-shadow-md', persona.color)}
+        className={cn(
+          'mt-0.5 text-[10px] font-bold drop-shadow-md',
+          persona.color,
+        )}
       >
         {persona.name}
       </span>
@@ -268,7 +301,9 @@ function AnimatedAgent({
             session.swarmStatus === 'idle' && 'bg-slate-400',
           )}
         />
-        <span className="text-[8px] text-slate-500 drop-shadow-sm">{persona.role}</span>
+        <span className="text-[8px] text-slate-500 drop-shadow-sm">
+          {persona.role}
+        </span>
       </div>
     </motion.div>
   )
@@ -287,7 +322,9 @@ function EmptyOffice() {
           🏢
         </motion.span>
         <p className="mt-2 text-sm text-slate-400">Virtual office is empty</p>
-        <p className="text-xs text-slate-500">Spawn agents to see them work here</p>
+        <p className="text-xs text-slate-500">
+          Spawn agents to see them work here
+        </p>
       </div>
     </div>
   )
@@ -314,7 +351,11 @@ function AmbientParticles() {
           className="absolute size-0.5 rounded-full bg-blue-400/20"
           style={{ left: `${p.x}%`, top: `${p.y}%` }}
           animate={{ opacity: [0, 0.6, 0], y: [0, -20, -40] }}
-          transition={{ duration: p.duration, delay: p.delay, repeat: Infinity }}
+          transition={{
+            duration: p.duration,
+            delay: p.delay,
+            repeat: Infinity,
+          }}
         />
       ))}
     </>
@@ -325,20 +366,26 @@ function AmbientParticles() {
 export function IsometricOffice({ sessions, className }: IsometricOfficeProps) {
   // Filter: show running/thinking always, completed/failed for 30s, skip idle old ones
   const activeSessions = useMemo(() => {
-    return sessions.filter(s => {
-      if (s.swarmStatus === 'running' || s.swarmStatus === 'thinking') return true
-      if (s.swarmStatus === 'complete' || s.swarmStatus === 'failed') {
-        return s.staleness < 30_000 // Show for 30s after completion
-      }
-      return s.staleness < 10_000 // Idle: show briefly
-    }).slice(0, 8) // Max 8 agents in office
+    return sessions
+      .filter((s) => {
+        if (s.swarmStatus === 'running' || s.swarmStatus === 'thinking')
+          return true
+        if (s.swarmStatus === 'complete' || s.swarmStatus === 'failed') {
+          return s.staleness < 30_000 // Show for 30s after completion
+        }
+        return s.staleness < 10_000 // Idle: show briefly
+      })
+      .slice(0, 8) // Max 8 agents in office
   }, [sessions])
 
   const behaviors = useAgentBehaviors(activeSessions)
 
   // Find chatting pairs for connection lines
   const chatLines = useMemo(() => {
-    const lines: Array<{ from: { x: number; y: number }; to: { x: number; y: number } }> = []
+    const lines: Array<{
+      from: { x: number; y: number }
+      to: { x: number; y: number }
+    }> = []
     for (const [, b] of behaviors) {
       if (b.activity === 'chatting' && b.chatTarget) {
         const target = behaviors.get(b.chatTarget)
@@ -351,9 +398,17 @@ export function IsometricOffice({ sessions, className }: IsometricOfficeProps) {
   }, [behaviors])
 
   return (
-    <div className={cn('relative h-full w-full overflow-hidden bg-[#0d1117]', className)}>
+    <div
+      className={cn(
+        'relative h-full w-full overflow-hidden bg-[#0d1117]',
+        className,
+      )}
+    >
       {/* Floor */}
-      <svg className="absolute inset-0 h-full w-full opacity-80" preserveAspectRatio="none">
+      <svg
+        className="absolute inset-0 h-full w-full opacity-80"
+        preserveAspectRatio="none"
+      >
         <CheckeredFloor />
       </svg>
 
@@ -361,7 +416,8 @@ export function IsometricOffice({ sessions, className }: IsometricOfficeProps) {
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          background: 'radial-gradient(ellipse at 50% 40%, rgba(59,130,246,0.05) 0%, transparent 70%)',
+          background:
+            'radial-gradient(ellipse at 50% 40%, rgba(59,130,246,0.05) 0%, transparent 70%)',
         }}
       />
 
@@ -409,11 +465,7 @@ export function IsometricOffice({ sessions, className }: IsometricOfficeProps) {
           const behavior = behaviors.get(key)
           if (!behavior) return null
           return (
-            <AnimatedAgent
-              key={key}
-              behavior={behavior}
-              session={session}
-            />
+            <AnimatedAgent key={key} behavior={behavior} session={session} />
           )
         })}
       </AnimatePresence>
@@ -423,7 +475,9 @@ export function IsometricOffice({ sessions, className }: IsometricOfficeProps) {
 
       {/* Office info */}
       <div className="absolute bottom-3 left-3 rounded bg-slate-900/80 px-2 py-1 backdrop-blur">
-        <span className="text-[9px] font-mono text-accent-400/60">🦞 ClawSuite Office</span>
+        <span className="text-[9px] font-mono text-accent-400/60">
+          🦞 ClawSuite Office
+        </span>
       </div>
 
       <div className="absolute bottom-3 right-3 rounded bg-slate-900/80 px-2 py-1 backdrop-blur">
@@ -436,8 +490,19 @@ export function IsometricOffice({ sessions, className }: IsometricOfficeProps) {
       <div className="absolute left-[8%] top-[10%] rounded border border-slate-600/30 bg-slate-800/70 px-2 py-1">
         <div className="text-[8px] text-slate-400 font-mono">
           <div>📋 Tasks: {sessions.length}</div>
-          <div>🏃 Active: {sessions.filter(s => s.swarmStatus === 'running' || s.swarmStatus === 'thinking').length}</div>
-          <div>✅ Done: {sessions.filter(s => s.swarmStatus === 'complete').length}</div>
+          <div>
+            🏃 Active:{' '}
+            {
+              sessions.filter(
+                (s) =>
+                  s.swarmStatus === 'running' || s.swarmStatus === 'thinking',
+              ).length
+            }
+          </div>
+          <div>
+            ✅ Done:{' '}
+            {sessions.filter((s) => s.swarmStatus === 'complete').length}
+          </div>
         </div>
       </div>
     </div>

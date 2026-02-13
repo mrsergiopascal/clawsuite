@@ -1,12 +1,6 @@
 import 'xterm/css/xterm.css'
 
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Terminal } from 'xterm'
 import { FitAddon } from 'xterm-addon-fit'
 import { WebLinksAddon } from 'xterm-addon-web-links'
@@ -60,7 +54,9 @@ export function TerminalPanel({ isMobile }: TerminalPanelProps) {
     }
     try {
       const parsed = JSON.parse(stored) as Array<TerminalTabState>
-      return parsed.length ? parsed : [{ id: crypto.randomUUID(), title: 'Terminal 1' }]
+      return parsed.length
+        ? parsed
+        : [{ id: crypto.randomUUID(), title: 'Terminal 1' }]
     } catch {
       return [{ id: crypto.randomUUID(), title: 'Terminal 1' }]
     }
@@ -140,35 +136,38 @@ export function TerminalPanel({ isMobile }: TerminalPanelProps) {
     setIsOpen((prev) => !prev)
   }, [])
 
-  const handleResizeStart = useCallback((event: React.MouseEvent) => {
-    if (!panelRef.current) return
-    resizingRef.current = true
-    const startY = event.clientY
-    const startHeight = height
+  const handleResizeStart = useCallback(
+    (event: React.MouseEvent) => {
+      if (!panelRef.current) return
+      resizingRef.current = true
+      const startY = event.clientY
+      const startHeight = height
 
-    const handleMove = (moveEvent: MouseEvent) => {
-      if (!resizingRef.current) return
-      const delta = startY - moveEvent.clientY
-      const nextHeight = Math.min(
-        MAX_HEIGHT,
-        Math.max(MIN_HEIGHT, startHeight + delta),
-      )
-      setHeight(nextHeight)
+      const handleMove = (moveEvent: MouseEvent) => {
+        if (!resizingRef.current) return
+        const delta = startY - moveEvent.clientY
+        const nextHeight = Math.min(
+          MAX_HEIGHT,
+          Math.max(MIN_HEIGHT, startHeight + delta),
+        )
+        setHeight(nextHeight)
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- runtime safety
+        const fit = fitMap.current.get(activeTab?.id ?? '')
+        fit?.fit()
+      }
+
+      const handleUp = () => {
+        resizingRef.current = false
+        window.removeEventListener('mousemove', handleMove)
+        window.removeEventListener('mouseup', handleUp)
+      }
+
+      window.addEventListener('mousemove', handleMove)
+      window.addEventListener('mouseup', handleUp)
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- runtime safety
-      const fit = fitMap.current.get(activeTab?.id ?? '')
-      fit?.fit()
-    }
-
-    const handleUp = () => {
-      resizingRef.current = false
-      window.removeEventListener('mousemove', handleMove)
-      window.removeEventListener('mouseup', handleUp)
-    }
-
-    window.addEventListener('mousemove', handleMove)
-    window.addEventListener('mouseup', handleUp)
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- runtime safety
-  }, [activeTab?.id, height])
+    },
+    [activeTab?.id, height],
+  )
 
   const handleSendInput = useCallback(
     async (tabId: string, data: string) => {
@@ -222,114 +221,108 @@ export function TerminalPanel({ isMobile }: TerminalPanelProps) {
     [handleSendInput, tabs],
   )
 
-  const connectSession = useCallback(
-    async (tabId: string) => {
-      const terminal = terminalMap.current.get(tabId)
-      if (!terminal) return
-      const existing = tabs.find((tab) => tab.id === tabId)
-      if (existing?.sessionId) return
+  const connectSession = useCallback(async (tabId: string) => {
+    const terminal = terminalMap.current.get(tabId)
+    if (!terminal) return
+    const existing = tabs.find((tab) => tab.id === tabId)
+    if (existing?.sessionId) return
 
-      const response = await fetch('/api/terminal-stream', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          // Let the server pick the shell from $SHELL
-          cwd: DEFAULT_CWD,
-        }),
-      })
+    const response = await fetch('/api/terminal-stream', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        // Let the server pick the shell from $SHELL
+        cwd: DEFAULT_CWD,
+      }),
+    })
 
-      if (!response.ok || !response.body) {
-        terminal.writeln('\r\n[terminal] failed to connect\r\n')
-        return
-      }
+    if (!response.ok || !response.body) {
+      terminal.writeln('\r\n[terminal] failed to connect\r\n')
+      return
+    }
 
-      const reader = response.body.getReader()
-      const decoder = new TextDecoder()
-      let buffer = ''
-      let sessionId: string | undefined
+    const reader = response.body.getReader()
+    const decoder = new TextDecoder()
+    let buffer = ''
+    let sessionId: string | undefined
 
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- runtime safety
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-        buffer += decoder.decode(value, { stream: true })
-        const events = buffer.split('\n\n')
-        buffer = events.pop() ?? ''
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- runtime safety
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+      buffer += decoder.decode(value, { stream: true })
+      const events = buffer.split('\n\n')
+      buffer = events.pop() ?? ''
 
-        for (const eventBlock of events) {
-          if (!eventBlock.trim()) continue
-          const lines = eventBlock.split('\n')
-          let currentEvent = ''
-          let currentData = ''
-          for (const line of lines) {
-            if (line.startsWith('event: ')) {
-              currentEvent = line.slice(7).trim()
-            } else if (line.startsWith('data: ')) {
-              currentData += line.slice(6)
-            } else if (line.startsWith('data:')) {
-              currentData += line.slice(5)
-            }
-          }
-          if (!currentEvent || !currentData) continue
-          try {
-            const payload = JSON.parse(currentData)
-            if (currentEvent === 'session') {
-              sessionId = payload.sessionId
-              setTabs((prev) =>
-                prev.map((tab) =>
-                  tab.id === tabId ? { ...tab, sessionId } : tab,
-                ),
-              )
-              continue
-            }
-            if (currentEvent === 'event') {
-              const textChunk =
-                payload?.payload?.data ??
-                payload?.payload?.text ??
-                payload?.payload?.chunk ??
-                payload?.payload?.output
-              if (typeof textChunk === 'string') {
-                terminal.write(textChunk)
-                const currentLog = logBufferRef.current.get(tabId) ?? ''
-                const nextLog = `${currentLog}${textChunk}`
-                logBufferRef.current.set(tabId, nextLog)
-                const existingTimer = logSaveTimers.current.get(tabId)
-                if (existingTimer) window.clearTimeout(existingTimer)
-                const timer = window.setTimeout(() => {
-                  setTabs((prev) =>
-                    prev.map((tab) =>
-                      tab.id === tabId ? { ...tab, log: nextLog } : tab,
-                    ),
-                  )
-                }, 500)
-                logSaveTimers.current.set(tabId, timer)
-              }
-            }
-          } catch {
-            // ignore
+      for (const eventBlock of events) {
+        if (!eventBlock.trim()) continue
+        const lines = eventBlock.split('\n')
+        let currentEvent = ''
+        let currentData = ''
+        for (const line of lines) {
+          if (line.startsWith('event: ')) {
+            currentEvent = line.slice(7).trim()
+          } else if (line.startsWith('data: ')) {
+            currentData += line.slice(6)
+          } else if (line.startsWith('data:')) {
+            currentData += line.slice(5)
           }
         }
+        if (!currentEvent || !currentData) continue
+        try {
+          const payload = JSON.parse(currentData)
+          if (currentEvent === 'session') {
+            sessionId = payload.sessionId
+            setTabs((prev) =>
+              prev.map((tab) =>
+                tab.id === tabId ? { ...tab, sessionId } : tab,
+              ),
+            )
+            continue
+          }
+          if (currentEvent === 'event') {
+            const textChunk =
+              payload?.payload?.data ??
+              payload?.payload?.text ??
+              payload?.payload?.chunk ??
+              payload?.payload?.output
+            if (typeof textChunk === 'string') {
+              terminal.write(textChunk)
+              const currentLog = logBufferRef.current.get(tabId) ?? ''
+              const nextLog = `${currentLog}${textChunk}`
+              logBufferRef.current.set(tabId, nextLog)
+              const existingTimer = logSaveTimers.current.get(tabId)
+              if (existingTimer) window.clearTimeout(existingTimer)
+              const timer = window.setTimeout(() => {
+                setTabs((prev) =>
+                  prev.map((tab) =>
+                    tab.id === tabId ? { ...tab, log: nextLog } : tab,
+                  ),
+                )
+              }, 500)
+              logSaveTimers.current.set(tabId, timer)
+            }
+          }
+        } catch {
+          // ignore
+        }
       }
+    }
 
-      if (sessionId) {
-        await fetch('/api/terminal-close', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sessionId }),
-        }).catch(() => undefined)
-      }
-    },
-    [],
-  )
+    if (sessionId) {
+      await fetch('/api/terminal-close', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId }),
+      }).catch(() => undefined)
+    }
+  }, [])
 
-  const handleSearch = useCallback(
-    (tabId: string, query: string) => {
-      const addon = searchMap.current.get(tabId)
-      if (!addon) return
-      addon.findNext(query)
-    },
-    [],
-  )
+  const handleSearch = useCallback((tabId: string, query: string) => {
+    const addon = searchMap.current.get(tabId)
+    if (!addon) return
+    addon.findNext(query)
+  }, [])
 
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- runtime safety
@@ -345,7 +338,7 @@ export function TerminalPanel({ isMobile }: TerminalPanelProps) {
         rows: term.rows,
       }),
     })
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- runtime safety
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- runtime safety
   }, [activeTab?.id, activeTab?.sessionId, height])
 
   if (isMobile) return null
@@ -354,7 +347,11 @@ export function TerminalPanel({ isMobile }: TerminalPanelProps) {
     <div className="flex flex-col bg-surface border-t border-primary-200">
       <div className="flex items-center justify-between px-3 py-2">
         <div className="flex items-center gap-2 text-sm font-medium">
-          <HugeiconsIcon icon={ComputerTerminal01Icon} size={18} strokeWidth={1.4} />
+          <HugeiconsIcon
+            icon={ComputerTerminal01Icon}
+            size={18}
+            strokeWidth={1.4}
+          />
           Terminal
         </div>
         <Button
@@ -429,7 +426,10 @@ export function TerminalPanel({ isMobile }: TerminalPanelProps) {
                   onKeyDown={(event) => {
                     if (event.key === 'Enter') {
                       // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- runtime safety
-                      handleSearch(activeTab?.id ?? '', event.currentTarget.value)
+                      handleSearch(
+                        activeTab?.id ?? '',
+                        event.currentTarget.value,
+                      )
                     }
                   }}
                 />
@@ -465,7 +465,12 @@ type TerminalViewProps = {
   onInput: (data: string) => void
 }
 
-function TerminalView({ isActive, onReady, onConnect, onInput }: TerminalViewProps) {
+function TerminalView({
+  isActive,
+  onReady,
+  onConnect,
+  onInput,
+}: TerminalViewProps) {
   const containerRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {

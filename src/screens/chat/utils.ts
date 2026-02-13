@@ -22,15 +22,26 @@ export function deriveFriendlyIdFromKey(key: string | undefined): string {
  * These are added by the gateway for multi-channel routing.
  */
 const CHANNEL_PREFIX_REGEX = /^\[([^\]]+)\]\s*/
-const KNOWN_CHANNELS = ['WebChat', 'WhatsApp', 'Telegram', 'Signal', 'Slack', 'Discord', 'iMessage', 'Teams', 'GoogleChat']
+const KNOWN_CHANNELS = [
+  'WebChat',
+  'WhatsApp',
+  'Telegram',
+  'Signal',
+  'Slack',
+  'Discord',
+  'iMessage',
+  'Teams',
+  'GoogleChat',
+]
 
 function stripChannelPrefix(text: string): string {
   const match = text.match(CHANNEL_PREFIX_REGEX)
   if (!match) return text
   const bracket = match[1] ?? ''
   // Strip if it contains a timestamp or known channel name
-  const hasTimestamp = /\d{4}-\d{2}-\d{2}/.test(bracket) || /\d{2}:\d{2}/.test(bracket)
-  const hasChannel = KNOWN_CHANNELS.some(ch => bracket.includes(ch))
+  const hasTimestamp =
+    /\d{4}-\d{2}-\d{2}/.test(bracket) || /\d{2}:\d{2}/.test(bracket)
+  const hasChannel = KNOWN_CHANNELS.some((ch) => bracket.includes(ch))
   if (hasTimestamp || hasChannel) return text.slice(match[0].length)
   return text
 }
@@ -51,7 +62,10 @@ function cleanUserText(raw: string): string {
   )
 
   // Remove timestamp prefixes like "[Fri 2026-02-13 10:45 EST]"
-  text = text.replace(/^\[[A-Z][a-z]{2}\s+\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}\s+[A-Z]{3}\]\s*/gm, '')
+  text = text.replace(
+    /^\[[A-Z][a-z]{2}\s+\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}\s+[A-Z]{3}\]\s*/gm,
+    '',
+  )
 
   // Remove [media attached: ...] blocks (may span multiple lines)
   text = text.replace(/\[media attached:[^\]]*\]\s*/gi, '')

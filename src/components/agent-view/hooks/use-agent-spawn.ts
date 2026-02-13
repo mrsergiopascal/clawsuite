@@ -107,9 +107,11 @@ export function useAgentSpawn(
         return intersectSet(previousSpawned, currentIds)
       })
 
-      const removedIds = Array.from(previousIds).filter(function findRemoved(agentId) {
-        return !currentIds.has(agentId)
-      })
+      const removedIds = Array.from(previousIds).filter(
+        function findRemoved(agentId) {
+          return !currentIds.has(agentId)
+        },
+      )
       removedIds.forEach(function clearRemovedAgentTimers(agentId) {
         const timeoutIds = timeoutByAgentIdRef.current.get(agentId)
         if (!timeoutIds) return
@@ -133,21 +135,27 @@ export function useAgentSpawn(
           }
 
           const delayMs = index * staggerMs
-          const startSpawnTimeoutId = window.setTimeout(function beginSpawnState() {
-            setSpawningAgentIds(function addSpawnedId(previousSpawned) {
-              return addSetItems(previousSpawned, [agentId])
-            })
-          }, delayMs)
+          const startSpawnTimeoutId = window.setTimeout(
+            function beginSpawnState() {
+              setSpawningAgentIds(function addSpawnedId(previousSpawned) {
+                return addSetItems(previousSpawned, [agentId])
+              })
+            },
+            delayMs,
+          )
 
-          const revealCardTimeoutId = window.setTimeout(function revealSpawnedCard() {
-            setRenderedAgentIds(function addRenderedId(previousRendered) {
-              return addSetItems(previousRendered, [agentId])
-            })
-            setSpawningAgentIds(function removeSpawnedId(previousSpawned) {
-              return removeSetItems(previousSpawned, [agentId])
-            })
-            timeoutByAgentIdRef.current.delete(agentId)
-          }, delayMs + ttlMs)
+          const revealCardTimeoutId = window.setTimeout(
+            function revealSpawnedCard() {
+              setRenderedAgentIds(function addRenderedId(previousRendered) {
+                return addSetItems(previousRendered, [agentId])
+              })
+              setSpawningAgentIds(function removeSpawnedId(previousSpawned) {
+                return removeSetItems(previousSpawned, [agentId])
+              })
+              timeoutByAgentIdRef.current.delete(agentId)
+            },
+            delayMs + ttlMs,
+          )
 
           timeoutByAgentIdRef.current.set(agentId, [
             startSpawnTimeoutId,
@@ -173,7 +181,9 @@ export function useAgentSpawn(
         getCardLayoutId: function getCardLayoutId(agentId: string): string {
           return getSpawnLayoutId('card', agentId)
         },
-        getChatBubbleLayoutId: function getChatBubbleLayoutId(agentId: string): string {
+        getChatBubbleLayoutId: function getChatBubbleLayoutId(
+          agentId: string,
+        ): string {
           return getSpawnLayoutId('chat', agentId)
         },
         getSharedLayoutId: function getSharedLayoutId(agentId: string): string {

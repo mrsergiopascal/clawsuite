@@ -7,11 +7,17 @@ export const Route = createFileRoute('/api/gateway/agents')({
     handlers: {
       GET: async () => {
         try {
-          const result = await gatewayRpc<Record<string, unknown>>('agents.list', {})
+          const result = await gatewayRpc<Record<string, unknown>>(
+            'agents.list',
+            {},
+          )
           return json({ ok: true, data: result })
         } catch (err) {
           return json(
-            { ok: false, error: err instanceof Error ? err.message : String(err) },
+            {
+              ok: false,
+              error: err instanceof Error ? err.message : String(err),
+            },
             { status: 500 },
           )
         }

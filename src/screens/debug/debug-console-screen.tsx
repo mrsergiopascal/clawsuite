@@ -98,8 +98,7 @@ const TROUBLESHOOTER_RULES: Array<TroubleshooterRule> = [
   {
     id: 'econnrefused',
     patterns: [/econnrefused/i],
-    suggestion:
-      'Gateway may not be running. Try: `openclaw gateway restart`',
+    suggestion: 'Gateway may not be running. Try: `openclaw gateway restart`',
     command: 'openclaw gateway restart',
   },
   {
@@ -160,7 +159,10 @@ function normalizeConnectionStatus(value: unknown): DebugConnectionStatus {
 
   return {
     state: parseState(record.state),
-    gatewayUrl: parseText(record.gatewayUrl, FALLBACK_CONNECTION_STATUS.gatewayUrl),
+    gatewayUrl: parseText(
+      record.gatewayUrl,
+      FALLBACK_CONNECTION_STATUS.gatewayUrl,
+    ),
     connectedSinceMs: parseNumber(record.connectedSinceMs),
     lastDisconnectedAtMs: parseNumber(record.lastDisconnectedAtMs),
     nowMs: parseNumber(record.nowMs) ?? Date.now(),
@@ -276,9 +278,7 @@ function filterIssueEvents(events: Array<ActivityEvent>): Array<ActivityEvent> {
     return isIssueLevel(event.level)
   })
 
-  return issueEvents
-    .slice(issueEvents.length - MAX_ERROR_EVENTS)
-    .reverse()
+  return issueEvents.slice(issueEvents.length - MAX_ERROR_EVENTS).reverse()
 }
 
 function countRecentErrors(events: Array<ActivityEvent>): number {
@@ -318,7 +318,8 @@ function matchesLogFilter(
 function matchesLogSearch(event: ActivityEvent, searchText: string): boolean {
   if (!searchText) return true
 
-  const content = `${event.title}\n${event.detail || ''}\n${event.source || ''}`.toLowerCase()
+  const content =
+    `${event.title}\n${event.detail || ''}\n${event.source || ''}`.toLowerCase()
   return content.includes(searchText)
 }
 
@@ -398,30 +399,45 @@ export function DebugConsoleScreen() {
     },
   })
 
-  const { events, isConnected: isActivityConnected, isLoading: isEventsLoading } =
-    useActivityEvents({
-      initialCount: 80,
-      maxEvents: 200,
-    })
+  const {
+    events,
+    isConnected: isActivityConnected,
+    isLoading: isEventsLoading,
+  } = useActivityEvents({
+    initialCount: 80,
+    maxEvents: 200,
+  })
 
-  const issueEvents = useMemo(function memoIssueEvents() {
-    return filterIssueEvents(events)
-  }, [events])
+  const issueEvents = useMemo(
+    function memoIssueEvents() {
+      return filterIssueEvents(events)
+    },
+    [events],
+  )
 
-  const recentIssueCount = useMemo(function memoRecentIssueCount() {
-    return countRecentErrors(events)
-  }, [events])
+  const recentIssueCount = useMemo(
+    function memoRecentIssueCount() {
+      return countRecentErrors(events)
+    },
+    [events],
+  )
 
-  const normalizedLogSearch = useMemo(function memoNormalizedLogSearch() {
-    return logSearch.trim().toLowerCase()
-  }, [logSearch])
+  const normalizedLogSearch = useMemo(
+    function memoNormalizedLogSearch() {
+      return logSearch.trim().toLowerCase()
+    },
+    [logSearch],
+  )
 
-  const filteredLogEvents = useMemo(function memoFilteredLogEvents() {
-    return events.filter(function keepMatchingEvent(event) {
-      if (!matchesLogFilter(event, selectedLogFilter)) return false
-      return matchesLogSearch(event, normalizedLogSearch)
-    })
-  }, [events, normalizedLogSearch, selectedLogFilter])
+  const filteredLogEvents = useMemo(
+    function memoFilteredLogEvents() {
+      return events.filter(function keepMatchingEvent(event) {
+        if (!matchesLogFilter(event, selectedLogFilter)) return false
+        return matchesLogSearch(event, normalizedLogSearch)
+      })
+    },
+    [events, normalizedLogSearch, selectedLogFilter],
+  )
 
   const troubleshooterSuggestions = useMemo(
     function memoTroubleshooterSuggestions() {
@@ -487,74 +503,90 @@ export function DebugConsoleScreen() {
   const [isExporting, setIsExporting] = useState(false)
   const [exportError, setExportError] = useState<string | null>(null)
 
-  const handleExportDiagnostics = useCallback(async function exportDiagnostics() {
-    setIsExporting(true)
-    setExportError(null)
+  const handleExportDiagnostics = useCallback(
+    async function exportDiagnostics() {
+      setIsExporting(true)
+      setExportError(null)
 
-    try {
-      // Fetch base diagnostics from server
-      const response = await fetch('/api/diagnostics')
-      if (!response.ok) throw new Error('Failed to fetch diagnostics')
+      try {
+        // Fetch base diagnostics from server
+        const response = await fetch('/api/diagnostics')
+        if (!response.ok) throw new Error('Failed to fetch diagnostics')
 
-      const serverBundle = await response.json() as DiagnosticsBundle
+        const serverBundle = (await response.json()) as DiagnosticsBundle
 
-      // Enrich with client-side data
+        // Enrich with client-side data
+        const bundle: DiagnosticsBundle = {
+          ...serverBundle,
+          environment: {
+            ...serverBundle.environment,
+            userAgent: navigator.userAgent,
+          },
+          gateway: {
+            status:
+              connectionStatus.state === 'connected'
+                ? 'connected'
+                : 'disconnected',
+            url: redactSensitiveData(connectionStatus.gatewayUrl),
+            uptime:
+              connectionTiming.label === 'Uptime'
+                ? connectionTiming.value
+                : null,
+          },
+          recentEvents: events.slice(0, 50).map((event) => ({
+            timestamp: new Date(event.timestamp).toISOString(),
+            level: event.level,
+            title: redactSensitiveData(event.title),
+            source: event.source ?? '',
+          })),
+          debugEntries: troubleshooterSuggestions.map((s) => ({
+            timestamp: new Date(s.matchedAt).toISOString(),
+            suggestion: s.suggestion,
+            triggeredBy: redactSensitiveData(s.matchedTitle),
+          })),
+        }
+
+        downloadBundle(bundle)
+      } catch (err) {
+        setExportError(err instanceof Error ? err.message : 'Export failed')
+      } finally {
+        setIsExporting(false)
+      }
+    },
+    [connectionStatus, connectionTiming, events, troubleshooterSuggestions],
+  )
+
+  const handleOpenIssue = useCallback(
+    function openIssue() {
       const bundle: DiagnosticsBundle = {
-        ...serverBundle,
+        version: DIAGNOSTICS_BUNDLE_VERSION,
+        generatedAt: new Date().toISOString(),
         environment: {
-          ...serverBundle.environment,
+          appVersion: '2.0.0',
+          os: navigator.platform,
+          nodeVersion: 'N/A (browser)',
           userAgent: navigator.userAgent,
         },
         gateway: {
-          status: connectionStatus.state === 'connected' ? 'connected' : 'disconnected',
+          status:
+            connectionStatus.state === 'connected'
+              ? 'connected'
+              : 'disconnected',
           url: redactSensitiveData(connectionStatus.gatewayUrl),
-          uptime: connectionTiming.label === 'Uptime' ? connectionTiming.value : null,
+          uptime:
+            connectionTiming.label === 'Uptime' ? connectionTiming.value : null,
         },
-        recentEvents: events.slice(0, 50).map((event) => ({
-          timestamp: new Date(event.timestamp).toISOString(),
-          level: event.level,
-          title: redactSensitiveData(event.title),
-          source: event.source ?? '',
-        })),
-        debugEntries: troubleshooterSuggestions.map((s) => ({
-          timestamp: new Date(s.matchedAt).toISOString(),
-          suggestion: s.suggestion,
-          triggeredBy: redactSensitiveData(s.matchedTitle),
-        })),
+        workspace: { folderName: 'N/A' },
+        providers: [],
+        recentEvents: [],
+        debugEntries: [],
       }
 
-      downloadBundle(bundle)
-    } catch (err) {
-      setExportError(err instanceof Error ? err.message : 'Export failed')
-    } finally {
-      setIsExporting(false)
-    }
-  }, [connectionStatus, connectionTiming, events, troubleshooterSuggestions])
-
-  const handleOpenIssue = useCallback(function openIssue() {
-    const bundle: DiagnosticsBundle = {
-      version: DIAGNOSTICS_BUNDLE_VERSION,
-      generatedAt: new Date().toISOString(),
-      environment: {
-        appVersion: '2.0.0',
-        os: navigator.platform,
-        nodeVersion: 'N/A (browser)',
-        userAgent: navigator.userAgent,
-      },
-      gateway: {
-        status: connectionStatus.state === 'connected' ? 'connected' : 'disconnected',
-        url: redactSensitiveData(connectionStatus.gatewayUrl),
-        uptime: connectionTiming.label === 'Uptime' ? connectionTiming.value : null,
-      },
-      workspace: { folderName: 'N/A' },
-      providers: [],
-      recentEvents: [],
-      debugEntries: [],
-    }
-
-    const issueUrl = buildGitHubIssueUrl(bundle)
-    window.open(issueUrl, '_blank', 'noopener,noreferrer')
-  }, [connectionStatus, connectionTiming])
+      const issueUrl = buildGitHubIssueUrl(bundle)
+      window.open(issueUrl, '_blank', 'noopener,noreferrer')
+    },
+    [connectionStatus, connectionTiming],
+  )
 
   return (
     <main className="h-full overflow-y-auto bg-surface px-4 py-6 text-primary-900 md:px-6 md:py-8">
@@ -576,7 +608,9 @@ export function DebugConsoleScreen() {
         >
           <div className="space-y-2.5 text-sm">
             <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-primary-200 bg-primary-100/50 px-3 py-2.5">
-              <span className="text-primary-700 text-pretty">Gateway state</span>
+              <span className="text-primary-700 text-pretty">
+                Gateway state
+              </span>
               <span
                 className={cn(
                   'inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs font-medium tabular-nums',
@@ -740,51 +774,50 @@ export function DebugConsoleScreen() {
           </div>
 
           <div className="mt-3 space-y-2.5">
-            {troubleshooterSuggestions.map(function renderSuggestion(
-              suggestion,
-              index,
-            ) {
-              const copied = copiedSuggestionId === suggestion.id
-              return (
-                <article
-                  key={`${suggestion.id}-${index}`}
-                  className="rounded-xl border border-primary-200 bg-primary-100/50 px-3 py-2.5"
-                >
-                  <p className="text-sm font-medium text-ink text-pretty">
-                    {suggestion.suggestion}
-                  </p>
-                  <p className="mt-1 text-xs text-primary-600 text-pretty tabular-nums">
-                    Triggered by: {suggestion.matchedTitle}
-                  </p>
-                  <p className="mt-0.5 text-xs text-primary-500 tabular-nums">
-                    {formatEventTimestamp(suggestion.matchedAt)}
-                  </p>
-                  <div className="mt-2.5 flex flex-wrap items-center gap-2">
-                    <code className="rounded-md border border-primary-200 bg-primary-50 px-2 py-1 font-mono text-xs text-primary-900 tabular-nums">
-                      {suggestion.command}
-                    </code>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-7 px-2 text-xs tabular-nums"
-                      onClick={function onCopyCommand() {
-                        void handleCopyCommand(
-                          suggestion.id,
-                          suggestion.command,
-                        )
-                      }}
-                    >
-                      <HugeiconsIcon
-                        icon={copied ? Tick02Icon : Copy01Icon}
-                        size={20}
-                        strokeWidth={1.5}
-                      />
-                      {copied ? 'Copied' : 'Copy'}
-                    </Button>
-                  </div>
-                </article>
-              )
-            })}
+            {troubleshooterSuggestions.map(
+              function renderSuggestion(suggestion, index) {
+                const copied = copiedSuggestionId === suggestion.id
+                return (
+                  <article
+                    key={`${suggestion.id}-${index}`}
+                    className="rounded-xl border border-primary-200 bg-primary-100/50 px-3 py-2.5"
+                  >
+                    <p className="text-sm font-medium text-ink text-pretty">
+                      {suggestion.suggestion}
+                    </p>
+                    <p className="mt-1 text-xs text-primary-600 text-pretty tabular-nums">
+                      Triggered by: {suggestion.matchedTitle}
+                    </p>
+                    <p className="mt-0.5 text-xs text-primary-500 tabular-nums">
+                      {formatEventTimestamp(suggestion.matchedAt)}
+                    </p>
+                    <div className="mt-2.5 flex flex-wrap items-center gap-2">
+                      <code className="rounded-md border border-primary-200 bg-primary-50 px-2 py-1 font-mono text-xs text-primary-900 tabular-nums">
+                        {suggestion.command}
+                      </code>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-7 px-2 text-xs tabular-nums"
+                        onClick={function onCopyCommand() {
+                          void handleCopyCommand(
+                            suggestion.id,
+                            suggestion.command,
+                          )
+                        }}
+                      >
+                        <HugeiconsIcon
+                          icon={copied ? Tick02Icon : Copy01Icon}
+                          size={20}
+                          strokeWidth={1.5}
+                        />
+                        {copied ? 'Copied' : 'Copy'}
+                      </Button>
+                    </div>
+                  </article>
+                )
+              },
+            )}
           </div>
 
           <div className="mt-3">
@@ -806,7 +839,8 @@ export function DebugConsoleScreen() {
           icon={PackageIcon}
         >
           <div className="rounded-xl border border-amber-200 bg-amber-100/60 px-3 py-2 text-xs text-amber-800 text-pretty">
-            ⚠️ Never share secrets. This bundle is automatically redacted, but always review before sharing.
+            ⚠️ Never share secrets. This bundle is automatically redacted, but
+            always review before sharing.
           </div>
 
           <div className="mt-3 space-y-3">
@@ -837,11 +871,7 @@ export function DebugConsoleScreen() {
                 {isExporting ? 'Exporting…' : 'Export Diagnostics'}
               </Button>
 
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleOpenIssue}
-              >
+              <Button variant="outline" size="sm" onClick={handleOpenIssue}>
                 <HugeiconsIcon
                   icon={Github01Icon}
                   size={20}

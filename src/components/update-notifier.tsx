@@ -30,7 +30,13 @@ type UpdateCheckResult = {
   changelog: Array<CommitEntry>
 }
 
-type UpdatePhase = 'idle' | 'pulling' | 'installing' | 'restarting' | 'done' | 'error'
+type UpdatePhase =
+  | 'idle'
+  | 'pulling'
+  | 'installing'
+  | 'restarting'
+  | 'done'
+  | 'error'
 
 const DISMISS_KEY = 'openclaw-update-dismissed'
 const CHECK_INTERVAL_MS = 15 * 60 * 1000
@@ -180,7 +186,8 @@ export function UpdateNotifier() {
     }
   }
 
-  const isUpdating = phase === 'pulling' || phase === 'installing' || phase === 'restarting'
+  const isUpdating =
+    phase === 'pulling' || phase === 'installing' || phase === 'restarting'
 
   return (
     <AnimatePresence>
@@ -209,22 +216,41 @@ export function UpdateNotifier() {
               transition={{ duration: 0.3 }}
             />
           )}
-          {phase === 'done' && (
-            <div className="h-0.5 bg-green-500" />
-          )}
+          {phase === 'done' && <div className="h-0.5 bg-green-500" />}
 
           {/* Header */}
           <div className="flex items-center gap-3 px-5 py-3.5">
-            <div className={cn(
-              'flex items-center justify-center size-9 rounded-xl shrink-0',
-              phase === 'done' ? 'bg-green-500/20' : phase === 'error' ? 'bg-red-500/20' : 'bg-accent-500/20',
-            )}>
+            <div
+              className={cn(
+                'flex items-center justify-center size-9 rounded-xl shrink-0',
+                phase === 'done'
+                  ? 'bg-green-500/20'
+                  : phase === 'error'
+                    ? 'bg-red-500/20'
+                    : 'bg-accent-500/20',
+              )}
+            >
               {isUpdating ? (
-                <HugeiconsIcon icon={Loading03Icon} size={18} strokeWidth={2} className="animate-spin text-accent-400" />
+                <HugeiconsIcon
+                  icon={Loading03Icon}
+                  size={18}
+                  strokeWidth={2}
+                  className="animate-spin text-accent-400"
+                />
               ) : phase === 'done' ? (
-                <HugeiconsIcon icon={Tick01Icon} size={18} strokeWidth={2} className="text-green-400" />
+                <HugeiconsIcon
+                  icon={Tick01Icon}
+                  size={18}
+                  strokeWidth={2}
+                  className="text-green-400"
+                />
               ) : (
-                <HugeiconsIcon icon={SparklesIcon} size={18} strokeWidth={2} className="text-accent-400" />
+                <HugeiconsIcon
+                  icon={SparklesIcon}
+                  size={18}
+                  strokeWidth={2}
+                  className="text-accent-400"
+                />
               )}
             </div>
 
@@ -274,7 +300,11 @@ export function UpdateNotifier() {
                   className="rounded-full p-1 text-primary-500 hover:text-primary-300 transition-colors"
                   aria-label="Dismiss"
                 >
-                  <HugeiconsIcon icon={Cancel01Icon} size={14} strokeWidth={2} />
+                  <HugeiconsIcon
+                    icon={Cancel01Icon}
+                    size={14}
+                    strokeWidth={2}
+                  />
                 </button>
               )}
             </div>
@@ -297,12 +327,14 @@ export function UpdateNotifier() {
                       <div className="flex items-center gap-2 px-5 pt-3 pb-2">
                         {changelogSummary.features > 0 && (
                           <span className="inline-flex items-center gap-1 rounded-full bg-accent-500/15 px-2.5 py-0.5 text-[11px] font-medium text-accent-400">
-                            ✨ {changelogSummary.features} feature{changelogSummary.features !== 1 ? 's' : ''}
+                            ✨ {changelogSummary.features} feature
+                            {changelogSummary.features !== 1 ? 's' : ''}
                           </span>
                         )}
                         {changelogSummary.fixes > 0 && (
                           <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/15 px-2.5 py-0.5 text-[11px] font-medium text-blue-400">
-                            🐛 {changelogSummary.fixes} fix{changelogSummary.fixes !== 1 ? 'es' : ''}
+                            🐛 {changelogSummary.fixes} fix
+                            {changelogSummary.fixes !== 1 ? 'es' : ''}
                           </span>
                         )}
                         {changelogSummary.other > 0 && (
@@ -319,15 +351,21 @@ export function UpdateNotifier() {
                             key={commit.hash}
                             className="flex items-start gap-2.5 py-1.5 group"
                           >
-                            <span className="text-sm leading-5 shrink-0">{commitTypeIcon(commit.subject)}</span>
+                            <span className="text-sm leading-5 shrink-0">
+                              {commitTypeIcon(commit.subject)}
+                            </span>
                             <div className="flex-1 min-w-0">
                               <p className="text-xs text-primary-200 leading-5 truncate">
                                 {cleanSubject(commit.subject)}
                               </p>
                             </div>
                             <div className="flex items-center gap-2 shrink-0">
-                              <code className="text-[10px] text-primary-500 font-mono">{commit.hash}</code>
-                              <span className="text-[10px] text-primary-600">{relativeTime(commit.date)}</span>
+                              <code className="text-[10px] text-primary-500 font-mono">
+                                {commit.hash}
+                              </code>
+                              <span className="text-[10px] text-primary-600">
+                                {relativeTime(commit.date)}
+                              </span>
                             </div>
                           </div>
                         ))}
@@ -336,7 +374,9 @@ export function UpdateNotifier() {
                   ) : (
                     <div className="px-5 py-4 text-center">
                       <p className="text-xs text-primary-400">
-                        {data.behindBy} new update{data.behindBy !== 1 ? 's' : ''} available with bug fixes and improvements.
+                        {data.behindBy} new update
+                        {data.behindBy !== 1 ? 's' : ''} available with bug
+                        fixes and improvements.
                       </p>
                       <p className="text-[10px] text-primary-500 mt-1">
                         Click Install to update to the latest version.

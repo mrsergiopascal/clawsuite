@@ -14,11 +14,53 @@ export type WidgetMeta = {
 }
 
 export const WIDGET_META: WidgetMeta[] = [
-  { id: 'skills', label: 'Skills', scope: 'dashboard', tier: 'primary', defaultVisible: true },
-  { id: 'agent-status', label: 'Active Agents', scope: 'dashboard', tier: 'primary', defaultVisible: true },
-  { id: 'usage-meter', label: 'Usage Meter', scope: 'dashboard', tier: 'primary', defaultVisible: true },
-  { id: 'recent-sessions', label: 'Recent Sessions', scope: 'dashboard', tier: 'secondary', defaultVisible: true },
-  { id: 'activity-log', label: 'Activity Log', scope: 'dashboard', tier: 'secondary', defaultVisible: true },
-  { id: 'notifications', label: 'Notifications', scope: 'dashboard', tier: 'secondary', defaultVisible: true },
-  { id: 'tasks', label: 'Tasks', scope: 'dashboard', tier: 'demo', defaultVisible: true },
+  {
+    id: 'skills',
+    label: 'Skills',
+    scope: 'dashboard',
+    tier: 'primary',
+    defaultVisible: true,
+  },
+  {
+    id: 'agent-status',
+    label: 'Active Agents',
+    scope: 'dashboard',
+    tier: 'primary',
+    defaultVisible: true,
+  },
+  {
+    id: 'usage-meter',
+    label: 'Usage Meter',
+    scope: 'dashboard',
+    tier: 'primary',
+    defaultVisible: true,
+  },
+  {
+    id: 'recent-sessions',
+    label: 'Recent Sessions',
+    scope: 'dashboard',
+    tier: 'secondary',
+    defaultVisible: true,
+  },
+  {
+    id: 'activity-log',
+    label: 'Activity Log',
+    scope: 'dashboard',
+    tier: 'secondary',
+    defaultVisible: true,
+  },
+  {
+    id: 'notifications',
+    label: 'Notifications',
+    scope: 'dashboard',
+    tier: 'secondary',
+    defaultVisible: true,
+  },
+  {
+    id: 'tasks',
+    label: 'Tasks',
+    scope: 'dashboard',
+    tier: 'demo',
+    defaultVisible: true,
+  },
 ]

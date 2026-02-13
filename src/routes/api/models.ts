@@ -26,31 +26,31 @@ export const Route = createFileRoute('/api/models')({
             {},
           )
           const allModels = Array.isArray(payload.models) ? payload.models : []
-          
+
           // Filter to only configured providers AND configured model IDs
           const configuredProviders = getConfiguredProviderNames()
           const configuredModelIds = getConfiguredModelIds()
           const providerSet = new Set(configuredProviders)
-          
+
           const filteredModels = allModels.filter((model) => {
             if (typeof model === 'string') return false
             const entry = model as ModelEntry
-            
+
             // Must be from a configured provider
             if (!entry.provider || !providerSet.has(entry.provider)) {
               return false
             }
-            
+
             // Must be a configured model ID
             if (!entry.id || !configuredModelIds.has(entry.id)) {
               return false
             }
-            
+
             return true
           })
-          
-          return json({ 
-            ok: true, 
+
+          return json({
+            ok: true,
             models: filteredModels,
             configuredProviders,
           })

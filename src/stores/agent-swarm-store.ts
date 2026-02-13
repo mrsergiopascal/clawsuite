@@ -26,21 +26,28 @@ type SwarmState = {
   stopPolling: () => void
 }
 
-function deriveSwarmStatus(session: GatewaySession): SwarmSession['swarmStatus'] {
+function deriveSwarmStatus(
+  session: GatewaySession,
+): SwarmSession['swarmStatus'] {
   const status = (session.status ?? '').toLowerCase()
   if (['thinking', 'reasoning'].includes(status)) return 'thinking'
   if (['error', 'errored'].includes(status)) return 'error'
-  if (['failed', 'cancelled', 'canceled', 'killed'].includes(status)) return 'failed'
-  if (['complete', 'completed', 'success', 'succeeded', 'done'].includes(status)) return 'complete'
+  if (['failed', 'cancelled', 'canceled', 'killed'].includes(status))
+    return 'failed'
+  if (
+    ['complete', 'completed', 'success', 'succeeded', 'done'].includes(status)
+  )
+    return 'complete'
   if (['idle', 'waiting', 'sleeping'].includes(status)) return 'idle'
 
   // Heuristic: if no explicit status, use staleness to detect completion
   // Sessions that haven't updated in 30s+ with tokens are likely done
-  const updatedAt = typeof session.updatedAt === 'number'
-    ? session.updatedAt
-    : typeof session.updatedAt === 'string'
-      ? new Date(session.updatedAt).getTime()
-      : Date.now()
+  const updatedAt =
+    typeof session.updatedAt === 'number'
+      ? session.updatedAt
+      : typeof session.updatedAt === 'string'
+        ? new Date(session.updatedAt).getTime()
+        : Date.now()
   const staleness = Date.now() - updatedAt
   const hasTokens = (session.totalTokens ?? session.tokenCount ?? 0) > 0
 
@@ -71,12 +78,15 @@ function getSessionErrorMessage(session: GatewaySession): string | null {
 }
 
 function toSwarmSession(session: GatewaySession): SwarmSession {
-  const updatedAt = typeof session.updatedAt === 'number'
-    ? session.updatedAt
-    : typeof session.updatedAt === 'string'
-      ? new Date(session.updatedAt).getTime()
-      : Date.now()
-  const hasExplicitError = getStopReason(session) === 'error' || getSessionErrorMessage(session) !== null
+  const updatedAt =
+    typeof session.updatedAt === 'number'
+      ? session.updatedAt
+      : typeof session.updatedAt === 'string'
+        ? new Date(session.updatedAt).getTime()
+        : Date.now()
+  const hasExplicitError =
+    getStopReason(session) === 'error' ||
+    getSessionErrorMessage(session) !== null
   const derivedStatus = deriveSwarmStatus(session)
 
   return {
@@ -99,22 +109,25 @@ export const useSwarmStore = create<SwarmState>((set, get) => ({
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const json = await res.json()
 
-      const rawSessions: GatewaySession[] = json?.data?.sessions ?? json?.sessions ?? []
+      const rawSessions: GatewaySession[] =
+        json?.data?.sessions ?? json?.sessions ?? []
 
       // Only show subagent sessions in the swarm (not main chat, cron, etc.)
-      const agentSessions = rawSessions.filter(s => {
+      const agentSessions = rawSessions.filter((s) => {
         const key = s.key ?? ''
         // Must be a subagent session
         if (!key.includes('subagent:')) return false
         // Skip sessions with zero tokens and very old (never ran)
         const tokens = s.totalTokens ?? s.tokenCount ?? 0
-        const hasExplicitError = getStopReason(s) === 'error' || getSessionErrorMessage(s) !== null
+        const hasExplicitError =
+          getStopReason(s) === 'error' || getSessionErrorMessage(s) !== null
         if (tokens === 0 && !hasExplicitError) {
-          const updatedAt = typeof s.updatedAt === 'number'
-            ? s.updatedAt
-            : typeof s.updatedAt === 'string'
-              ? new Date(s.updatedAt).getTime()
-              : 0
+          const updatedAt =
+            typeof s.updatedAt === 'number'
+              ? s.updatedAt
+              : typeof s.updatedAt === 'string'
+                ? new Date(s.updatedAt).getTime()
+                : 0
           if (Date.now() - updatedAt > 120_000) return false
         }
         return true
@@ -124,7 +137,14 @@ export const useSwarmStore = create<SwarmState>((set, get) => ({
 
       // Sort: running/thinking first, then by updatedAt desc
       swarmSessions.sort((a, b) => {
-        const priority = { thinking: 0, running: 1, idle: 2, complete: 3, failed: 4, error: 5 }
+        const priority = {
+          thinking: 0,
+          running: 1,
+          idle: 2,
+          complete: 3,
+          failed: 4,
+          error: 5,
+        }
         const pa = priority[a.swarmStatus] ?? 2
         const pb = priority[b.swarmStatus] ?? 2
         if (pa !== pb) return pa - pb

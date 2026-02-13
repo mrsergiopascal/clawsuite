@@ -49,7 +49,8 @@ function ChatContainerRoot({
 
     const handleScroll = () => {
       // Track stick-to-bottom internally based on actual scroll position
-      const distFromBottom = element.scrollHeight - element.scrollTop - element.clientHeight
+      const distFromBottom =
+        element.scrollHeight - element.scrollTop - element.clientHeight
       const wasScrollingUp = element.scrollTop < lastScrollTopRef.current - 5
       lastScrollTopRef.current = element.scrollTop
 
@@ -118,7 +119,12 @@ function ChatContainerRoot({
   }, [])
 
   return (
-    <div className={cn('relative flex-1 min-h-0 overflow-hidden flex flex-col', className)}>
+    <div
+      className={cn(
+        'relative flex-1 min-h-0 overflow-hidden flex flex-col',
+        className,
+      )}
+    >
       <div
         ref={scrollRef}
         className="flex-1 min-h-0 overflow-y-auto overscroll-contain"
@@ -139,11 +145,11 @@ function ChatContainerContent({
   ...props
 }: ChatContainerContentProps) {
   return (
-    <div
-      className={cn('flex w-full flex-col', className)}
-      {...props}
-    >
-      <div className="mx-auto w-full px-3 sm:px-5 flex flex-col" style={{ maxWidth: 'min(768px, 100%)' }}>
+    <div className={cn('flex w-full flex-col', className)} {...props}>
+      <div
+        className="mx-auto w-full px-3 sm:px-5 flex flex-col"
+        style={{ maxWidth: 'min(768px, 100%)' }}
+      >
         <div className="flex flex-col space-y-3">{children}</div>
       </div>
     </div>
@@ -163,8 +169,4 @@ function ChatContainerScrollAnchor({
   )
 }
 
-export {
-  ChatContainerRoot,
-  ChatContainerContent,
-  ChatContainerScrollAnchor,
-}
+export { ChatContainerRoot, ChatContainerContent, ChatContainerScrollAnchor }

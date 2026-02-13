@@ -1,6 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
 import { HugeiconsIcon } from '@hugeicons/react'
-import { AlertDiamondIcon, ArrowTurnBackwardIcon } from '@hugeicons/core-free-icons'
+import {
+  AlertDiamondIcon,
+  ArrowTurnBackwardIcon,
+} from '@hugeicons/core-free-icons'
 
 type SessionEntry = {
   key: string
@@ -40,7 +43,9 @@ function KindBadge({ kind }: { kind?: string }) {
     subagent: 'bg-amber-100 text-amber-700',
   }
   return (
-    <span className={`inline-flex px-1.5 py-0.5 rounded text-[10px] font-medium ${colors[kind || ''] || 'bg-primary-100 text-primary-600'}`}>
+    <span
+      className={`inline-flex px-1.5 py-0.5 rounded text-[10px] font-medium ${colors[kind || ''] || 'bg-primary-100 text-primary-600'}`}
+    >
       {kind || 'unknown'}
     </span>
   )
@@ -60,7 +65,9 @@ export function SessionsScreen() {
     retry: 1,
   })
 
-  const lastUpdated = query.dataUpdatedAt ? new Date(query.dataUpdatedAt).toLocaleTimeString() : null
+  const lastUpdated = query.dataUpdatedAt
+    ? new Date(query.dataUpdatedAt).toLocaleTimeString()
+    : null
   const sessions = query.data?.sessions || []
 
   return (
@@ -68,12 +75,24 @@ export function SessionsScreen() {
       <div className="flex items-center justify-between px-6 py-4 border-b border-primary-200">
         <div className="flex items-center gap-3">
           <h1 className="text-[15px] font-semibold text-ink">Sessions</h1>
-          <span className="text-[11px] text-primary-500">{sessions.length} active</span>
-          {query.isFetching && !query.isLoading ? <span className="text-[10px] text-primary-500 animate-pulse">syncing…</span> : null}
+          <span className="text-[11px] text-primary-500">
+            {sessions.length} active
+          </span>
+          {query.isFetching && !query.isLoading ? (
+            <span className="text-[10px] text-primary-500 animate-pulse">
+              syncing…
+            </span>
+          ) : null}
         </div>
         <div className="flex items-center gap-3">
-          {lastUpdated ? <span className="text-[10px] text-primary-500">Updated {lastUpdated}</span> : null}
-          <span className={`inline-block size-2 rounded-full ${query.isError ? 'bg-red-500' : query.isSuccess ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+          {lastUpdated ? (
+            <span className="text-[10px] text-primary-500">
+              Updated {lastUpdated}
+            </span>
+          ) : null}
+          <span
+            className={`inline-block size-2 rounded-full ${query.isError ? 'bg-red-500' : query.isSuccess ? 'bg-emerald-500' : 'bg-amber-500'}`}
+          />
         </div>
       </div>
 
@@ -87,36 +106,79 @@ export function SessionsScreen() {
           </div>
         ) : query.isError ? (
           <div className="flex flex-col items-center justify-center h-32 gap-3">
-            <HugeiconsIcon icon={AlertDiamondIcon} size={24} strokeWidth={1.5} className="text-red-500" />
-            <p className="text-sm text-primary-600">{query.error instanceof Error ? query.error.message : 'Failed to fetch'}</p>
-            <button type="button" onClick={() => query.refetch()} className="inline-flex items-center gap-1.5 rounded-md border border-primary-200 px-3 py-1.5 text-xs font-medium text-primary-700 hover:bg-primary-100">
-              <HugeiconsIcon icon={ArrowTurnBackwardIcon} size={14} strokeWidth={1.5} />Retry
+            <HugeiconsIcon
+              icon={AlertDiamondIcon}
+              size={24}
+              strokeWidth={1.5}
+              className="text-red-500"
+            />
+            <p className="text-sm text-primary-600">
+              {query.error instanceof Error
+                ? query.error.message
+                : 'Failed to fetch'}
+            </p>
+            <button
+              type="button"
+              onClick={() => query.refetch()}
+              className="inline-flex items-center gap-1.5 rounded-md border border-primary-200 px-3 py-1.5 text-xs font-medium text-primary-700 hover:bg-primary-100"
+            >
+              <HugeiconsIcon
+                icon={ArrowTurnBackwardIcon}
+                size={14}
+                strokeWidth={1.5}
+              />
+              Retry
             </button>
           </div>
         ) : sessions.length === 0 ? (
-          <p className="text-sm text-primary-500 text-center py-8">No active sessions.</p>
+          <p className="text-sm text-primary-500 text-center py-8">
+            No active sessions.
+          </p>
         ) : (
           <table className="w-full text-[13px]">
             <thead>
               <tr className="border-b border-primary-200 text-left">
-                <th className="pb-2 text-[11px] font-medium text-primary-500 uppercase tracking-wider">Session</th>
-                <th className="pb-2 text-[11px] font-medium text-primary-500 uppercase tracking-wider">Kind</th>
-                <th className="pb-2 text-[11px] font-medium text-primary-500 uppercase tracking-wider">Model</th>
-                <th className="pb-2 text-[11px] font-medium text-primary-500 uppercase tracking-wider">Origin</th>
-                <th className="pb-2 text-[11px] font-medium text-primary-500 uppercase tracking-wider text-right">Updated</th>
+                <th className="pb-2 text-[11px] font-medium text-primary-500 uppercase tracking-wider">
+                  Session
+                </th>
+                <th className="pb-2 text-[11px] font-medium text-primary-500 uppercase tracking-wider">
+                  Kind
+                </th>
+                <th className="pb-2 text-[11px] font-medium text-primary-500 uppercase tracking-wider">
+                  Model
+                </th>
+                <th className="pb-2 text-[11px] font-medium text-primary-500 uppercase tracking-wider">
+                  Origin
+                </th>
+                <th className="pb-2 text-[11px] font-medium text-primary-500 uppercase tracking-wider text-right">
+                  Updated
+                </th>
               </tr>
             </thead>
             <tbody>
               {sessions.map((s) => (
-                <tr key={s.key} className="border-b border-primary-100 hover:bg-primary-50 transition-colors">
+                <tr
+                  key={s.key}
+                  className="border-b border-primary-100 hover:bg-primary-50 transition-colors"
+                >
                   <td className="py-3">
-                    <div className="font-medium text-ink truncate max-w-[280px]">{s.label || s.displayName || s.key}</div>
-                    <div className="text-[11px] text-primary-500 truncate max-w-[280px]">{s.key}</div>
+                    <div className="font-medium text-ink truncate max-w-[280px]">
+                      {s.label || s.displayName || s.key}
+                    </div>
+                    <div className="text-[11px] text-primary-500 truncate max-w-[280px]">
+                      {s.key}
+                    </div>
                   </td>
-                  <td className="py-3"><KindBadge kind={s.kind} /></td>
+                  <td className="py-3">
+                    <KindBadge kind={s.kind} />
+                  </td>
                   <td className="py-3 text-primary-700">{s.model || '—'}</td>
-                  <td className="py-3 text-primary-600">{s.origin?.surface || '—'}</td>
-                  <td className="py-3 text-primary-600 text-right">{timeAgo(s.updatedAt)}</td>
+                  <td className="py-3 text-primary-600">
+                    {s.origin?.surface || '—'}
+                  </td>
+                  <td className="py-3 text-primary-600 text-right">
+                    {timeAgo(s.updatedAt)}
+                  </td>
                 </tr>
               ))}
             </tbody>

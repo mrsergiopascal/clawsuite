@@ -28,7 +28,12 @@ function stringifyBlock(value: unknown): string {
   }
 }
 
-export function CronJobDetail({ job, runs, loading, error }: CronJobDetailProps) {
+export function CronJobDetail({
+  job,
+  runs,
+  loading,
+  error,
+}: CronJobDetailProps) {
   return (
     <motion.section
       initial={{ opacity: 0, height: 0 }}
@@ -43,7 +48,9 @@ export function CronJobDetail({ job, runs, loading, error }: CronJobDetailProps)
           <p className="mt-1 text-sm font-medium text-primary-900 text-pretty">
             {formatCronHuman(job.schedule)}
           </p>
-          <p className="mt-1 truncate text-xs text-primary-600 tabular-nums">{job.schedule}</p>
+          <p className="mt-1 truncate text-xs text-primary-600 tabular-nums">
+            {job.schedule}
+          </p>
         </div>
         <div>
           <p className="text-xs text-primary-600 tabular-nums">Last Run</p>
@@ -55,7 +62,9 @@ export function CronJobDetail({ job, runs, loading, error }: CronJobDetailProps)
           </p>
         </div>
         <div>
-          <p className="text-xs text-primary-600 tabular-nums">Current Status</p>
+          <p className="text-xs text-primary-600 tabular-nums">
+            Current Status
+          </p>
           <span
             className={cn(
               'mt-1 inline-flex rounded-md border px-2 py-1 text-xs tabular-nums',
@@ -75,7 +84,9 @@ export function CronJobDetail({ job, runs, loading, error }: CronJobDetailProps)
           </pre>
         </div>
         <div className="min-w-0">
-          <h4 className="text-xs text-primary-600 tabular-nums">Delivery Config</h4>
+          <h4 className="text-xs text-primary-600 tabular-nums">
+            Delivery Config
+          </h4>
           <pre className="mt-1 max-h-32 overflow-auto rounded-md border border-primary-200 bg-primary-50/80 p-2 text-xs text-primary-800 tabular-nums">
             {stringifyBlock(job.deliveryConfig)}
           </pre>
@@ -109,12 +120,16 @@ export function CronJobDetail({ job, runs, loading, error }: CronJobDetailProps)
                   className="grid grid-cols-[1fr_auto_auto] gap-2 rounded-md border border-primary-200 bg-primary-50/80 px-3 py-2"
                 >
                   <div className="min-w-0">
-                    <p className="truncate text-xs text-primary-600 tabular-nums">{run.id}</p>
+                    <p className="truncate text-xs text-primary-600 tabular-nums">
+                      {run.id}
+                    </p>
                     <p className="text-xs text-primary-700 tabular-nums">
                       {formatDateTime(run.startedAt)}
                     </p>
                     {run.error ? (
-                      <p className="mt-1 line-clamp-1 text-xs text-accent-500 text-pretty">{run.error}</p>
+                      <p className="mt-1 line-clamp-1 text-xs text-accent-500 text-pretty">
+                        {run.error}
+                      </p>
                     ) : null}
                   </div>
                   <span

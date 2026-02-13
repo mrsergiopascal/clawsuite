@@ -1,12 +1,5 @@
 import { marked } from 'marked'
-import {
-  createContext,
-  memo,
-  useContext,
-  useId,
-  useMemo,
-  useRef,
-} from 'react'
+import { createContext, memo, useContext, useId, useMemo, useRef } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkBreaks from 'remark-breaks'
 import remarkGfm from 'remark-gfm'
@@ -73,7 +66,7 @@ const INITIAL_COMPONENTS: Partial<Components> = {
 
     if (isInline) {
       return (
-        <code className="rounded bg-primary-100 px-1.5 py-1 text-sm font-mono text-primary-900 border border-primary-200">
+        <code className="rounded bg-primary-100 px-1.5 py-0.5 text-[0.9em] font-mono text-primary-900 border border-primary-200">
           {children}
         </code>
       )
@@ -84,7 +77,7 @@ const INITIAL_COMPONENTS: Partial<Components> = {
       <CodeBlock
         content={String(children ?? '')}
         language={language}
-        className="w-full"
+        className="w-full my-2"
       />
     )
   },
@@ -341,7 +334,12 @@ function MarkdownComponent({
   const blocks = useMemo(() => parseMarkdownIntoBlocks(children), [children])
 
   return (
-    <div className={cn('flex flex-col gap-2 break-words overflow-hidden', className)}>
+    <div
+      className={cn(
+        'flex flex-col gap-2 break-words overflow-hidden',
+        className,
+      )}
+    >
       {blocks.map((block, index) => (
         <MemoizedMarkdownBlock
           key={`${blockId}-block-${index}`}

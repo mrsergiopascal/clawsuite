@@ -1,6 +1,6 @@
 /**
  * Phase 4.2: Pinned Models
- * 
+ *
  * Persist user's favorite models for quick access in model switcher
  */
 import { useState, useEffect } from 'react'
@@ -35,7 +35,7 @@ export function usePinnedModels() {
       const next = isPinned
         ? prev.filter((id) => id !== modelId)
         : [...prev, modelId]
-      
+
       savePinnedToStorage(next)
       return next
     })

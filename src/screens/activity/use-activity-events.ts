@@ -21,7 +21,12 @@ const EVENT_TYPES: Array<ActivityEvent['type']> = [
   'session',
 ]
 
-const EVENT_LEVELS: Array<ActivityEvent['level']> = ['debug', 'info', 'warn', 'error']
+const EVENT_LEVELS: Array<ActivityEvent['level']> = [
+  'debug',
+  'info',
+  'warn',
+  'error',
+]
 
 function toRecord(value: unknown): Record<string, unknown> | null {
   if (!value || typeof value !== 'object') return null
@@ -52,7 +57,13 @@ function normalizeActivityEvent(value: unknown): ActivityEvent | null {
   const source = typeof record.source === 'string' ? record.source : undefined
   const level = record.level
 
-  if (!id || !timestamp || !isEventType(type) || !title || !isEventLevel(level)) {
+  if (
+    !id ||
+    !timestamp ||
+    !isEventType(type) ||
+    !title ||
+    !isEventLevel(level)
+  ) {
     return null
   }
 
@@ -122,13 +133,19 @@ export function useActivityEvents(options: UseActivityEventsOptions) {
   const [isConnected, setIsConnected] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
 
-  const initialCount = useMemo(function getInitialCount() {
-    return clampCount(options.initialCount, 20)
-  }, [options.initialCount])
+  const initialCount = useMemo(
+    function getInitialCount() {
+      return clampCount(options.initialCount, 20)
+    },
+    [options.initialCount],
+  )
 
-  const maxEvents = useMemo(function getMaxEvents() {
-    return clampCount(options.maxEvents, 100)
-  }, [options.maxEvents])
+  const maxEvents = useMemo(
+    function getMaxEvents() {
+      return clampCount(options.maxEvents, 100)
+    },
+    [options.maxEvents],
+  )
 
   useEffect(
     function subscribeToActivityStream() {
@@ -192,7 +209,9 @@ export function useActivityEvents(options: UseActivityEventsOptions) {
           const payload = (await response.json()) as RecentEventsResponse
           if (!active) return
 
-          const recentItems = Array.isArray(payload.events) ? payload.events : []
+          const recentItems = Array.isArray(payload.events)
+            ? payload.events
+            : []
           appendIncoming(normalizeEvents(recentItems))
 
           if (typeof payload.connected === 'boolean') {

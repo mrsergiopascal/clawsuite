@@ -70,7 +70,9 @@ function labelForDateGroup(value: string): string {
   }).format(date)
 }
 
-function buildMemoryGroups(files: Array<MemoryViewerFile>): Array<MemoryFileGroup> {
+function buildMemoryGroups(
+  files: Array<MemoryViewerFile>,
+): Array<MemoryFileGroup> {
   const groups = new Map<string, Array<MemoryViewerFile>>()
   const otherFiles: Array<MemoryViewerFile> = []
 
@@ -198,6 +200,36 @@ function buildSearchResults(
 
 export const Route = createFileRoute('/memory')({
   component: MemoryRoute,
+  errorComponent: function MemoryError({ error }) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full p-6 text-center bg-primary-50">
+        <h2 className="text-xl font-semibold text-primary-900 mb-3">
+          Failed to Load Memory
+        </h2>
+        <p className="text-sm text-primary-600 mb-4 max-w-md">
+          {error instanceof Error
+            ? error.message
+            : 'An unexpected error occurred'}
+        </p>
+        <button
+          onClick={() => window.location.reload()}
+          className="px-4 py-2 bg-accent-500 text-white rounded-lg hover:bg-accent-600 transition-colors"
+        >
+          Reload Page
+        </button>
+      </div>
+    )
+  },
+  pendingComponent: function MemoryPending() {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-center">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-accent-500 border-r-transparent mb-3" />
+          <p className="text-sm text-primary-500">Loading memory files...</p>
+        </div>
+      </div>
+    )
+  },
 })
 
 function MemoryRoute() {
@@ -221,21 +253,28 @@ function MemoryRoute() {
   })
 
   const files = memoryIndexQuery.data?.files || []
-  const rootFile = files.find(function findRoot(file) {
-    return file.path === 'MEMORY.md'
-  }) || null
-  const groups = useMemo(function memoGroups() {
-    return buildMemoryGroups(files)
-  }, [files])
+  const rootFile =
+    files.find(function findRoot(file) {
+      return file.path === 'MEMORY.md'
+    }) || null
+  const groups = useMemo(
+    function memoGroups() {
+      return buildMemoryGroups(files)
+    },
+    [files],
+  )
 
-  const contentQueryKey = useMemo(function memoKey() {
-    const joinedPaths = files
-      .map(function mapPath(file) {
-        return file.path
-      })
-      .join('|')
-    return ['memory-contents', joinedPaths]
-  }, [files])
+  const contentQueryKey = useMemo(
+    function memoKey() {
+      const joinedPaths = files
+        .map(function mapPath(file) {
+          return file.path
+        })
+        .join('|')
+      return ['memory-contents', joinedPaths]
+    },
+    [files],
+  )
 
   const memoryContentsQuery = useQuery({
     enabled: files.length > 0,
@@ -253,37 +292,54 @@ function MemoryRoute() {
 
   const fallbackPath = rootFile?.path || files[0]?.path || null
 
-  const activePath = useMemo(function memoActivePath() {
-    if (!fallbackPath) return null
-    if (selectedPath && files.some(function hasSelected(file) {
-      return file.path === selectedPath
-    })) {
-      return selectedPath
-    }
-    return fallbackPath
-  }, [fallbackPath, files, selectedPath])
+  const activePath = useMemo(
+    function memoActivePath() {
+      if (!fallbackPath) return null
+      if (
+        selectedPath &&
+        files.some(function hasSelected(file) {
+          return file.path === selectedPath
+        })
+      ) {
+        return selectedPath
+      }
+      return fallbackPath
+    },
+    [fallbackPath, files, selectedPath],
+  )
 
-  const savedContentMap = useMemo(function memoSavedContentMap() {
-    return {
-      ...(memoryContentsQuery.data || {}),
-      ...savedOverrides,
-    }
-  }, [memoryContentsQuery.data, savedOverrides])
+  const savedContentMap = useMemo(
+    function memoSavedContentMap() {
+      return {
+        ...(memoryContentsQuery.data || {}),
+        ...savedOverrides,
+      }
+    },
+    [memoryContentsQuery.data, savedOverrides],
+  )
 
-  const mergedContentMap = useMemo(function memoMergedContentMap() {
-    return {
-      ...savedContentMap,
-      ...drafts,
-    }
-  }, [drafts, savedContentMap])
+  const mergedContentMap = useMemo(
+    function memoMergedContentMap() {
+      return {
+        ...savedContentMap,
+        ...drafts,
+      }
+    },
+    [drafts, savedContentMap],
+  )
 
   const activeSavedContent = activePath ? savedContentMap[activePath] || '' : ''
-  const activeDraftContent = activePath ? mergedContentMap[activePath] || '' : ''
+  const activeDraftContent = activePath
+    ? mergedContentMap[activePath] || ''
+    : ''
   const activeDirty = activeDraftContent !== activeSavedContent
 
-  const searchResults = useMemo(function memoResults() {
-    return buildSearchResults(searchQuery, mergedContentMap)
-  }, [mergedContentMap, searchQuery])
+  const searchResults = useMemo(
+    function memoResults() {
+      return buildSearchResults(searchQuery, mergedContentMap)
+    },
+    [mergedContentMap, searchQuery],
+  )
 
   const saveFile = useCallback(
     async function saveFile(pathValue: string) {
@@ -476,7 +532,10 @@ function MemoryRoute() {
                   transition={{ duration: 0.2, ease: 'easeOut' }}
                   className="min-h-[240px] border-t border-primary-200 lg:min-h-0 lg:w-[38%] lg:border-t-0"
                 >
-                  <MemoryPreview path={activePath} content={activeDraftContent} />
+                  <MemoryPreview
+                    path={activePath}
+                    content={activeDraftContent}
+                  />
                 </motion.div>
               ) : null}
             </AnimatePresence>

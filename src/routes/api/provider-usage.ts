@@ -2,7 +2,11 @@ import { createFileRoute } from '@tanstack/react-router'
 import { json } from '@tanstack/react-start'
 import { getProviderUsage } from '../../server/provider-usage'
 
-export type { ProviderUsageResult, ProviderUsageResponse, UsageLine } from '../../server/provider-usage'
+export type {
+  ProviderUsageResult,
+  ProviderUsageResponse,
+  UsageLine,
+} from '../../server/provider-usage'
 
 export const Route = createFileRoute('/api/provider-usage')({
   server: {

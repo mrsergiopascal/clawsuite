@@ -18,26 +18,32 @@ function braille(...dots: number[]): string {
 }
 
 // Dot bit constants
-const D1 = 0x01, D2 = 0x02, D3 = 0x04, D4 = 0x08
-const D5 = 0x10, D6 = 0x20, D7 = 0x40, D8 = 0x80
+const D1 = 0x01,
+  D2 = 0x02,
+  D3 = 0x04,
+  D4 = 0x08
+const D5 = 0x10,
+  D6 = 0x20,
+  D7 = 0x40,
+  D8 = 0x80
 
 const PRESETS: Record<string, string[]> = {
   // Classic rotating braille spinner
   braille: '⠿⠧⠇⠏⠟⠻⠹⠸⠼⠾'.split(''),
 
   // Single dot orbiting all 8 positions
-  orbit: [D1, D2, D3, D7, D8, D6, D5, D4].map(d => braille(d)),
+  orbit: [D1, D2, D3, D7, D8, D6, D5, D4].map((d) => braille(d)),
 
   // Expanding and contracting
   breathe: [
-    braille(D3, D6),            // center dots only
-    braille(D2, D3, D5, D6),    // mid + bottom
+    braille(D3, D6), // center dots only
+    braille(D2, D3, D5, D6), // mid + bottom
     braille(D1, D2, D3, D4, D5, D6), // top 6
     braille(D1, D2, D3, D4, D5, D6, D7, D8), // all 8
     braille(D1, D2, D3, D4, D5, D6), // shrink
-    braille(D2, D3, D5, D6),    // mid + bottom
-    braille(D3, D6),            // center only
-    braille(0),                 // blank
+    braille(D2, D3, D5, D6), // mid + bottom
+    braille(D3, D6), // center only
+    braille(0), // blank
   ],
 
   // Pulsing density
@@ -56,19 +62,19 @@ const PRESETS: Record<string, string[]> = {
   // Open pincer → closing → gripped → releasing
   claw: [
     // Open wide - two "arms" spread
-    braille(D1, D4),                          // tips open
-    braille(D1, D2, D4, D5),                  // arms extending down
-    braille(D1, D2, D3, D4, D5, D6),          // full arms open
+    braille(D1, D4), // tips open
+    braille(D1, D2, D4, D5), // arms extending down
+    braille(D1, D2, D3, D4, D5, D6), // full arms open
     braille(D1, D2, D3, D7, D4, D5, D6, D8), // arms + base (fully open claw)
     // Closing inward
-    braille(D2, D3, D7, D5, D6, D8),          // tips retract, mid closes
-    braille(D3, D7, D6, D8),                  // closing more
-    braille(D7, D8),                          // gripped! just the base
-    braille(D3, D7, D6, D8),                  // grip pulse
-    braille(D7, D8),                          // gripped tight
+    braille(D2, D3, D7, D5, D6, D8), // tips retract, mid closes
+    braille(D3, D7, D6, D8), // closing more
+    braille(D7, D8), // gripped! just the base
+    braille(D3, D7, D6, D8), // grip pulse
+    braille(D7, D8), // gripped tight
     // Releasing
-    braille(D3, D7, D6, D8),                  // opening
-    braille(D2, D3, D7, D5, D6, D8),          // wider
+    braille(D3, D7, D6, D8), // opening
+    braille(D2, D3, D7, D5, D6, D8), // wider
     braille(D1, D2, D3, D7, D4, D5, D6, D8), // fully open again
   ],
 
@@ -130,7 +136,7 @@ function BrailleSpinnerComponent({
 
   useEffect(() => {
     intervalRef.current = setInterval(() => {
-      setFrame(prev => (prev + 1) % frames.length)
+      setFrame((prev) => (prev + 1) % frames.length)
     }, speed)
 
     return () => {

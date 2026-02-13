@@ -22,7 +22,9 @@ export function QuickActions({
   return (
     <div className="space-y-4">
       <div>
-        <div className="mb-2 text-xs font-medium text-muted-foreground">Recent Searches</div>
+        <div className="mb-2 text-xs font-medium text-muted-foreground">
+          Recent Searches
+        </div>
         <div className="flex flex-wrap gap-2">
           {recentSearches.map((entry) => (
             <button
@@ -41,7 +43,9 @@ export function QuickActions({
       </div>
 
       <div>
-        <div className="mb-2 text-xs font-medium text-muted-foreground">Quick Actions</div>
+        <div className="mb-2 text-xs font-medium text-muted-foreground">
+          Quick Actions
+        </div>
         <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
           {actions.map((action) => (
             <button

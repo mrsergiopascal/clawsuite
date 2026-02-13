@@ -9,7 +9,8 @@ export const Route = createFileRoute('/api/terminal-close')({
           string,
           unknown
         >
-        const sessionId = typeof body.sessionId === 'string' ? body.sessionId : ''
+        const sessionId =
+          typeof body.sessionId === 'string' ? body.sessionId : ''
         closeTerminalSession(sessionId)
         return new Response(JSON.stringify({ ok: true }), {
           headers: { 'Content-Type': 'application/json' },

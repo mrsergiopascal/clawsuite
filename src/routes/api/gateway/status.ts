@@ -8,7 +8,8 @@ export const Route = createFileRoute('/api/gateway/status')({
       GET: async () => {
         try {
           const status = await gatewayRpc('status')
-          const data = typeof status === 'object' && status !== null ? status : {}
+          const data =
+            typeof status === 'object' && status !== null ? status : {}
           return json({ connected: true, ok: true, ...data })
         } catch {
           return json({ connected: true, ok: true })

@@ -1,4 +1,7 @@
-import { Activity01Icon, WifiDisconnected02Icon } from '@hugeicons/core-free-icons'
+import {
+  Activity01Icon,
+  WifiDisconnected02Icon,
+} from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useActivityEvents } from './use-activity-events'
@@ -45,12 +48,18 @@ function matchesLevelFilter(
   return event.level === selectedLevel
 }
 
-function matchesSourceFilter(event: ActivityEvent, selectedSource: string): boolean {
+function matchesSourceFilter(
+  event: ActivityEvent,
+  selectedSource: string,
+): boolean {
   if (selectedSource === ALL_SOURCE_FILTER_VALUE) return true
   return normalizeSource(event.source) === selectedSource
 }
 
-function matchesSearchFilter(event: ActivityEvent, normalizedSearchText: string): boolean {
+function matchesSearchFilter(
+  event: ActivityEvent,
+  normalizedSearchText: string,
+): boolean {
   if (!normalizedSearchText) return true
 
   const content = `${event.title}\n${event.detail || ''}`.toLowerCase()
@@ -79,49 +88,71 @@ export function ActivityScreen() {
     maxEvents: 200,
   })
 
-  const normalizedSearchText = useMemo(function memoNormalizedSearchText() {
-    return searchText.trim().toLowerCase()
-  }, [searchText])
+  const normalizedSearchText = useMemo(
+    function memoNormalizedSearchText() {
+      return searchText.trim().toLowerCase()
+    },
+    [searchText],
+  )
 
-  const sourceOptions = useMemo(function memoSourceOptions() {
-    const sourceMap = new Map<string, string>()
+  const sourceOptions = useMemo(
+    function memoSourceOptions() {
+      const sourceMap = new Map<string, string>()
 
-    for (const event of events) {
-      const normalizedSource = normalizeSource(event.source)
-      if (!normalizedSource) continue
-      if (sourceMap.has(normalizedSource)) continue
+      for (const event of events) {
+        const normalizedSource = normalizeSource(event.source)
+        if (!normalizedSource) continue
+        if (sourceMap.has(normalizedSource)) continue
 
-      sourceMap.set(normalizedSource, event.source?.trim() || normalizedSource)
-    }
+        sourceMap.set(
+          normalizedSource,
+          event.source?.trim() || normalizedSource,
+        )
+      }
 
-    return Array.from(sourceMap.entries())
-      .sort(function sortByLabel([leftLabel], [rightLabel]) {
-        return leftLabel.localeCompare(rightLabel)
+      return Array.from(sourceMap.entries())
+        .sort(function sortByLabel([leftLabel], [rightLabel]) {
+          return leftLabel.localeCompare(rightLabel)
+        })
+        .map(function mapSourceOption([value, label]): ActivitySourceOption {
+          return { label, value }
+        })
+    },
+    [events],
+  )
+
+  const filteredEvents = useMemo(
+    function memoFilteredEvents() {
+      return events.filter(function keepMatchingEvent(event) {
+        if (!matchesLevelFilter(event, selectedLevel)) return false
+        if (!matchesSourceFilter(event, selectedSource)) return false
+        return matchesSearchFilter(event, normalizedSearchText)
       })
-      .map(function mapSourceOption([value, label]): ActivitySourceOption {
-        return { label, value }
-      })
-  }, [events])
+    },
+    [events, normalizedSearchText, selectedLevel, selectedSource],
+  )
 
-  const filteredEvents = useMemo(function memoFilteredEvents() {
-    return events.filter(function keepMatchingEvent(event) {
-      if (!matchesLevelFilter(event, selectedLevel)) return false
-      if (!matchesSourceFilter(event, selectedSource)) return false
-      return matchesSearchFilter(event, normalizedSearchText)
-    })
-  }, [events, normalizedSearchText, selectedLevel, selectedSource])
+  const isFiltered = useMemo(
+    function memoIsFiltered() {
+      return (
+        normalizedSearchText.length > 0 ||
+        selectedLevel !== 'all' ||
+        selectedSource !== ALL_SOURCE_FILTER_VALUE
+      )
+    },
+    [normalizedSearchText, selectedLevel, selectedSource],
+  )
 
-  const isFiltered = useMemo(function memoIsFiltered() {
-    return (
-      normalizedSearchText.length > 0 ||
-      selectedLevel !== 'all' ||
-      selectedSource !== ALL_SOURCE_FILTER_VALUE
-    )
-  }, [normalizedSearchText, selectedLevel, selectedSource])
-
-  const eventCountLabel = useMemo(function memoEventCountLabel() {
-    return formatEventCountLabel(filteredEvents.length, events.length, isFiltered)
-  }, [events.length, filteredEvents.length, isFiltered])
+  const eventCountLabel = useMemo(
+    function memoEventCountLabel() {
+      return formatEventCountLabel(
+        filteredEvents.length,
+        events.length,
+        isFiltered,
+      )
+    },
+    [events.length, filteredEvents.length, isFiltered],
+  )
 
   const scrollToBottom = useCallback(function scrollToBottom() {
     const viewport = viewportRef.current
@@ -226,24 +257,26 @@ export function ActivityScreen() {
             >
               <div className="sticky top-0 z-10 border-b border-primary-200 bg-primary-50/95 p-3 backdrop-blur-sm">
                 <div className="flex flex-wrap items-center gap-1.5">
-                  {ACTIVITY_LEVEL_FILTERS.map(function renderLevelFilter(filterOption) {
-                    const selected = selectedLevel === filterOption.id
+                  {ACTIVITY_LEVEL_FILTERS.map(
+                    function renderLevelFilter(filterOption) {
+                      const selected = selectedLevel === filterOption.id
 
-                    return (
-                      <Button
-                        key={filterOption.id}
-                        size="sm"
-                        variant={selected ? 'default' : 'outline'}
-                        className="h-7 px-2 text-xs tabular-nums"
-                        onClick={function onSelectLevelFilter() {
-                          setSelectedLevel(filterOption.id)
-                        }}
-                        aria-pressed={selected}
-                      >
-                        {filterOption.label}
-                      </Button>
-                    )
-                  })}
+                      return (
+                        <Button
+                          key={filterOption.id}
+                          size="sm"
+                          variant={selected ? 'default' : 'outline'}
+                          className="h-7 px-2 text-xs tabular-nums"
+                          onClick={function onSelectLevelFilter() {
+                            setSelectedLevel(filterOption.id)
+                          }}
+                          aria-pressed={selected}
+                        >
+                          {filterOption.label}
+                        </Button>
+                      )
+                    },
+                  )}
                 </div>
 
                 <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -273,7 +306,9 @@ export function ActivityScreen() {
                       className="h-7 rounded-lg border border-primary-200 bg-primary-50 px-2 text-xs text-primary-900 tabular-nums outline-none focus-visible:ring-2 focus-visible:ring-primary-400"
                       aria-label="Filter by source"
                     >
-                      <option value={ALL_SOURCE_FILTER_VALUE}>All sources</option>
+                      <option value={ALL_SOURCE_FILTER_VALUE}>
+                        All sources
+                      </option>
                       {sourceOptions.map(function renderSourceOption(option) {
                         return (
                           <option key={option.value} value={option.value}>

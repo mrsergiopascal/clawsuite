@@ -4,7 +4,12 @@ import { motion } from 'motion/react'
 import { CronJobCard } from './CronJobCard'
 import { CronJobDetail } from './CronJobDetail'
 import { sortCronJobs } from './cron-utils'
-import type { CronJob, CronRun, CronSortKey, CronStatusFilter } from './cron-types'
+import type {
+  CronJob,
+  CronRun,
+  CronSortKey,
+  CronStatusFilter,
+} from './cron-types'
 import { cn } from '@/lib/utils'
 
 type CronJobListProps = {
@@ -108,29 +113,31 @@ export function CronJobList({
           </select>
 
           <div className="inline-flex rounded-lg border border-primary-200 bg-primary-100/60 p-1">
-            {(['all', 'enabled', 'disabled'] as const).map(function mapFilter(filterValue) {
-              return (
-                <button
-                  key={filterValue}
-                  type="button"
-                  onClick={function onClickFilter() {
-                    onStatusFilterChange(filterValue)
-                  }}
-                  className={cn(
-                    'rounded-md px-2.5 py-1.5 text-xs tabular-nums transition-colors',
-                    statusFilter === filterValue
-                      ? 'bg-primary-900 text-primary-50'
-                      : 'text-primary-700 hover:bg-primary-200',
-                  )}
-                >
-                  {filterValue === 'all'
-                    ? 'All'
-                    : filterValue === 'enabled'
-                      ? 'Enabled'
-                      : 'Disabled'}
-                </button>
-              )
-            })}
+            {(['all', 'enabled', 'disabled'] as const).map(
+              function mapFilter(filterValue) {
+                return (
+                  <button
+                    key={filterValue}
+                    type="button"
+                    onClick={function onClickFilter() {
+                      onStatusFilterChange(filterValue)
+                    }}
+                    className={cn(
+                      'rounded-md px-2.5 py-1.5 text-xs tabular-nums transition-colors',
+                      statusFilter === filterValue
+                        ? 'bg-primary-900 text-primary-50'
+                        : 'text-primary-700 hover:bg-primary-200',
+                    )}
+                  >
+                    {filterValue === 'all'
+                      ? 'All'
+                      : filterValue === 'enabled'
+                        ? 'Enabled'
+                        : 'Disabled'}
+                  </button>
+                )
+              },
+            )}
           </div>
         </div>
       </div>

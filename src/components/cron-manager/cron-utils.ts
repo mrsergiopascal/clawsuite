@@ -29,22 +29,46 @@ export function formatCronHuman(expression: string): string {
 
   const [minute, hour, dayOfMonth, month, dayOfWeek] = parts
 
-  if (minute === '*' && hour === '*' && dayOfMonth === '*' && month === '*' && dayOfWeek === '*') {
+  if (
+    minute === '*' &&
+    hour === '*' &&
+    dayOfMonth === '*' &&
+    month === '*' &&
+    dayOfWeek === '*'
+  ) {
     return 'Every minute'
   }
 
-  if (minute.startsWith('*/') && hour === '*' && dayOfMonth === '*' && month === '*' && dayOfWeek === '*') {
+  if (
+    minute.startsWith('*/') &&
+    hour === '*' &&
+    dayOfMonth === '*' &&
+    month === '*' &&
+    dayOfWeek === '*'
+  ) {
     const interval = Number(minute.slice(2))
     if (Number.isFinite(interval) && interval > 0) {
       return `Every ${interval} minutes`
     }
   }
 
-  if (/^\d+$/.test(minute) && hour === '*' && dayOfMonth === '*' && month === '*' && dayOfWeek === '*') {
+  if (
+    /^\d+$/.test(minute) &&
+    hour === '*' &&
+    dayOfMonth === '*' &&
+    month === '*' &&
+    dayOfWeek === '*'
+  ) {
     return `At minute ${minute} past every hour`
   }
 
-  if (/^\d+$/.test(minute) && /^\d+$/.test(hour) && dayOfMonth === '*' && month === '*' && dayOfWeek === '*') {
+  if (
+    /^\d+$/.test(minute) &&
+    /^\d+$/.test(hour) &&
+    dayOfMonth === '*' &&
+    month === '*' &&
+    dayOfWeek === '*'
+  ) {
     return `Every day at ${formatTwoDigits(Number(hour))}:${formatTwoDigits(Number(minute))}`
   }
 
@@ -90,7 +114,10 @@ export function statusLabel(status: CronRunStatus): string {
   return 'Unknown'
 }
 
-export function sortCronJobs(jobs: Array<CronJob>, sortKey: CronSortKey): Array<CronJob> {
+export function sortCronJobs(
+  jobs: Array<CronJob>,
+  sortKey: CronSortKey,
+): Array<CronJob> {
   return [...jobs].sort(function sortJobs(a, b) {
     if (sortKey === 'name') {
       return a.name.localeCompare(b.name)
@@ -105,7 +132,10 @@ export function sortCronJobs(jobs: Array<CronJob>, sortKey: CronSortKey): Array<
   })
 }
 
-export function getLatestRun(job: CronJob, runs: Array<CronRun>): CronRun | undefined {
+export function getLatestRun(
+  job: CronJob,
+  runs: Array<CronRun>,
+): CronRun | undefined {
   if (runs.length > 0) return runs[0]
   return job.lastRun
 }

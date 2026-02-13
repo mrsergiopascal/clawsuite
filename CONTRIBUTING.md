@@ -43,6 +43,7 @@ npm run lint
 - **Gateway communication:** WebSocket via OpenClaw RPC
 
 Key directories:
+
 ```
 src/
 ├── components/     # Shared UI components

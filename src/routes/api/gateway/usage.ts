@@ -8,7 +8,10 @@ export const Route = createFileRoute('/api/gateway/usage')({
       GET: async () => {
         try {
           const [usage, cost] = await Promise.allSettled([
-            gatewayRpc<Record<string, unknown>>('sessions.usage', { limit: 1000, includeContextWeight: true }),
+            gatewayRpc<Record<string, unknown>>('sessions.usage', {
+              limit: 1000,
+              includeContextWeight: true,
+            }),
             gatewayRpc<Record<string, unknown>>('usage.cost', {}),
           ])
           return json({
@@ -20,7 +23,10 @@ export const Route = createFileRoute('/api/gateway/usage')({
           })
         } catch (err) {
           return json(
-            { ok: false, error: err instanceof Error ? err.message : String(err) },
+            {
+              ok: false,
+              error: err instanceof Error ? err.message : String(err),
+            },
             { status: 500 },
           )
         }

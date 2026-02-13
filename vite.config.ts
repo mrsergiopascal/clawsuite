@@ -17,7 +17,9 @@ const config = defineConfig(({ mode, isSsrBuild }) => {
   // Allow access from Tailscale, LAN, or custom domains via env var
   // e.g. CLAWSUITE_ALLOWED_HOSTS=my-server.tail1234.ts.net,192.168.1.50
   const allowedHosts: string[] | true = env.CLAWSUITE_ALLOWED_HOSTS?.trim()
-    ? env.CLAWSUITE_ALLOWED_HOSTS.split(',').map((h) => h.trim()).filter(Boolean)
+    ? env.CLAWSUITE_ALLOWED_HOSTS.split(',')
+        .map((h) => h.trim())
+        .filter(Boolean)
     : []
   let proxyTarget = 'http://127.0.0.1:18789'
 
@@ -33,11 +35,15 @@ const config = defineConfig(({ mode, isSsrBuild }) => {
   return {
     define: {
       'process.env.CLAWDBOT_GATEWAY_URL': JSON.stringify(gatewayUrl),
-      'process.env.CLAWDBOT_GATEWAY_TOKEN': JSON.stringify(env.CLAWDBOT_GATEWAY_TOKEN || ''),
-      ...(!isSsrBuild ? {
-        'process.env': {},
-        'process.platform': '"browser"',
-      } : {})
+      'process.env.CLAWDBOT_GATEWAY_TOKEN': JSON.stringify(
+        env.CLAWDBOT_GATEWAY_TOKEN || '',
+      ),
+      ...(!isSsrBuild
+        ? {
+            'process.env': {},
+            'process.platform': '"browser"',
+          }
+        : {}),
     },
     resolve: {
       alias: {
@@ -45,10 +51,20 @@ const config = defineConfig(({ mode, isSsrBuild }) => {
       },
     },
     ssr: {
-      external: ['playwright', 'playwright-core', 'playwright-extra', 'puppeteer-extra-plugin-stealth'],
+      external: [
+        'playwright',
+        'playwright-core',
+        'playwright-extra',
+        'puppeteer-extra-plugin-stealth',
+      ],
     },
     optimizeDeps: {
-      exclude: ['playwright', 'playwright-core', 'playwright-extra', 'puppeteer-extra-plugin-stealth'],
+      exclude: [
+        'playwright',
+        'playwright-core',
+        'playwright-extra',
+        'puppeteer-extra-plugin-stealth',
+      ],
     },
     server: {
       host: allowedHosts.length > 0 ? '0.0.0.0' : undefined,

@@ -24,8 +24,10 @@ function getLineColor(status: AgentNodeStatus): string {
 }
 
 function getGlowFilter(status: AgentNodeStatus): string {
-  if (status === 'thinking') return 'drop-shadow(0 0 4px rgba(249, 115, 22, 0.6))'
-  if (status === 'complete') return 'drop-shadow(0 0 3px rgba(16, 185, 129, 0.5))'
+  if (status === 'thinking')
+    return 'drop-shadow(0 0 4px rgba(249, 115, 22, 0.6))'
+  if (status === 'complete')
+    return 'drop-shadow(0 0 3px rgba(16, 185, 129, 0.5))'
   if (status === 'failed') return 'drop-shadow(0 0 3px rgba(239, 68, 68, 0.5))'
   return 'drop-shadow(0 0 4px rgba(16, 185, 129, 0.6))'
 }

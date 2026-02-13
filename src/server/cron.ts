@@ -25,7 +25,8 @@ export function normalizeCronBool(value: unknown, fallback = false): boolean {
   if (typeof value === 'number') return value > 0
   if (typeof value === 'string') {
     const normalized = value.trim().toLowerCase()
-    if (['true', '1', 'enabled', 'active', 'on'].includes(normalized)) return true
+    if (['true', '1', 'enabled', 'active', 'on'].includes(normalized))
+      return true
     if (['false', '0', 'disabled', 'inactive', 'off'].includes(normalized)) {
       return false
     }
@@ -61,7 +62,11 @@ function asRecord(value: unknown): Record<string, unknown> {
 function normalizeRun(run: unknown, index: number): Record<string, unknown> {
   const row = asRecord(run)
   const startedAt = normalizeTimestamp(
-    row.startedAt ?? row.started_at ?? row.createdAt ?? row.timestamp ?? row.time,
+    row.startedAt ??
+      row.started_at ??
+      row.createdAt ??
+      row.timestamp ??
+      row.time,
   )
   const finishedAt = normalizeTimestamp(
     row.finishedAt ?? row.finished_at ?? row.completedAt ?? row.endedAt,
@@ -92,7 +97,9 @@ function normalizeRun(run: unknown, index: number): Record<string, unknown> {
   }
 }
 
-export function normalizeCronRuns(payload: unknown): Array<Record<string, unknown>> {
+export function normalizeCronRuns(
+  payload: unknown,
+): Array<Record<string, unknown>> {
   const root = asRecord(payload)
   const rows = Array.isArray(payload)
     ? payload
@@ -109,7 +116,9 @@ export function normalizeCronRuns(payload: unknown): Array<Record<string, unknow
   })
 }
 
-export function normalizeCronJobs(payload: unknown): Array<Record<string, unknown>> {
+export function normalizeCronJobs(
+  payload: unknown,
+): Array<Record<string, unknown>> {
   const root = asRecord(payload)
   const rows = Array.isArray(payload)
     ? payload
@@ -149,7 +158,11 @@ export function normalizeCronJobs(payload: unknown): Array<Record<string, unknow
       enabled,
       payload: row.payload ?? row.data ?? row.body ?? null,
       deliveryConfig:
-        row.deliveryConfig ?? row.delivery ?? row.config ?? row.transport ?? null,
+        row.deliveryConfig ??
+        row.delivery ??
+        row.config ??
+        row.transport ??
+        null,
       status: normalizeRunStatus(row.status ?? row.state),
       description:
         typeof row.description === 'string' ? row.description : undefined,
@@ -172,7 +185,9 @@ export function normalizeCronJobs(payload: unknown): Array<Record<string, unknow
                   ? row.lastRunDurationMs
                   : undefined,
               error:
-                typeof row.lastRunError === 'string' ? row.lastRunError : undefined,
+                typeof row.lastRunError === 'string'
+                  ? row.lastRunError
+                  : undefined,
             },
     }
   })

@@ -1,6 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
 import { HugeiconsIcon } from '@hugeicons/react'
-import { AlertDiamondIcon, ArrowTurnBackwardIcon } from '@hugeicons/core-free-icons'
+import {
+  AlertDiamondIcon,
+  ArrowTurnBackwardIcon,
+} from '@hugeicons/core-free-icons'
 
 type GatewayApiResponse = {
   ok: boolean
@@ -8,7 +11,9 @@ type GatewayApiResponse = {
   error?: string
 }
 
-async function fetchGatewayEndpoint(endpoint: string): Promise<GatewayApiResponse> {
+async function fetchGatewayEndpoint(
+  endpoint: string,
+): Promise<GatewayApiResponse> {
   const res = await fetch(endpoint)
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   return res.json() as Promise<GatewayApiResponse>
@@ -29,11 +34,13 @@ function formatValue(value: unknown, depth = 0): React.ReactNode {
     return <span className="text-accent-600">{value}</span>
   }
   if (typeof value === 'string') {
-    if (value.length > 200) return <span className="text-ink break-all">{value.slice(0, 200)}…</span>
+    if (value.length > 200)
+      return <span className="text-ink break-all">{value.slice(0, 200)}…</span>
     return <span className="text-ink">{value}</span>
   }
   if (Array.isArray(value)) {
-    if (value.length === 0) return <span className="text-primary-500 italic">[]</span>
+    if (value.length === 0)
+      return <span className="text-primary-500 italic">[]</span>
     return (
       <div className={depth > 0 ? 'ml-4 border-l border-primary-200 pl-3' : ''}>
         {value.map((item, i) => (
@@ -47,12 +54,15 @@ function formatValue(value: unknown, depth = 0): React.ReactNode {
   }
   if (typeof value === 'object') {
     const entries = Object.entries(value as Record<string, unknown>)
-    if (entries.length === 0) return <span className="text-primary-500 italic">{'{}'}</span>
+    if (entries.length === 0)
+      return <span className="text-primary-500 italic">{'{}'}</span>
     return (
       <div className={depth > 0 ? 'ml-4 border-l border-primary-200 pl-3' : ''}>
         {entries.map(([key, val]) => (
           <div key={key} className="py-0.5 flex gap-2">
-            <span className="text-primary-600 font-medium text-xs shrink-0">{key}:</span>
+            <span className="text-primary-600 font-medium text-xs shrink-0">
+              {key}:
+            </span>
             <div className="min-w-0">{formatValue(val, depth + 1)}</div>
           </div>
         ))}
@@ -91,7 +101,9 @@ export function GatewayDataScreen({
         <div className="flex items-center gap-3">
           <h1 className="text-[15px] font-semibold text-ink">{title}</h1>
           {query.isFetching && !query.isLoading ? (
-            <span className="text-[10px] text-primary-500 animate-pulse">syncing…</span>
+            <span className="text-[10px] text-primary-500 animate-pulse">
+              syncing…
+            </span>
           ) : null}
         </div>
         <div className="flex items-center gap-3">
@@ -102,9 +114,19 @@ export function GatewayDataScreen({
           ) : null}
           <span
             className={`inline-block size-2 rounded-full ${
-              query.isError ? 'bg-red-500' : query.isSuccess ? 'bg-emerald-500' : 'bg-amber-500'
+              query.isError
+                ? 'bg-red-500'
+                : query.isSuccess
+                  ? 'bg-emerald-500'
+                  : 'bg-amber-500'
             }`}
-            title={query.isError ? 'Disconnected' : query.isSuccess ? 'Connected' : 'Connecting'}
+            title={
+              query.isError
+                ? 'Disconnected'
+                : query.isSuccess
+                  ? 'Connected'
+                  : 'Connecting'
+            }
           />
         </div>
       </div>
@@ -120,29 +142,51 @@ export function GatewayDataScreen({
           </div>
         ) : query.isError ? (
           <div className="flex flex-col items-center justify-center h-32 gap-3">
-            <HugeiconsIcon icon={AlertDiamondIcon} size={24} strokeWidth={1.5} className="text-red-500" />
+            <HugeiconsIcon
+              icon={AlertDiamondIcon}
+              size={24}
+              strokeWidth={1.5}
+              className="text-red-500"
+            />
             <p className="text-sm text-primary-600">
-              {query.error instanceof Error ? query.error.message : 'Failed to fetch'}
+              {query.error instanceof Error
+                ? query.error.message
+                : 'Failed to fetch'}
             </p>
             <button
               type="button"
               onClick={() => query.refetch()}
               className="inline-flex items-center gap-1.5 rounded-md border border-primary-200 px-3 py-1.5 text-xs font-medium text-primary-700 hover:bg-primary-100 transition-colors"
             >
-              <HugeiconsIcon icon={ArrowTurnBackwardIcon} size={14} strokeWidth={1.5} />
+              <HugeiconsIcon
+                icon={ArrowTurnBackwardIcon}
+                size={14}
+                strokeWidth={1.5}
+              />
               Retry
             </button>
           </div>
         ) : query.data?.ok === false ? (
           <div className="flex flex-col items-center justify-center h-32 gap-3">
-            <HugeiconsIcon icon={AlertDiamondIcon} size={24} strokeWidth={1.5} className="text-amber-500" />
-            <p className="text-sm text-primary-600">{query.data.error || 'Gateway returned an error'}</p>
+            <HugeiconsIcon
+              icon={AlertDiamondIcon}
+              size={24}
+              strokeWidth={1.5}
+              className="text-amber-500"
+            />
+            <p className="text-sm text-primary-600">
+              {query.data.error || 'Gateway returned an error'}
+            </p>
             <button
               type="button"
               onClick={() => query.refetch()}
               className="inline-flex items-center gap-1.5 rounded-md border border-primary-200 px-3 py-1.5 text-xs font-medium text-primary-700 hover:bg-primary-100 transition-colors"
             >
-              <HugeiconsIcon icon={ArrowTurnBackwardIcon} size={14} strokeWidth={1.5} />
+              <HugeiconsIcon
+                icon={ArrowTurnBackwardIcon}
+                size={14}
+                strokeWidth={1.5}
+              />
               Retry
             </button>
           </div>

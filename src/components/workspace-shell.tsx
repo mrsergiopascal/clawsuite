@@ -31,7 +31,11 @@ async function fetchSessions(): Promise<SessionsListResponse> {
   const res = await fetch('/api/sessions')
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   const data = await res.json()
-  return Array.isArray(data?.sessions) ? data.sessions : Array.isArray(data) ? data : []
+  return Array.isArray(data?.sessions)
+    ? data.sessions
+    : Array.isArray(data)
+      ? data
+      : []
 }
 
 export function WorkspaceShell() {
@@ -106,9 +110,11 @@ export function WorkspaceShell() {
 
   const startNewChat = useCallback(() => {
     setCreatingSession(true)
-    navigate({ to: '/chat/$sessionKey', params: { sessionKey: 'new' } }).then(() => {
-      setCreatingSession(false)
-    })
+    navigate({ to: '/chat/$sessionKey', params: { sessionKey: 'new' } }).then(
+      () => {
+        setCreatingSession(false)
+      },
+    )
   }, [navigate])
 
   const handleSelectSession = useCallback(() => {
@@ -128,12 +134,20 @@ export function WorkspaceShell() {
       toggleSidebar()
     }
     window.addEventListener(SIDEBAR_TOGGLE_EVENT, handleToggleEvent)
-    return () => window.removeEventListener(SIDEBAR_TOGGLE_EVENT, handleToggleEvent)
+    return () =>
+      window.removeEventListener(SIDEBAR_TOGGLE_EVENT, handleToggleEvent)
   }, [toggleSidebar])
 
-  // Show nothing while checking auth
+  // Show loading indicator while checking auth
   if (!authState.checked) {
-    return null
+    return (
+      <div className="flex items-center justify-center h-screen bg-surface">
+        <div className="text-center">
+          <div className="inline-block h-10 w-10 animate-spin rounded-full border-4 border-accent-500 border-r-transparent mb-4" />
+          <p className="text-sm text-primary-500">Initializing ClawSuite...</p>
+        </div>
+      </div>
+    )
   }
 
   // Show login screen if auth is required and not authenticated
@@ -146,7 +160,9 @@ export function WorkspaceShell() {
       <div
         className={cn(
           'h-full overflow-hidden',
-          isOnChatRoute ? 'grid grid-cols-[auto_1fr] grid-rows-[minmax(0,1fr)]' : 'grid grid-cols-[auto_1fr] grid-rows-[minmax(0,1fr)] min-[1200px]:grid-cols-[auto_1fr_auto]',
+          isOnChatRoute
+            ? 'grid grid-cols-[auto_1fr] grid-rows-[minmax(0,1fr)]'
+            : 'grid grid-cols-[auto_1fr] grid-rows-[minmax(0,1fr)] min-[1200px]:grid-cols-[auto_1fr_auto]',
         )}
       >
         {/* Activity ticker bar */}
@@ -167,7 +183,10 @@ export function WorkspaceShell() {
         />
 
         {/* Main content area — renders the matched route */}
-        <main className="h-full min-h-0 min-w-0 overflow-y-auto overflow-x-hidden" data-tour="chat-area">
+        <main
+          className="h-full min-h-0 min-w-0 overflow-y-auto overflow-x-hidden"
+          data-tour="chat-area"
+        >
           <Outlet />
         </main>
 

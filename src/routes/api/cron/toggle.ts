@@ -12,8 +12,7 @@ export const Route = createFileRoute('/api/cron/toggle')({
             unknown
           >
 
-          const jobId =
-            typeof body.jobId === 'string' ? body.jobId.trim() : ''
+          const jobId = typeof body.jobId === 'string' ? body.jobId.trim() : ''
           if (!jobId) {
             return json({ error: 'jobId is required' }, { status: 400 })
           }
@@ -21,7 +20,12 @@ export const Route = createFileRoute('/api/cron/toggle')({
           const enabled = normalizeCronBool(body.enabled, true)
 
           const payload = await gatewayCronRpc(
-            ['cron.toggle', 'cron.jobs.toggle', 'cron.setEnabled', 'scheduler.toggle'],
+            [
+              'cron.toggle',
+              'cron.jobs.toggle',
+              'cron.setEnabled',
+              'scheduler.toggle',
+            ],
             {
               jobId,
               enabled,

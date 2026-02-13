@@ -126,7 +126,9 @@ export function CronJobForm({
           </label>
 
           <label className="space-y-1">
-            <span className="text-xs text-primary-600 tabular-nums">Schedule</span>
+            <span className="text-xs text-primary-600 tabular-nums">
+              Schedule
+            </span>
             <input
               value={schedule}
               onChange={function onChangeSchedule(event) {
@@ -139,7 +141,9 @@ export function CronJobForm({
         </div>
 
         <label className="space-y-1">
-          <span className="text-xs text-primary-600 tabular-nums">Description</span>
+          <span className="text-xs text-primary-600 tabular-nums">
+            Description
+          </span>
           <textarea
             value={description}
             onChange={function onChangeDescription(event) {
@@ -153,7 +157,9 @@ export function CronJobForm({
 
         <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
           <label className="space-y-1">
-            <span className="text-xs text-primary-600 tabular-nums">Payload JSON</span>
+            <span className="text-xs text-primary-600 tabular-nums">
+              Payload JSON
+            </span>
             <textarea
               value={payloadInput}
               onChange={function onChangePayload(event) {
@@ -166,7 +172,9 @@ export function CronJobForm({
           </label>
 
           <label className="space-y-1">
-            <span className="text-xs text-primary-600 tabular-nums">Delivery Config JSON</span>
+            <span className="text-xs text-primary-600 tabular-nums">
+              Delivery Config JSON
+            </span>
             <textarea
               value={deliveryConfigInput}
               onChange={function onChangeDeliveryConfig(event) {
@@ -187,7 +195,9 @@ export function CronJobForm({
                 setEnabled(Boolean(nextValue))
               }}
             />
-            <span className="tabular-nums">{enabled ? 'Enabled' : 'Disabled'}</span>
+            <span className="tabular-nums">
+              {enabled ? 'Enabled' : 'Disabled'}
+            </span>
           </div>
 
           <div className="flex items-center gap-2">
@@ -202,8 +212,17 @@ export function CronJobForm({
             >
               Cancel
             </Button>
-            <Button size="sm" type="submit" disabled={pending} className="tabular-nums">
-              {pending ? 'Saving...' : mode === 'edit' ? 'Save Changes' : 'Create Job'}
+            <Button
+              size="sm"
+              type="submit"
+              disabled={pending}
+              className="tabular-nums"
+            >
+              {pending
+                ? 'Saving...'
+                : mode === 'edit'
+                  ? 'Save Changes'
+                  : 'Create Job'}
             </Button>
           </div>
         </div>

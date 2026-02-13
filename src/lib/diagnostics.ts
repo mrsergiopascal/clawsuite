@@ -35,9 +35,7 @@ export function redactSensitiveData(text: string): string {
 }
 
 // Redact object values recursively
-export function redactObject<T extends Record<string, unknown>>(
-  obj: T,
-): T {
+export function redactObject<T extends Record<string, unknown>>(obj: T): T {
   const result = { ...obj } as Record<string, unknown>
 
   for (const key of Object.keys(result)) {
@@ -183,7 +181,10 @@ ${JSON.stringify(
     version: bundle.version,
     generatedAt: bundle.generatedAt,
     gateway: bundle.gateway,
-    providers: bundle.providers.map((p) => ({ name: p.name, status: p.status })),
+    providers: bundle.providers.map((p) => ({
+      name: p.name,
+      status: p.status,
+    })),
     recentEventCount: bundle.recentEvents.length,
   },
   null,

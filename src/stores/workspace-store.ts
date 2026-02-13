@@ -28,10 +28,13 @@ export const useWorkspaceStore = create<WorkspaceState>()(
       activeSubPage: null,
       chatPanelOpen: false,
       chatPanelSessionKey: 'main',
-      toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
+      toggleSidebar: () =>
+        set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
       setSidebarCollapsed: (collapsed) => set({ sidebarCollapsed: collapsed }),
-      toggleFileExplorer: () => set((s) => ({ fileExplorerCollapsed: !s.fileExplorerCollapsed })),
-      setFileExplorerCollapsed: (collapsed) => set({ fileExplorerCollapsed: collapsed }),
+      toggleFileExplorer: () =>
+        set((s) => ({ fileExplorerCollapsed: !s.fileExplorerCollapsed })),
+      setFileExplorerCollapsed: (collapsed) =>
+        set({ fileExplorerCollapsed: collapsed }),
       setActiveSubPage: (page) => set({ activeSubPage: page }),
       toggleChatPanel: () => set((s) => ({ chatPanelOpen: !s.chatPanelOpen })),
       setChatPanelOpen: (open) => set({ chatPanelOpen: open }),

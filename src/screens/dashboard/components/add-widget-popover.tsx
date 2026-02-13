@@ -17,12 +17,17 @@ export function AddWidgetPopover({ visibleIds, onAdd }: AddWidgetPopoverProps) {
   const [open, setOpen] = useState(false)
   const popoverRef = useRef<HTMLDivElement>(null)
 
-  const hiddenWidgets = WIDGET_META.filter((w) => !visibleIds.includes(w.id as WidgetId))
+  const hiddenWidgets = WIDGET_META.filter(
+    (w) => !visibleIds.includes(w.id as WidgetId),
+  )
 
   useEffect(() => {
     if (!open) return
     function handleClick(e: MouseEvent) {
-      if (popoverRef.current && !popoverRef.current.contains(e.target as Node)) {
+      if (
+        popoverRef.current &&
+        !popoverRef.current.contains(e.target as Node)
+      ) {
         setOpen(false)
       }
     }
@@ -50,7 +55,9 @@ export function AddWidgetPopover({ visibleIds, onAdd }: AddWidgetPopoverProps) {
           className="absolute right-0 top-full z-[9999] mt-2 w-64 rounded-xl border border-primary-200 bg-primary-50 p-3 shadow-xl backdrop-blur-xl dark:bg-primary-100"
         >
           <div className="mb-2 flex items-center justify-between">
-            <h3 className="text-xs font-medium uppercase tracking-wide text-primary-500">Widgets</h3>
+            <h3 className="text-xs font-medium uppercase tracking-wide text-primary-500">
+              Widgets
+            </h3>
             <button
               type="button"
               onClick={() => setOpen(false)}
@@ -61,11 +68,16 @@ export function AddWidgetPopover({ visibleIds, onAdd }: AddWidgetPopoverProps) {
           </div>
 
           {hiddenWidgets.length === 0 ? (
-            <p className="py-4 text-center text-xs text-primary-400">All widgets are visible</p>
+            <p className="py-4 text-center text-xs text-primary-400">
+              All widgets are visible
+            </p>
           ) : (
             <ul className="space-y-1">
               {hiddenWidgets.map((w) => (
-                <li key={w.id} className="flex items-center justify-between rounded-lg px-2 py-1.5 hover:bg-primary-100 dark:hover:bg-primary-200/50">
+                <li
+                  key={w.id}
+                  className="flex items-center justify-between rounded-lg px-2 py-1.5 hover:bg-primary-100 dark:hover:bg-primary-200/50"
+                >
                   <div className="flex items-center gap-2 min-w-0">
                     <span className="truncate text-sm text-ink">{w.label}</span>
                     {w.tier === 'demo' ? (
@@ -76,7 +88,9 @@ export function AddWidgetPopover({ visibleIds, onAdd }: AddWidgetPopoverProps) {
                   </div>
                   <button
                     type="button"
-                    onClick={() => { onAdd(w.id as WidgetId); }}
+                    onClick={() => {
+                      onAdd(w.id as WidgetId)
+                    }}
                     className="shrink-0 rounded-md border border-primary-200 px-2 py-0.5 text-[11px] font-medium text-primary-600 transition-colors hover:border-primary-300 hover:text-ink"
                   >
                     Add

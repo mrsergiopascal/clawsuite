@@ -8,7 +8,7 @@ import { isAuthenticated } from '../../server/auth-middleware'
  */
 function extractTextFromMessage(message: any): string {
   if (!message?.content) return ''
-  
+
   // Handle array content format
   if (Array.isArray(message.content)) {
     return message.content
@@ -16,12 +16,12 @@ function extractTextFromMessage(message: any): string {
       .map((block: any) => block.text)
       .join('')
   }
-  
+
   // Handle string content format
   if (typeof message.content === 'string') {
     return message.content
   }
-  
+
   return ''
 }
 
@@ -47,9 +47,11 @@ export const Route = createFileRoute('/api/chat-events')({
 
         const url = new URL(request.url)
         const sessionKeyParam = url.searchParams.get('sessionKey')?.trim()
-        
+
         const encoder = new TextEncoder()
-        let conn: Awaited<ReturnType<typeof createGatewayStreamConnection>> | null = null
+        let conn: Awaited<
+          ReturnType<typeof createGatewayStreamConnection>
+        > | null = null
         let streamClosed = false
         let heartbeatTimer: ReturnType<typeof setInterval> | null = null
 
@@ -68,36 +70,41 @@ export const Route = createFileRoute('/api/chat-events')({
             const closeStream = () => {
               if (streamClosed) return
               streamClosed = true
-              
+
               if (heartbeatTimer) {
                 clearInterval(heartbeatTimer)
                 heartbeatTimer = null
               }
-              
+
               try {
                 controller.close()
               } catch {
                 // ignore
               }
-              
+
               conn?.close().catch(() => {})
             }
 
             try {
               // Connect to gateway
               conn = await createGatewayStreamConnection()
-              
-              sendEvent('connected', { 
+
+              sendEvent('connected', {
                 timestamp: Date.now(),
                 sessionKey: sessionKeyParam || 'all',
               })
 
               // Listen for agent events (streaming responses)
               conn.on('agent', (payload: any) => {
-                const eventSessionKey = payload?.sessionKey || payload?.context?.sessionKey
-                
+                const eventSessionKey =
+                  payload?.sessionKey || payload?.context?.sessionKey
+
                 // Filter by session if specified
-                if (sessionKeyParam && eventSessionKey && eventSessionKey !== sessionKeyParam) {
+                if (
+                  sessionKeyParam &&
+                  eventSessionKey &&
+                  eventSessionKey !== sessionKeyParam
+                ) {
                   return
                 }
 
@@ -133,17 +140,23 @@ export const Route = createFileRoute('/api/chat-events')({
               // Protocol: state = "delta" | "final" | "error" | "aborted"
               // CRITICAL: delta sends FULL accumulated text, not incremental
               conn.on('chat', (payload: any) => {
-                const eventSessionKey = payload?.sessionKey || payload?.context?.sessionKey
-                
+                const eventSessionKey =
+                  payload?.sessionKey || payload?.context?.sessionKey
+
                 // Filter by session if specified
-                if (sessionKeyParam && eventSessionKey && eventSessionKey !== sessionKeyParam) {
+                if (
+                  sessionKeyParam &&
+                  eventSessionKey &&
+                  eventSessionKey !== sessionKeyParam
+                ) {
                   return
                 }
 
                 const state = payload?.state
                 const message = payload?.message
                 const runId = payload?.runId
-                const targetSessionKey = eventSessionKey || sessionKeyParam || 'main'
+                const targetSessionKey =
+                  eventSessionKey || sessionKeyParam || 'main'
 
                 // Handle streaming delta - extract full text and send as chunk
                 if (state === 'delta' && message) {
@@ -169,7 +182,7 @@ export const Route = createFileRoute('/api/chat-events')({
                   })
                   return
                 }
-                
+
                 if (state === 'error') {
                   sendEvent('done', {
                     state: 'error',
@@ -179,7 +192,7 @@ export const Route = createFileRoute('/api/chat-events')({
                   })
                   return
                 }
-                
+
                 if (state === 'aborted') {
                   sendEvent('done', {
                     state: 'aborted',
@@ -220,10 +233,15 @@ export const Route = createFileRoute('/api/chat-events')({
 
               // Handle other events that might contain messages
               conn.on('other', (eventName: string, payload: any) => {
-                const eventSessionKey = payload?.sessionKey || payload?.context?.sessionKey
-                
+                const eventSessionKey =
+                  payload?.sessionKey || payload?.context?.sessionKey
+
                 // Filter by session if specified
-                if (sessionKeyParam && eventSessionKey && eventSessionKey !== sessionKeyParam) {
+                if (
+                  sessionKeyParam &&
+                  eventSessionKey &&
+                  eventSessionKey !== sessionKeyParam
+                ) {
                   return
                 }
 
@@ -251,7 +269,9 @@ export const Route = createFileRoute('/api/chat-events')({
 
               conn.on('close', () => {
                 if (!streamClosed) {
-                  sendEvent('disconnected', { reason: 'Gateway connection closed' })
+                  sendEvent('disconnected', {
+                    reason: 'Gateway connection closed',
+                  })
                   closeStream()
                 }
               })
@@ -269,7 +289,6 @@ export const Route = createFileRoute('/api/chat-events')({
               heartbeatTimer = setInterval(() => {
                 sendEvent('heartbeat', { timestamp: Date.now() })
               }, 30000)
-
             } catch (err) {
               const errorMsg = err instanceof Error ? err.message : String(err)
               sendEvent('error', { message: errorMsg })

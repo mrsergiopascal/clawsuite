@@ -1,7 +1,12 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { json } from '@tanstack/react-start'
 import { analyzeError, readOpenClawLogs } from '../../server/debug-analyzer'
-import { getClientIp, rateLimit, rateLimitResponse, safeErrorMessage } from '../../server/rate-limit'
+import {
+  getClientIp,
+  rateLimit,
+  rateLimitResponse,
+  safeErrorMessage,
+} from '../../server/rate-limit'
 
 export const Route = createFileRoute('/api/debug-analyze')({
   server: {
@@ -24,7 +29,10 @@ export const Route = createFileRoute('/api/debug-analyze')({
           const analysis = await analyzeError(terminalOutput, logContent)
           return json(analysis)
         } catch (error) {
-          console.error('[/api/debug-analyze] Error:', error instanceof Error ? error.message : String(error))
+          console.error(
+            '[/api/debug-analyze] Error:',
+            error instanceof Error ? error.message : String(error),
+          )
           return json(
             {
               summary: 'Debug analysis request failed.',

@@ -139,9 +139,9 @@ export function CodeBlock({
           </Button>
         </div>
       </div>
-      <div className="flex min-w-0">
+      <div className="flex min-w-0 overflow-x-auto">
         {showLineNumbers ? (
-          <ol className="select-none border-r border-primary-200 bg-primary-100/60 px-2 py-3 text-right text-xs text-primary-600 tabular-nums">
+          <ol className="sticky left-0 z-10 select-none border-r border-primary-200 bg-primary-100/60 px-2 py-3 text-right text-xs text-primary-600 tabular-nums">
             {Array.from({ length: lineCount }, (_, index) => (
               <li key={`line-${index + 1}`} className="leading-6">
                 {index + 1}
@@ -149,7 +149,7 @@ export function CodeBlock({
             ))}
           </ol>
         ) : null}
-        <div className="min-w-0 flex-1 overflow-x-auto">
+        <div className="min-w-0 flex-1">
           {html ? (
             <div
               className={cn(
@@ -163,11 +163,11 @@ export function CodeBlock({
           ) : (
             <pre
               className={cn(
-                'text-sm leading-6',
+                'text-sm leading-6 text-primary-900',
                 isSingleLine ? 'whitespace-pre px-3 py-2' : 'px-3 py-3',
               )}
             >
-              <code className="overflow-x-auto">{fallback}</code>
+              <code>{fallback}</code>
             </pre>
           )}
         </div>

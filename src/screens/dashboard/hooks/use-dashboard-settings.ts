@@ -41,7 +41,9 @@ const listeners = new Set<() => void>()
 
 function subscribe(cb: () => void) {
   listeners.add(cb)
-  return () => { listeners.delete(cb) }
+  return () => {
+    listeners.delete(cb)
+  }
 }
 
 function getSnapshot() {
@@ -51,7 +53,9 @@ function getSnapshot() {
 export function useDashboardSettings() {
   const settings = useSyncExternalStore(subscribe, getSnapshot, getSnapshot)
 
-  const update = useCallback(function updateSettings(patch: Partial<DashboardSettings>) {
+  const update = useCallback(function updateSettings(
+    patch: Partial<DashboardSettings>,
+  ) {
     write({ ...read(), ...patch })
   }, [])
 

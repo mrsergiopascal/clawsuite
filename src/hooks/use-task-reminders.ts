@@ -7,14 +7,19 @@ const firedAutoAlerts = new Set<string>()
 
 function showNotification(title: string, body: string) {
   // Try browser Notification API first
-  if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+  if (
+    typeof Notification !== 'undefined' &&
+    Notification.permission === 'granted'
+  ) {
     new Notification(title, { body, icon: '/favicon.ico' })
     return
   }
 
   // Fallback: dispatch custom event for in-app toast
   window.dispatchEvent(
-    new CustomEvent('clawsuite:toast', { detail: { title, body, type: 'warning' } }),
+    new CustomEvent('clawsuite:toast', {
+      detail: { title, body, type: 'warning' },
+    }),
   )
 }
 
@@ -34,7 +39,11 @@ export function useTaskReminders() {
 
   useEffect(() => {
     // Request notification permission on mount
-    if (typeof window !== 'undefined' && typeof Notification !== 'undefined' && Notification.permission === 'default') {
+    if (
+      typeof window !== 'undefined' &&
+      typeof Notification !== 'undefined' &&
+      Notification.permission === 'default'
+    ) {
       void Notification.requestPermission()
     }
 
@@ -95,7 +104,11 @@ export function useTaskReminders() {
           }
         }
 
-        if (task.priority === 'P1' && task.status === 'in_progress' && !task.reminder) {
+        if (
+          task.priority === 'P1' &&
+          task.status === 'in_progress' &&
+          !task.reminder
+        ) {
           const updated = new Date(task.updatedAt).getTime()
           const twoDays = 2 * 24 * 60 * 60 * 1000
           if (now - updated > twoDays) {

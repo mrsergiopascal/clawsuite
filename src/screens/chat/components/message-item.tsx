@@ -33,9 +33,13 @@ import {
 } from '@/hooks/use-chat-settings'
 import { cn } from '@/lib/utils'
 
-// Streaming cursor component
+// Streaming cursor component — enhanced visibility
 function StreamingCursor() {
-  return <LoadingIndicator ariaLabel="Assistant is streaming" />
+  return (
+    <span className="inline-flex items-center ml-0.5">
+      <span className="size-1.5 rounded-full bg-primary-600 animate-pulse" />
+    </span>
+  )
 }
 
 const WORDS_PER_TICK = 4
@@ -288,20 +292,20 @@ function MessageItemComponent({
       : messageStreamingThinking
   // Only treat as streaming if explicitly passed isStreaming prop (active stream)
   // Ignore stale __streamingStatus from history
-  const remoteStreamingActive =
-    isStreaming === true
+  const remoteStreamingActive = isStreaming === true
 
   const fullText = useMemo(() => textFromMessage(message), [message])
-  const initialDisplayText =
-    remoteStreamingActive ? remoteStreamingText ?? fullText : fullText
-  const [displayText, setDisplayText] = useState(() =>
-    initialDisplayText,
-  )
+  const initialDisplayText = remoteStreamingActive
+    ? (remoteStreamingText ?? fullText)
+    : fullText
+  const [displayText, setDisplayText] = useState(() => initialDisplayText)
   const [revealedWordCount, setRevealedWordCount] = useState(() =>
-    (remoteStreamingActive || _simulateStreaming) ? 0 : countWords(initialDisplayText),
+    remoteStreamingActive || _simulateStreaming
+      ? 0
+      : countWords(initialDisplayText),
   )
   const [revealedText, setRevealedText] = useState(() =>
-    (remoteStreamingActive || _simulateStreaming) ? '' : initialDisplayText,
+    remoteStreamingActive || _simulateStreaming ? '' : initialDisplayText,
   )
   const revealTimerRef = useRef<number | null>(null)
   const targetWordCountRef = useRef(countWords(initialDisplayText))
@@ -324,9 +328,7 @@ function MessageItemComponent({
       return
     }
 
-    setDisplayText((current) =>
-      current === fullText ? current : fullText,
-    )
+    setDisplayText((current) => (current === fullText ? current : fullText))
   }, [remoteStreamingActive, remoteStreamingText, fullText])
 
   // Reset word count when simulate streaming starts for a new message
@@ -347,7 +349,8 @@ function MessageItemComponent({
   // Simulate streaming is only active while words are still being revealed
   const totalWords = countWords(displayText)
   const revealComplete = revealedWordCount >= totalWords && totalWords > 0
-  const effectiveIsStreaming = remoteStreamingActive || (_simulateStreaming && !revealComplete)
+  const effectiveIsStreaming =
+    remoteStreamingActive || (_simulateStreaming && !revealComplete)
   const assistantDisplayText = effectiveIsStreaming ? revealedText : displayText
 
   useEffect(() => {
@@ -355,7 +358,8 @@ function MessageItemComponent({
     const previousText = previousTextRef.current
     const previousLength = previousTextLengthRef.current
     const textGrew =
-      displayText.length > previousLength && displayText.startsWith(previousText)
+      displayText.length > previousLength &&
+      displayText.startsWith(previousText)
     const textChanged = displayText !== previousText
 
     targetWordCountRef.current = totalWords
@@ -402,7 +406,10 @@ function MessageItemComponent({
             currentWordCount + WORDS_PER_TICK,
           )
 
-          if (nextWordCount >= targetWordCount && revealTimerRef.current !== null) {
+          if (
+            nextWordCount >= targetWordCount &&
+            revealTimerRef.current !== null
+          ) {
             window.clearInterval(revealTimerRef.current)
             revealTimerRef.current = null
           }
@@ -438,7 +445,7 @@ function MessageItemComponent({
   const isUser = role === 'user'
   const timestamp = getMessageTimestamp(message)
   const attachments = Array.isArray(message.attachments)
-    ? (message.attachments).filter(
+    ? message.attachments.filter(
         (attachment) => attachmentSource(attachment).length > 0,
       )
     : []
@@ -450,9 +457,10 @@ function MessageItemComponent({
     return parts
       .filter((p: any) => p.type === 'image' && p.source)
       .map((p: any, i: number) => {
-        const src = p.source?.type === 'base64' && p.source?.data
-          ? `data:${p.source.media_type || 'image/jpeg'};base64,${p.source.data}`
-          : p.source?.url || p.url || ''
+        const src =
+          p.source?.type === 'base64' && p.source?.data
+            ? `data:${p.source.media_type || 'image/jpeg'};base64,${p.source.data}`
+            : p.source?.url || p.url || ''
         return { id: `inline-img-${i}`, src }
       })
       .filter((img) => img.src.length > 0)
@@ -492,8 +500,9 @@ function MessageItemComponent({
 
   // Check if this message is queued (optimistic and not yet confirmed by server)
   const isQueued = Boolean(
-    (message as any).__optimisticId || message.status === 'sending'
+    (message as any).__optimisticId || message.status === 'sending',
   )
+  const isFailed = message.status === 'error'
 
   return (
     <div
@@ -547,114 +556,127 @@ function MessageItemComponent({
       {/* Narration messages (tool-call activity) — compact collapsible row */}
       {!isUser && (message as any).__isNarration && hasText && (
         <div className="w-full max-w-[900px]">
-          <details className="group/narration">
-            <summary className="flex items-center gap-2 cursor-pointer select-none py-1 text-primary-500 hover:text-primary-700 transition-colors">
-              <span className="size-5 flex items-center justify-center rounded-full bg-accent-500/10">
-                <span className="text-[10px]">⚡</span>
+          <details className="group/narration rounded-lg border border-primary-200/50 bg-primary-50/30 hover:bg-primary-50/50 transition-colors">
+            <summary className="flex items-center gap-2 cursor-pointer select-none px-3 py-2 list-none [&::-webkit-details-marker]:hidden">
+              <span className="size-6 flex items-center justify-center rounded-full bg-accent-500/15 shrink-0">
+                <span className="text-xs">⚡</span>
               </span>
-              <span className="text-xs font-medium truncate flex-1">
-                {displayText.slice(0, 120)}{displayText.length > 120 ? '...' : ''}
+              <span className="text-xs font-medium truncate flex-1 text-primary-700">
+                {displayText.slice(0, 120)}
+                {displayText.length > 120 ? '...' : ''}
               </span>
-              <span className="text-[10px] text-primary-400 shrink-0 group-open/narration:hidden">▸</span>
-              <span className="text-[10px] text-primary-400 shrink-0 hidden group-open/narration:inline">▾</span>
+              <HugeiconsIcon
+                icon={ArrowDown01Icon}
+                size={16}
+                strokeWidth={1.5}
+                className="text-primary-400 shrink-0 transition-transform group-open/narration:rotate-180"
+              />
             </summary>
-            <div className="mt-1 ml-7 rounded-lg border border-primary-200/60 bg-primary-50/50 p-3 text-[13px] text-primary-600 whitespace-pre-wrap text-pretty">
+            <div className="px-3 pb-3 pt-1 text-[13px] text-primary-600 whitespace-pre-wrap text-pretty max-h-[400px] overflow-y-auto">
               {displayText}
             </div>
           </details>
         </div>
       )}
-      {(hasText || hasAttachments || hasInlineImages || effectiveIsStreaming) && !(message as any).__isNarration && (
-        <Message className={cn(isUser ? 'flex-row-reverse' : '')}>
-          {isUser ? (
-            <UserAvatar
-              size={24}
-              className="mt-0.5"
-              src={profileAvatarDataUrl}
-              alt={profileDisplayName}
-            />
-          ) : (
-            <AssistantAvatar size={24} className="mt-0.5" />
-          )}
-          <div
-            data-chat-message-bubble={isUser ? 'true' : undefined}
-            className={cn(
-              'rounded-[12px] break-words whitespace-normal min-w-0 text-primary-900 flex flex-col gap-2',
-              effectiveIsStreaming && !isUser && remoteStreamingActive ? 'chat-streaming-message chat-streaming-glow' : '',
-              !isUser
-                ? 'bg-transparent w-full'
-                : 'bg-primary-100 max-w-[75%] rounded-2xl px-4 py-2.5',
-              isQueued && isUser && 'opacity-70',
-              bubbleClassName,
+      {(hasText || hasAttachments || hasInlineImages || effectiveIsStreaming) &&
+        !(message as any).__isNarration && (
+          <Message className={cn(isUser ? 'flex-row-reverse' : '')}>
+            {isUser ? (
+              <UserAvatar
+                size={24}
+                className="mt-0.5"
+                src={profileAvatarDataUrl}
+                alt={profileDisplayName}
+              />
+            ) : (
+              <AssistantAvatar size={24} className="mt-0.5" />
             )}
-          >
-            {hasAttachments && (
-              <div className="flex flex-wrap gap-2">
-                {attachments.map((attachment) => (
-                  <a
-                    key={attachment.id}
-                    href={attachmentSource(attachment)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block overflow-hidden rounded-lg border border-primary-200 hover:border-primary-400 transition-colors"
-                  >
-                    <img
-                      src={attachmentSource(attachment)}
-                      alt={attachment.name || 'Attached image'}
-                      className="max-h-48 max-w-full object-contain"
-                    />
-                  </a>
-                ))}
-              </div>
-            )}
-            {hasInlineImages && (
-              <div className="flex flex-wrap gap-2">
-                {inlineImages.map((img) => (
-                  <a
-                    key={img.id}
-                    href={img.src}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block overflow-hidden rounded-lg border border-primary-200 hover:border-primary-400 transition-colors"
-                  >
-                    <img
-                      src={img.src}
-                      alt="Shared image"
-                      className="max-h-48 max-w-full object-contain"
-                    />
-                  </a>
-                ))}
-              </div>
-            )}
-            {hasText &&
-              (isUser ? (
-                <span className="text-pretty">{displayText}</span>
-              ) : (
-                <div className="relative">
-                  <MessageContent
-                    markdown
-                    className={cn(
-                      'text-primary-900 bg-transparent w-full text-pretty',
-                      effectiveIsStreaming && 'chat-streaming-content',
-                    )}
-                  >
-                    {assistantDisplayText}
-                  </MessageContent>
-                  {effectiveIsStreaming && <StreamingCursor />}
+            <div
+              data-chat-message-bubble={isUser ? 'true' : undefined}
+              className={cn(
+                'rounded-[12px] break-words whitespace-normal min-w-0 text-primary-900 flex flex-col gap-2',
+                effectiveIsStreaming && !isUser && remoteStreamingActive
+                  ? 'chat-streaming-message chat-streaming-glow'
+                  : '',
+                !isUser
+                  ? 'bg-transparent w-full'
+                  : 'bg-primary-100 max-w-[75%] rounded-2xl px-4 py-2.5',
+                isQueued && isUser && !isFailed && 'opacity-70',
+                isFailed && isUser && 'bg-red-50/50 border border-red-300',
+                bubbleClassName,
+              )}
+            >
+              {hasAttachments && (
+                <div className="flex flex-wrap gap-2">
+                  {attachments.map((attachment) => (
+                    <a
+                      key={attachment.id}
+                      href={attachmentSource(attachment)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block overflow-hidden rounded-lg border border-primary-200 hover:border-primary-400 transition-colors max-w-full"
+                    >
+                      <img
+                        src={attachmentSource(attachment)}
+                        alt={attachment.name || 'Attached image'}
+                        className="max-h-64 w-auto max-w-full object-contain"
+                        loading="lazy"
+                      />
+                    </a>
+                  ))}
                 </div>
-              ))}
-            {effectiveIsStreaming && !hasText && (
-              <div className="flex items-center gap-1.5 py-1">
-                <span className="typing-dots flex gap-1">
-                  <span className="size-2 rounded-full bg-primary-400 animate-[typing-bounce_1.4s_ease-in-out_infinite]" />
-                  <span className="size-2 rounded-full bg-primary-400 animate-[typing-bounce_1.4s_ease-in-out_0.2s_infinite]" />
-                  <span className="size-2 rounded-full bg-primary-400 animate-[typing-bounce_1.4s_ease-in-out_0.4s_infinite]" />
-                </span>
-              </div>
-            )}
-          </div>
-        </Message>
-      )}
+              )}
+              {hasInlineImages && (
+                <div className="flex flex-wrap gap-2">
+                  {inlineImages.map((img) => (
+                    <a
+                      key={img.id}
+                      href={img.src}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block overflow-hidden rounded-lg border border-primary-200 hover:border-primary-400 transition-colors max-w-full"
+                    >
+                      <img
+                        src={img.src}
+                        alt="Shared image"
+                        className="max-h-64 w-auto max-w-full object-contain"
+                        loading="lazy"
+                      />
+                    </a>
+                  ))}
+                </div>
+              )}
+              {hasText &&
+                (isUser ? (
+                  <span className="text-pretty max-h-[600px] overflow-y-auto">
+                    {displayText}
+                  </span>
+                ) : (
+                  <div className="relative max-h-[800px] overflow-y-auto">
+                    <MessageContent
+                      markdown
+                      className={cn(
+                        'text-primary-900 bg-transparent w-full text-pretty',
+                        effectiveIsStreaming && 'chat-streaming-content',
+                      )}
+                    >
+                      {assistantDisplayText}
+                    </MessageContent>
+                    {effectiveIsStreaming && <StreamingCursor />}
+                  </div>
+                ))}
+              {effectiveIsStreaming && !hasText && (
+                <div className="flex items-center gap-1.5 py-1">
+                  <span className="typing-dots flex gap-1">
+                    <span className="size-2 rounded-full bg-primary-400 animate-[typing-bounce_1.4s_ease-in-out_infinite]" />
+                    <span className="size-2 rounded-full bg-primary-400 animate-[typing-bounce_1.4s_ease-in-out_0.2s_infinite]" />
+                    <span className="size-2 rounded-full bg-primary-400 animate-[typing-bounce_1.4s_ease-in-out_0.4s_infinite]" />
+                  </span>
+                </div>
+              )}
+            </div>
+          </Message>
+        )}
 
       {/* Render tool calls - only when message is tool-call-only (no text) */}
       {hasToolCalls && !hasText && (
@@ -703,6 +725,15 @@ function MessageItemComponent({
           align={isUser ? 'end' : 'start'}
           forceVisible={forceActionsVisible}
           isQueued={isUser && isQueued}
+          isFailed={isUser && isFailed}
+          onRetry={
+            isFailed
+              ? () => {
+                  // TODO: Wire up retry handler from parent
+                  console.log('Retry message:', fullText)
+                }
+              : undefined
+          }
         />
       )}
     </div>
@@ -741,14 +772,11 @@ function areMessagesEqual(
   if (prevProps.streamingKey !== nextProps.streamingKey) {
     return false
   }
-  if (
-    prevProps.expandAllToolSections !== nextProps.expandAllToolSections
-  ) {
+  if (prevProps.expandAllToolSections !== nextProps.expandAllToolSections) {
     return false
   }
   if (
-    prevProps.message.__streamingStatus !==
-    nextProps.message.__streamingStatus
+    prevProps.message.__streamingStatus !== nextProps.message.__streamingStatus
   ) {
     return false
   }

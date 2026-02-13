@@ -3,7 +3,12 @@ import path from 'node:path'
 import { createFileRoute } from '@tanstack/react-router'
 import { json } from '@tanstack/react-start'
 import { z } from 'zod'
-import { getClientIp, rateLimit, rateLimitResponse, safeErrorMessage } from '../../../server/rate-limit'
+import {
+  getClientIp,
+  rateLimit,
+  rateLimitResponse,
+  safeErrorMessage,
+} from '../../../server/rate-limit'
 
 const TASKS_FILE = path.join(process.cwd(), 'data', 'tasks.json')
 
@@ -25,7 +30,9 @@ async function writeTasks(tasks: unknown[]): Promise<void> {
 const CreateTaskSchema = z.object({
   title: z.string().trim().min(1).max(500),
   description: z.string().max(5000).default(''),
-  status: z.enum(['backlog', 'in_progress', 'review', 'done']).default('backlog'),
+  status: z
+    .enum(['backlog', 'in_progress', 'review', 'done'])
+    .default('backlog'),
   priority: z.enum(['P0', 'P1', 'P2', 'P3']).default('P1'),
   project: z.string().max(100).optional(),
   tags: z.array(z.string().max(50)).max(20).default([]),
@@ -38,7 +45,8 @@ export const Route = createFileRoute('/api/tasks/')({
     handlers: {
       GET: async ({ request }) => {
         const ip = getClientIp(request)
-        if (!rateLimit(`tasks-get:${ip}`, 60, 60_000)) return rateLimitResponse()
+        if (!rateLimit(`tasks-get:${ip}`, 60, 60_000))
+          return rateLimitResponse()
 
         try {
           const tasks = await readTasks()
@@ -50,14 +58,18 @@ export const Route = createFileRoute('/api/tasks/')({
 
       POST: async ({ request }) => {
         const ip = getClientIp(request)
-        if (!rateLimit(`tasks-post:${ip}`, 30, 60_000)) return rateLimitResponse()
+        if (!rateLimit(`tasks-post:${ip}`, 30, 60_000))
+          return rateLimitResponse()
 
         try {
           const body = await request.json().catch(() => ({}))
           const parsed = CreateTaskSchema.safeParse(body)
           if (!parsed.success) {
             return json(
-              { error: 'Validation failed', details: parsed.error.flatten().fieldErrors },
+              {
+                error: 'Validation failed',
+                details: parsed.error.flatten().fieldErrors,
+              },
               { status: 400 },
             )
           }

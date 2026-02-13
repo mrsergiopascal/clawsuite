@@ -30,7 +30,10 @@ export const Route = createFileRoute('/api/auth')({
           const parsed = AuthSchema.safeParse(raw)
 
           if (!parsed.success) {
-            return json({ ok: false, error: 'Invalid request' }, { status: 400 })
+            return json(
+              { ok: false, error: 'Invalid request' },
+              { status: 400 },
+            )
           }
 
           const { password } = parsed.data
@@ -41,7 +44,10 @@ export const Route = createFileRoute('/api/auth')({
           if (!valid) {
             // Add small delay to prevent brute force
             await new Promise((resolve) => setTimeout(resolve, 1000))
-            return json({ ok: false, error: 'Invalid password' }, { status: 401 })
+            return json(
+              { ok: false, error: 'Invalid password' },
+              { status: 401 },
+            )
           }
 
           // Generate session token

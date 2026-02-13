@@ -1,5 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { getClientIp, rateLimit, rateLimitResponse } from '../../server/rate-limit'
+import {
+  getClientIp,
+  rateLimit,
+  rateLimitResponse,
+} from '../../server/rate-limit'
 import { getTerminalSession } from '../../server/terminal-sessions'
 import { isAuthenticated } from '../../server/auth-middleware'
 
@@ -24,7 +28,8 @@ export const Route = createFileRoute('/api/terminal-input')({
           string,
           unknown
         >
-        const sessionId = typeof body.sessionId === 'string' ? body.sessionId : ''
+        const sessionId =
+          typeof body.sessionId === 'string' ? body.sessionId : ''
         const data = typeof body.data === 'string' ? body.data : ''
         const session = getTerminalSession(sessionId)
         if (!session) {

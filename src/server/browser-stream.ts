@@ -27,7 +27,9 @@ let currentTitle = ''
 function broadcast(msg: Record<string, unknown>) {
   const data = JSON.stringify(msg)
   for (const ws of clients) {
-    try { ws.send(data) } catch {}
+    try {
+      ws.send(data)
+    } catch {}
   }
 }
 
@@ -47,7 +49,8 @@ async function launchBrowserInstance() {
   try {
     // Use playwright-extra with stealth plugin for anti-detection
     const { chromium } = await import('playwright-extra')
-    const StealthPlugin = (await import('puppeteer-extra-plugin-stealth')).default
+    const StealthPlugin = (await import('puppeteer-extra-plugin-stealth'))
+      .default
     chromium.use(StealthPlugin())
 
     // Persistent context = cookies/sessions survive restarts
@@ -62,30 +65,40 @@ async function launchBrowserInstance() {
         '--disable-blink-features=AutomationControlled',
       ],
       ignoreDefaultArgs: ['--enable-automation'],
-      userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
+      userAgent:
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
       locale: 'en-US',
       timezoneId: 'America/New_York',
     })
     browser = null // persistentContext doesn't expose browser separately
 
     // Persistent context may already have pages open
-    page = context.pages()[0] || await context.newPage()
+    page = context.pages()[0] || (await context.newPage())
 
     // Helper to attach CDP + screencast to a page
     async function attachToPage(p: Page) {
       page = p
       // Clean up old CDP
       if (cdp) {
-        try { await cdp.send('Page.stopScreencast') } catch {}
-        try { await cdp.detach() } catch {}
+        try {
+          await cdp.send('Page.stopScreencast')
+        } catch {}
+        try {
+          await cdp.detach()
+        } catch {}
       }
       cdp = await context!.newCDPSession(p)
-      cdp.on('Page.screencastFrame', (params: { data: string; sessionId: number; metadata: any }) => {
-        const frame = `data:image/jpeg;base64,${params.data}`
-        lastFrame = frame
-        broadcast({ type: 'frame', data: frame })
-        cdp.send('Page.screencastFrameAck', { sessionId: params.sessionId }).catch(() => {})
-      })
+      cdp.on(
+        'Page.screencastFrame',
+        (params: { data: string; sessionId: number; metadata: any }) => {
+          const frame = `data:image/jpeg;base64,${params.data}`
+          lastFrame = frame
+          broadcast({ type: 'frame', data: frame })
+          cdp
+            .send('Page.screencastFrameAck', { sessionId: params.sessionId })
+            .catch(() => {})
+        },
+      )
       await cdp.send('Page.startScreencast', {
         format: 'jpeg',
         quality: 85,
@@ -128,14 +141,19 @@ async function launchBrowserInstance() {
 
     // Initial CDP attach
     cdp = await context.newCDPSession(page)
-    cdp.on('Page.screencastFrame', (params: { data: string; sessionId: number; metadata: any }) => {
-      const frame = `data:image/jpeg;base64,${params.data}`
-      lastFrame = frame
-      // Push frame to all connected clients
-      broadcast({ type: 'frame', data: frame })
-      // Ack so Chrome keeps sending
-      cdp.send('Page.screencastFrameAck', { sessionId: params.sessionId }).catch(() => {})
-    })
+    cdp.on(
+      'Page.screencastFrame',
+      (params: { data: string; sessionId: number; metadata: any }) => {
+        const frame = `data:image/jpeg;base64,${params.data}`
+        lastFrame = frame
+        // Push frame to all connected clients
+        broadcast({ type: 'frame', data: frame })
+        // Ack so Chrome keeps sending
+        cdp
+          .send('Page.screencastFrameAck', { sessionId: params.sessionId })
+          .catch(() => {})
+      },
+    )
 
     await cdp.send('Page.startScreencast', {
       format: 'jpeg',
@@ -154,11 +172,19 @@ async function launchBrowserInstance() {
 
 async function closeBrowserInstance() {
   if (cdp) {
-    try { await cdp.send('Page.stopScreencast') } catch {}
+    try {
+      await cdp.send('Page.stopScreencast')
+    } catch {}
     cdp = null
   }
-  if (context) { await context.close().catch(() => {}); context = null }
-  if (browser) { await browser.close().catch(() => {}); browser = null }
+  if (context) {
+    await context.close().catch(() => {})
+    context = null
+  }
+  if (browser) {
+    await browser.close().catch(() => {})
+    browser = null
+  }
   page = null
   lastFrame = null
   currentUrl = ''
@@ -174,31 +200,45 @@ async function recoverPage(): Promise<boolean> {
   if (pages.length === 0) return false
   page = pages[pages.length - 1]
   try {
-    if (cdp) { try { await cdp.detach() } catch {} }
+    if (cdp) {
+      try {
+        await cdp.detach()
+      } catch {}
+    }
     cdp = await context.newCDPSession(page)
     currentUrl = page.url()
     currentTitle = await page.title().catch(() => '')
     broadcastState()
     return true
-  } catch { return false }
+  } catch {
+    return false
+  }
 }
 
 async function handleAction(action: string, params: Record<string, unknown>) {
   if (!page && action !== 'launch') {
     // Try to recover
-    if (context && await recoverPage()) {
+    if (context && (await recoverPage())) {
       // recovered
     } else {
       return { error: 'Browser not running' }
     }
   }
 
-  try { return await executeAction(action, params) } catch (err: any) {
+  try {
+    return await executeAction(action, params)
+  } catch (err: any) {
     // Auto-recover on stale page/CDP errors
-    if (err?.message?.includes('closed') || err?.message?.includes('Target') || err?.message?.includes('detached')) {
+    if (
+      err?.message?.includes('closed') ||
+      err?.message?.includes('Target') ||
+      err?.message?.includes('detached')
+    ) {
       const recovered = await recoverPage()
       if (recovered) {
-        try { return await executeAction(action, params) } catch (retryErr: any) {
+        try {
+          return await executeAction(action, params)
+        } catch (retryErr: any) {
           return { error: retryErr?.message || String(retryErr) }
         }
       }
@@ -207,7 +247,10 @@ async function handleAction(action: string, params: Record<string, unknown>) {
   }
 }
 
-async function executeAction(action: string, params: Record<string, unknown>): Promise<Record<string, unknown>> {
+async function executeAction(
+  action: string,
+  params: Record<string, unknown>,
+): Promise<Record<string, unknown>> {
   switch (action) {
     case 'launch':
       await launchBrowserInstance()
@@ -221,7 +264,9 @@ async function executeAction(action: string, params: Record<string, unknown>): P
       let url = String(params.url || '').trim()
       if (!url) return { error: 'url required' }
       if (!url.match(/^https?:\/\//)) url = `https://${url}`
-      await page!.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {})
+      await page!
+        .goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 })
+        .catch(() => {})
       currentUrl = page!.url()
       currentTitle = await page!.title().catch(() => '')
       broadcastState()
@@ -233,8 +278,20 @@ async function executeAction(action: string, params: Record<string, unknown>): P
       const y = Number(params.y) || 0
       // Use CDP for more reliable clicks
       if (cdp) {
-        await cdp.send('Input.dispatchMouseEvent', { type: 'mousePressed', x, y, button: 'left', clickCount: 1 })
-        await cdp.send('Input.dispatchMouseEvent', { type: 'mouseReleased', x, y, button: 'left', clickCount: 1 })
+        await cdp.send('Input.dispatchMouseEvent', {
+          type: 'mousePressed',
+          x,
+          y,
+          button: 'left',
+          clickCount: 1,
+        })
+        await cdp.send('Input.dispatchMouseEvent', {
+          type: 'mouseReleased',
+          x,
+          y,
+          button: 'left',
+          clickCount: 1,
+        })
       } else {
         await page!.mouse.click(x, y)
       }
@@ -315,7 +372,13 @@ async function executeAction(action: string, params: Record<string, unknown>): P
     case 'scroll': {
       const dy = params.direction === 'up' ? -400 : 400
       if (cdp) {
-        await cdp.send('Input.dispatchMouseEvent', { type: 'mouseWheel', x: 640, y: 400, deltaX: 0, deltaY: dy })
+        await cdp.send('Input.dispatchMouseEvent', {
+          type: 'mouseWheel',
+          x: 640,
+          y: 400,
+          deltaX: 0,
+          deltaY: dy,
+        })
       } else {
         await page!.mouse.wheel(0, dy)
       }
@@ -344,18 +407,30 @@ async function executeAction(action: string, params: Record<string, unknown>): P
       return { ok: true }
 
     case 'screenshot': {
-      return { ok: true, screenshot: lastFrame || '', url: currentUrl, title: currentTitle }
+      return {
+        ok: true,
+        screenshot: lastFrame || '',
+        url: currentUrl,
+        title: currentTitle,
+      }
     }
 
     case 'content': {
       const url = page!.url()
       const title = await page!.title().catch(() => '')
-      const text = await page!.evaluate(() => {
-        const clone = document.body?.cloneNode(true) as HTMLElement
-        if (!clone) return ''
-        clone.querySelectorAll('script,style,noscript,svg').forEach(el => el.remove())
-        return (clone.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 8000)
-      }).catch(() => '')
+      const text = await page!
+        .evaluate(() => {
+          const clone = document.body?.cloneNode(true) as HTMLElement
+          if (!clone) return ''
+          clone
+            .querySelectorAll('script,style,noscript,svg')
+            .forEach((el) => el.remove())
+          return (clone.textContent || '')
+            .replace(/\s+/g, ' ')
+            .trim()
+            .slice(0, 8000)
+        })
+        .catch(() => '')
       return { ok: true, url, title, text }
     }
 
@@ -385,15 +460,23 @@ export async function startBrowserStream(): Promise<{ port: number }> {
       // Simple HTTP endpoint for status/actions (agent handoff uses this)
       if (req.method === 'POST') {
         let body = ''
-        req.on('data', (c) => { body += c })
+        req.on('data', (c) => {
+          body += c
+        })
         req.on('end', async () => {
           try {
             const params = JSON.parse(body)
             const result = await handleAction(params.action, params)
-            res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' })
+            res.writeHead(200, {
+              'Content-Type': 'application/json',
+              'Access-Control-Allow-Origin': '*',
+            })
             res.end(JSON.stringify(result))
           } catch (err) {
-            res.writeHead(500, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' })
+            res.writeHead(500, {
+              'Content-Type': 'application/json',
+              'Access-Control-Allow-Origin': '*',
+            })
             res.end(JSON.stringify({ error: String(err) }))
           }
         })
@@ -401,8 +484,18 @@ export async function startBrowserStream(): Promise<{ port: number }> {
       }
 
       // Status
-      res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' })
-      res.end(JSON.stringify({ running: !!page, url: currentUrl, title: currentTitle, port: WS_PORT }))
+      res.writeHead(200, {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+      })
+      res.end(
+        JSON.stringify({
+          running: !!page,
+          url: currentUrl,
+          title: currentTitle,
+          port: WS_PORT,
+        }),
+      )
     })
 
     const wss = new WebSocketServer({ server })
@@ -413,7 +506,14 @@ export async function startBrowserStream(): Promise<{ port: number }> {
       clients.add(ws)
 
       // Send current state + last frame immediately
-      ws.send(JSON.stringify({ type: 'state', url: currentUrl, title: currentTitle, running: !!page }))
+      ws.send(
+        JSON.stringify({
+          type: 'state',
+          url: currentUrl,
+          title: currentTitle,
+          running: !!page,
+        }),
+      )
       if (lastFrame) {
         ws.send(JSON.stringify({ type: 'frame', data: lastFrame }))
       }
@@ -436,7 +536,9 @@ export async function startBrowserStream(): Promise<{ port: number }> {
     server.on('error', (err: any) => {
       if (err.code === 'EADDRINUSE') {
         // Port already in use — likely stale from a previous session. Reuse it.
-        console.warn(`[browser-stream] Port ${WS_PORT} already in use, reusing existing server`)
+        console.warn(
+          `[browser-stream] Port ${WS_PORT} already in use, reusing existing server`,
+        )
         resolve({ port: WS_PORT })
       } else {
         console.error('[browser-stream] Server error:', err)

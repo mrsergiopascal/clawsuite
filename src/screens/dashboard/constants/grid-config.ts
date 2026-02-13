@@ -82,7 +82,10 @@ export const WIDGET_REGISTRY: Array<WidgetRegistryEntry> = [
 ]
 
 /* ── Layout Constraints ── */
-function tierConstraints(tier: WidgetSizeTier, breakpoint: keyof typeof GRID_COLS) {
+function tierConstraints(
+  tier: WidgetSizeTier,
+  breakpoint: keyof typeof GRID_COLS,
+) {
   const [w, h] = SIZE_TIERS[tier][breakpoint]
   const maxCols = GRID_COLS[breakpoint]
   return {
@@ -162,9 +165,11 @@ const LAYOUT_STORAGE_KEY = 'openclaw-dashboard-layouts-v4'
 const LEGACY_LAYOUT_STORAGE_KEY = 'openclaw-dashboard-layout'
 
 const BREAKPOINT_KEYS = Object.keys(GRID_COLS) as Array<keyof typeof GRID_COLS>
-const WIDGET_IDS = new Set<WidgetId>(WIDGET_REGISTRY.map(function mapWidget(widget) {
-  return widget.id
-}))
+const WIDGET_IDS = new Set<WidgetId>(
+  WIDGET_REGISTRY.map(function mapWidget(widget) {
+    return widget.id
+  }),
+)
 
 function cloneLayout(layout: Layout): Layout {
   return layout.map(function cloneItem(item) {
@@ -278,7 +283,9 @@ export function loadLayouts(): ResponsiveLayouts {
     if (!raw) return buildDefaultLayouts()
     const parsed = JSON.parse(raw) as unknown
     return normalizeLayouts(parsed)
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
   return buildDefaultLayouts()
 }
 

@@ -12,7 +12,9 @@ const STORAGE_KEY = 'openclaw-dashboard-visible-widgets-v3'
 const HIDDEN_BY_DEFAULT: WidgetId[] = ['notifications']
 
 function getDefaultVisibleIds(): WidgetId[] {
-  return WIDGET_REGISTRY.map((w) => w.id).filter((id) => !HIDDEN_BY_DEFAULT.includes(id))
+  return WIDGET_REGISTRY.map((w) => w.id).filter(
+    (id) => !HIDDEN_BY_DEFAULT.includes(id),
+  )
 }
 
 function loadVisible(): WidgetId[] {
@@ -22,7 +24,9 @@ function loadVisible(): WidgetId[] {
       const parsed = JSON.parse(raw) as WidgetId[]
       if (Array.isArray(parsed) && parsed.length > 0) return parsed
     }
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
   return getDefaultVisibleIds()
 }
 

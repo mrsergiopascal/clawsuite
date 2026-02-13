@@ -4,7 +4,7 @@ import { gatewayRpc } from '../../server/gateway'
 
 const SESSION_STATUS_METHODS = [
   'session.status',
-  'sessions.status', 
+  'sessions.status',
   'session_status',
   'status',
 ]
@@ -18,7 +18,9 @@ async function trySessionStatus(): Promise<unknown> {
       lastError = error
     }
   }
-  throw lastError instanceof Error ? lastError : new Error('Session status unavailable')
+  throw lastError instanceof Error
+    ? lastError
+    : new Error('Session status unavailable')
 }
 
 // Known model context windows
@@ -50,11 +52,16 @@ export const Route = createFileRoute('/api/session-status')({
           // Fetch both status and usage data in parallel
           const [statusResult, usageResult] = await Promise.allSettled([
             trySessionStatus(),
-            gatewayRpc<any>('sessions.usage', { limit: 5, includeContextWeight: true }),
+            gatewayRpc<any>('sessions.usage', {
+              limit: 5,
+              includeContextWeight: true,
+            }),
           ])
 
-          const payload = statusResult.status === 'fulfilled' ? statusResult.value : {}
-          const usageData = usageResult.status === 'fulfilled' ? usageResult.value : null
+          const payload =
+            statusResult.status === 'fulfilled' ? statusResult.value : {}
+          const usageData =
+            usageResult.status === 'fulfilled' ? usageResult.value : null
 
           // Find main session usage
           const mainUsage = usageData?.sessions?.find((s: any) =>
@@ -73,14 +80,16 @@ export const Route = createFileRoute('/api/session-status')({
 
             // Calculate context % from cache data
             const cacheRead = u.cacheRead ?? 0
-            const turnCount = u.latency?.count ?? u.messageCounts?.assistant ?? 1
+            const turnCount =
+              u.latency?.count ?? u.messageCounts?.assistant ?? 1
             let estimatedContext = 0
             if (cacheRead > 0 && turnCount > 0) {
               estimatedContext = Math.ceil((cacheRead / turnCount) * 1.2)
             }
-            const contextPercent = maxTokens > 0
-              ? Math.min((estimatedContext / maxTokens) * 100, 100)
-              : 0
+            const contextPercent =
+              maxTokens > 0
+                ? Math.min((estimatedContext / maxTokens) * 100, 100)
+                : 0
 
             enriched.inputTokens = u.input ?? 0
             enriched.outputTokens = u.output ?? 0

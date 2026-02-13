@@ -1,82 +1,85 @@
-import { useState, useCallback, useEffect, useRef, memo } from 'react';
-import { cn } from '@/lib/utils';
-import type { Mode } from '@/hooks/use-modes';
+import { useState, useCallback, useEffect, useRef, memo } from 'react'
+import { cn } from '@/lib/utils'
+import type { Mode } from '@/hooks/use-modes'
 
 type SaveModeDialogProps = {
-  currentModel: string;
-  onSave: (name: string, includeModel: boolean) => Mode | { error: string };
-  onClose: () => void;
-};
+  currentModel: string
+  onSave: (name: string, includeModel: boolean) => Mode | { error: string }
+  onClose: () => void
+}
 
 export const SaveModeDialog = memo(function SaveModeDialog({
   currentModel,
   onSave,
   onClose,
 }: SaveModeDialogProps) {
-  const [name, setName] = useState('');
-  const [includeModel, setIncludeModel] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const dialogRef = useRef<HTMLDivElement>(null);
+  const [name, setName] = useState('')
+  const [includeModel, setIncludeModel] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const dialogRef = useRef<HTMLDivElement>(null)
 
   // Focus input on mount
   useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
+    inputRef.current?.focus()
+  }, [])
 
   // Focus trap
   useEffect(() => {
-    const dialog = dialogRef.current;
-    if (!dialog) return;
+    const dialog = dialogRef.current
+    if (!dialog) return
 
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === 'Escape') {
-        onClose();
-        return;
+        onClose()
+        return
       }
 
       if (event.key === 'Tab') {
         const focusable = dialog!.querySelectorAll<HTMLElement>(
-          'button, input, [tabindex]:not([tabindex="-1"])'
-        );
-        const first = focusable[0];
-        const last = focusable[focusable.length - 1];
+          'button, input, [tabindex]:not([tabindex="-1"])',
+        )
+        const first = focusable[0]
+        const last = focusable[focusable.length - 1]
 
         if (event.shiftKey && document.activeElement === first) {
-          event.preventDefault();
-          last.focus();
+          event.preventDefault()
+          last.focus()
         } else if (!event.shiftKey && document.activeElement === last) {
-          event.preventDefault();
-          first.focus();
+          event.preventDefault()
+          first.focus()
         }
       }
     }
 
-    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('keydown', handleKeyDown)
     return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [onClose]);
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [onClose])
 
   const handleSave = useCallback(() => {
-    const trimmed = name.trim();
+    const trimmed = name.trim()
     if (!trimmed) {
-      setError('Mode name is required');
-      return;
+      setError('Mode name is required')
+      return
     }
 
-    const result = onSave(trimmed, includeModel);
+    const result = onSave(trimmed, includeModel)
     if ('error' in result) {
-      setError(result.error);
+      setError(result.error)
     } else {
-      onClose();
+      onClose()
     }
-  }, [name, includeModel, onSave, onClose]);
+  }, [name, includeModel, onSave, onClose])
 
-  const handleSubmit = useCallback((event: React.FormEvent) => {
-    event.preventDefault();
-    handleSave();
-  }, [handleSave]);
+  const handleSubmit = useCallback(
+    (event: React.FormEvent) => {
+      event.preventDefault()
+      handleSave()
+    },
+    [handleSave],
+  )
 
   return (
     <>
@@ -116,12 +119,13 @@ export const SaveModeDialog = memo(function SaveModeDialog({
               type="text"
               value={name}
               onChange={(e) => {
-                setName(e.target.value);
-                setError(null);
+                setName(e.target.value)
+                setError(null)
               }}
               className={cn(
                 'w-full rounded-lg border border-primary-200 bg-primary-50 px-3 py-2 text-sm text-primary-900 placeholder-primary-400 focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-400',
-                error && 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                error &&
+                  'border-red-500 focus:border-red-500 focus:ring-red-500',
               )}
               placeholder="e.g., Work Mode"
               maxLength={50}
@@ -150,7 +154,8 @@ export const SaveModeDialog = memo(function SaveModeDialog({
               <span>Include current model ({currentModel || 'none'})</span>
             </label>
             <p className="ml-6 mt-1 text-xs text-primary-500">
-              If unchecked, applying this mode will only update settings (not model).
+              If unchecked, applying this mode will only update settings (not
+              model).
             </p>
           </div>
 
@@ -172,5 +177,5 @@ export const SaveModeDialog = memo(function SaveModeDialog({
         </form>
       </div>
     </>
-  );
+  )
 })

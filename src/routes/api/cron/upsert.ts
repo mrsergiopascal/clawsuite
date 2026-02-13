@@ -25,7 +25,11 @@ function resolvePayloadJobId(payload: unknown): string | undefined {
   return undefined
 }
 
-function buildUpsertParams(body: Record<string, unknown>, jobId: string, enabled: boolean) {
+function buildUpsertParams(
+  body: Record<string, unknown>,
+  jobId: string,
+  enabled: boolean,
+) {
   const name = readString(body.name)
   const schedule = readString(body.schedule)
   const description = readString(body.description)
@@ -81,7 +85,9 @@ export const Route = createFileRoute('/api/cron/upsert')({
 
           const jobId = readString(body.jobId || body.id || body.key)
           const name = readString(body.name)
-          const schedule = readString(body.schedule || body.cron || body.expression)
+          const schedule = readString(
+            body.schedule || body.cron || body.expression,
+          )
 
           if (!name) {
             return json({ error: 'name is required' }, { status: 400 })
@@ -114,7 +120,8 @@ export const Route = createFileRoute('/api/cron/upsert')({
             methods,
             buildUpsertParams(body, jobId, enabled),
           )
-          const resolvedJobId = resolvePayloadJobId(payload) ?? (jobId || undefined)
+          const resolvedJobId =
+            resolvePayloadJobId(payload) ?? (jobId || undefined)
 
           return json({
             ok: true,
