@@ -1,19 +1,10 @@
 // ClawSuite Service Worker
-const CACHE_NAME = 'clawsuite-v2'
-const API_CACHE = 'clawsuite-api-v2'
+const CACHE_NAME = 'clawsuite-v3'
+const API_CACHE = 'clawsuite-api-v3'
 
-// App shell - critical assets cached on install
-const APP_SHELL = ['/', '/favicon.svg', '/logo-icon-simple.svg']
-
-// Install event - cache app shell
+// Install event - skip app shell caching to avoid redirect loops with auth
 self.addEventListener('install', (event) => {
   console.log('[SW] Installing service worker...')
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      console.log('[SW] Caching app shell')
-      return cache.addAll(APP_SHELL)
-    }),
-  )
   // Activate immediately
   self.skipWaiting()
 })
@@ -37,23 +28,27 @@ self.addEventListener('activate', (event) => {
   return self.clients.claim()
 })
 
-// Fetch event - network-first for API, cache-first for static assets
+// Fetch event - network-first for API, cache-first for static assets only
 self.addEventListener('fetch', (event) => {
   const { request } = event
   const url = new URL(request.url)
 
   // Skip non-GET requests
-  if (request.method !== 'GET') {
-    return
-  }
+  if (request.method !== 'GET') return
+
+  // NEVER intercept navigation requests (HTML pages) — let the server handle auth/redirects
+  if (request.mode === 'navigate') return
+
+  // Skip auth-related endpoints
+  if (url.pathname.startsWith('/api/auth')) return
 
   // API calls - network-first strategy
   if (url.pathname.startsWith('/api/')) {
     event.respondWith(
       fetch(request)
         .then((response) => {
-          // Clone and cache successful responses
-          if (response.ok) {
+          // Only cache successful, non-redirect responses
+          if (response.ok && !response.redirected) {
             const responseClone = response.clone()
             caches.open(API_CACHE).then((cache) => {
               cache.put(request, responseClone)
@@ -69,32 +64,33 @@ self.addEventListener('fetch', (event) => {
     return
   }
 
-  // Static assets - cache-first strategy
-  event.respondWith(
-    caches.match(request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse
-      }
+  // Static assets only - cache-first strategy (JS, CSS, images, fonts)
+  if (
+    url.pathname.endsWith('.js') ||
+    url.pathname.endsWith('.css') ||
+    url.pathname.endsWith('.svg') ||
+    url.pathname.endsWith('.png') ||
+    url.pathname.endsWith('.jpg') ||
+    url.pathname.endsWith('.webp') ||
+    url.pathname.endsWith('.woff2')
+  ) {
+    event.respondWith(
+      caches.match(request).then((cachedResponse) => {
+        if (cachedResponse) return cachedResponse
 
-      // Not in cache, fetch from network
-      return fetch(request).then((response) => {
-        // Cache successful responses for static assets
-        if (
-          response.ok &&
-          (url.pathname.endsWith('.js') ||
-            url.pathname.endsWith('.css') ||
-            url.pathname.endsWith('.svg') ||
-            url.pathname.endsWith('.png') ||
-            url.pathname.endsWith('.jpg') ||
-            url.pathname.endsWith('.webp'))
-        ) {
-          const responseClone = response.clone()
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(request, responseClone)
-          })
-        }
-        return response
-      })
-    }),
-  )
+        return fetch(request).then((response) => {
+          if (response.ok && !response.redirected) {
+            const responseClone = response.clone()
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(request, responseClone)
+            })
+          }
+          return response
+        })
+      }),
+    )
+    return
+  }
+
+  // Everything else — go to network, don't cache
 })

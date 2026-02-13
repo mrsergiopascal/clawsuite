@@ -98,25 +98,55 @@ Before running ClawSuite, ensure you have:
 - **Node.js 22+** ([Download](https://nodejs.org/))
 - **OpenClaw Gateway** running locally ([Setup Guide](https://openclaw.ai/docs/installation))
   - Default gateway URL: `http://localhost:18789`
+- **Python 3** (for integrated terminal PTY support)
 
-### Installation
+### Quick Start
 
 ```bash
-# Clone the repository
+# 1. Clone the repository
 git clone https://github.com/outsourc-e/clawsuite.git
 cd clawsuite
 
-# Install dependencies
+# 2. Install dependencies
 npm install
 
-# Install Playwright browser (required for Browser tab)
+# 3. Install Playwright browser (required for Browser tab)
 npx playwright install chromium
 
-# Start development server
+# 4. Set up environment variables
+cp .env.example .env
+# Edit .env with your gateway URL and token (see Environment Setup below)
+
+# 5. Start development server
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+### Environment Setup
+
+ClawSuite connects to your local OpenClaw Gateway. Create a `.env` file (copy from `.env.example`) and configure:
+
+**Required:**
+- `CLAWDBOT_GATEWAY_URL` — WebSocket URL to your gateway
+  - **Default:** `ws://127.0.0.1:18789` (local OpenClaw Gateway)
+  - Use `ws://` for local, `wss://` for remote/encrypted connections
+
+**Authentication (choose one):**
+- `CLAWDBOT_GATEWAY_TOKEN` — **Recommended** authentication method
+  - Find your token: Run `openclaw config get gateway.auth.token` in your terminal
+  - Or check OpenClaw settings UI
+  - Example format: `clw_abc123def456...` (64+ character token)
+- `CLAWDBOT_GATEWAY_PASSWORD` — Alternative password-based auth
+
+**Optional:**
+- `CLAWSUITE_PASSWORD` — Protect ClawSuite with a password (leave empty for no auth)
+- `CLAWSUITE_ALLOWED_HOSTS` — Allow access from non-localhost (e.g., Tailscale, LAN)
+  - Example: `my-server.tail1234.ts.net,192.168.1.50`
+  - Also binds server to `0.0.0.0` for network access
+
+**First-time setup:**
+ClawSuite will auto-detect a local gateway on first run if you leave the token blank. For production or remote gateways, authentication is required.
 
 ### Build for Production
 
@@ -127,6 +157,48 @@ npm run build
 # Preview production build
 npm run preview
 ```
+
+### Docker Setup
+
+ClawSuite includes a `docker-compose.yml` for containerized deployment.
+
+**Quick Start:**
+
+```bash
+# Build and run (detached)
+docker compose up -d
+
+# View logs
+docker compose logs -f
+
+# Stop
+docker compose down
+```
+
+**Configuration:**
+
+The container reads from the same `.env` file. Key differences:
+
+- **Gateway URL:** Use `ws://host.docker.internal:18789` to reach the host machine's gateway
+  - This is the default in `docker-compose.yml` if `CLAWDBOT_GATEWAY_URL` is not set
+  - For remote gateways, use the actual hostname/IP
+- **Port:** ClawSuite runs on `3000` inside the container, mapped to `3000` on the host
+- **Network Access:** Set `CLAWSUITE_ALLOWED_HOSTS` to allow access from other machines
+
+**Example `.env` for Docker:**
+
+```bash
+CLAWDBOT_GATEWAY_URL=ws://host.docker.internal:18789
+CLAWDBOT_GATEWAY_TOKEN=clw_your_token_here
+CLAWSUITE_ALLOWED_HOSTS=192.168.1.0/24
+```
+
+**Production Deployment:**
+
+For production, consider:
+- Using `wss://` with a reverse proxy (nginx, Caddy) for TLS
+- Setting `CLAWSUITE_PASSWORD` to protect the interface
+- Restricting `CLAWSUITE_ALLOWED_HOSTS` to specific IPs/domains
 
 ### Optional: Desktop App (Tauri)
 
@@ -170,44 +242,25 @@ tauri build
 
 ## ⚙️ Configuration
 
-### Gateway URL
+### Runtime Settings
 
-ClawSuite connects to your OpenClaw gateway. Set the gateway URL in:
+In addition to the `.env` file, you can adjust settings within the app:
 
-1. **Environment Variable** (recommended):
+1. **Settings → Gateway**:
+   - View/update gateway URL
+   - Test connection status
+   - View authentication state
 
-   ```bash
-   # Create .env file
-   echo "CLAWDBOT_GATEWAY_URL=ws://127.0.0.1:18789" > .env
-   ```
+2. **Settings → Providers**:
+   - Configure AI provider API keys (OpenAI, Anthropic, etc.)
+   - These are stored in the gateway, not ClawSuite
 
-2. **In-App Settings**:
-   - Navigate to Settings → Gateway
-   - Enter your gateway URL
-   - Click "Test Connection"
+3. **Settings → Appearance**:
+   - Theme (System / Light / Dark)
+   - Accent color
+   - UI preferences
 
-### Environment Variables
-
-Create a `.env` file in the project root:
-
-```bash
-# Gateway configuration
-CLAWDBOT_GATEWAY_URL=ws://127.0.0.1:18789
-
-# Optional: Gateway authentication token
-CLAWDBOT_GATEWAY_TOKEN=your_token_here
-
-# Optional: Gateway password (alternative to token)
-# CLAWDBOT_GATEWAY_PASSWORD=your_password
-
-# Optional: Custom port for dev server
-PORT=3000
-
-# Optional: Enable debug logging
-DEBUG=true
-```
-
-See [.env.example](.env.example) for all available options.
+See [.env.example](.env.example) for all available environment variables.
 
 ---
 
