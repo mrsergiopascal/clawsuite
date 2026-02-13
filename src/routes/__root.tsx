@@ -19,7 +19,7 @@ const themeScript = `
   try {
     const stored = localStorage.getItem('openclaw-settings')
     const fallback = localStorage.getItem('chat-settings')
-    let theme = 'dark'
+    let theme = 'light'
     let accent = 'orange'
     if (stored) {
       const parsed = JSON.parse(stored)
