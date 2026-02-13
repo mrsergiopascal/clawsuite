@@ -162,8 +162,9 @@ function SettingsRoute() {
         headers['Authorization'] = `Bearer ${settings.gatewayToken}`
       }
 
-      // Try hitting the gateway's /health endpoint
-      const testUrl = url.startsWith('http') ? `${url}/health` : url
+      // Normalize ws:// → http:// for fetch, then hit /health
+      const httpUrl = url.replace(/^ws(s?):\/\//, 'http$1://')
+      const testUrl = httpUrl.startsWith('http') ? `${httpUrl}/health` : httpUrl
       const response = await fetch(testUrl, {
         headers,
         signal: AbortSignal.timeout(5000),

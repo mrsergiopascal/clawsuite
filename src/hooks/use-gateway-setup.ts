@@ -33,9 +33,13 @@ type GatewaySetupState = {
   open: () => void
 }
 
+function wsToHttp(url: string): string {
+  return url.replace(/^ws(s?):\/\//, 'http$1://')
+}
+
 async function checkGatewayHealth(url?: string): Promise<boolean> {
   try {
-    const targetUrl = url || '/api/ping'
+    const targetUrl = url ? wsToHttp(url) : '/api/ping'
     const response = await fetch(targetUrl, {
       signal: AbortSignal.timeout(5000),
     })
@@ -161,8 +165,9 @@ export const useGatewaySetupStore = create<GatewaySetupState>((set, get) => ({
         headers['Authorization'] = `Bearer ${state.gatewayToken}`
       }
 
-      // Try hitting the gateway's /health endpoint
-      const testUrl = url.startsWith('http') ? `${url}/health` : url
+      // Normalize ws:// → http:// for fetch, then hit /health
+      const httpUrl = wsToHttp(url)
+      const testUrl = httpUrl.startsWith('http') ? `${httpUrl}/health` : httpUrl
       const response = await fetch(testUrl, {
         headers,
         signal: AbortSignal.timeout(5000),

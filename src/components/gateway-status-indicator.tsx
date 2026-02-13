@@ -18,8 +18,9 @@ async function pingGateway(url: string, token: string): Promise<boolean> {
       headers['Authorization'] = `Bearer ${token}`
     }
 
-    // Try hitting the gateway's /health endpoint
-    const testUrl = targetUrl.startsWith('http') ? `${targetUrl}/health` : targetUrl
+    // Normalize ws:// → http:// for fetch, then hit /health
+    const httpUrl = targetUrl.replace(/^ws(s?):\/\//, 'http$1://')
+    const testUrl = httpUrl.startsWith('http') ? `${httpUrl}/health` : httpUrl
     const response = await fetch(testUrl, {
       headers,
       signal: AbortSignal.timeout(5000),
