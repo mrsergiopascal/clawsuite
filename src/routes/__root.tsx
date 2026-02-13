@@ -4,6 +4,7 @@ import {
   createRootRoute,
 } from '@tanstack/react-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { useEffect } from 'react'
 import appCss from '../styles.css?url'
 import { SearchModal } from '@/components/search/search-modal'
 import { TerminalShortcutListener } from '@/components/terminal-shortcut-listener'
@@ -94,6 +95,19 @@ export const Route = createRootRoute({
         name: 'twitter:image',
         content: '/cover.png',
       },
+      // PWA meta tags
+      {
+        name: 'theme-color',
+        content: '#f97316',
+      },
+      {
+        name: 'apple-mobile-web-app-capable',
+        content: 'yes',
+      },
+      {
+        name: 'apple-mobile-web-app-status-bar-style',
+        content: 'default',
+      },
     ],
     links: [
       {
@@ -104,6 +118,15 @@ export const Route = createRootRoute({
         rel: 'icon',
         type: 'image/svg+xml',
         href: '/favicon.svg',
+      },
+      // PWA manifest and icons
+      {
+        rel: 'manifest',
+        href: '/manifest.json',
+      },
+      {
+        rel: 'apple-touch-icon',
+        href: '/clawsuite-icon-192.png',
       },
     ],
   }),
@@ -136,6 +159,20 @@ function TaskReminderRunner() {
 }
 
 function RootLayout() {
+  // Register service worker (client-side only)
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+      navigator.serviceWorker
+        .register('/sw.js')
+        .then((registration) => {
+          console.log('[PWA] Service Worker registered:', registration.scope);
+        })
+        .catch((error) => {
+          console.error('[PWA] Service Worker registration failed:', error);
+        });
+    }
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <GlobalShortcutListener />
