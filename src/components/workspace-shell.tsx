@@ -63,7 +63,10 @@ export function WorkspaceShell() {
   useEffect(() => {
     async function checkAuth() {
       try {
-        const res = await fetch('/api/auth-check')
+        const controller = new AbortController()
+        const timeout = setTimeout(() => controller.abort(), 3000)
+        const res = await fetch('/api/auth-check', { signal: controller.signal })
+        clearTimeout(timeout)
         const data = await res.json()
         setAuthState({
           checked: true,
@@ -71,7 +74,7 @@ export function WorkspaceShell() {
           authRequired: data.authRequired ?? false,
         })
       } catch {
-        // On error, assume no auth required (fail open for local dev)
+        // On error/timeout, assume no auth required (fail open for local dev)
         setAuthState({
           checked: true,
           authenticated: true,
