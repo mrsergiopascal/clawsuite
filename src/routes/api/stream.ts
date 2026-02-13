@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import { createFileRoute } from '@tanstack/react-router'
 import WebSocket from 'ws'
+import { isAuthenticated } from '../../server/auth-middleware'
 
 type GatewayFrame =
   | { type: 'req'; id: string; method: string; params?: unknown }
@@ -68,6 +69,14 @@ export const Route = createFileRoute('/api/stream')({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        // Auth check
+        if (!isAuthenticated(request)) {
+          return new Response(
+            JSON.stringify({ ok: false, error: 'Unauthorized' }),
+            { status: 401, headers: { 'Content-Type': 'application/json' } },
+          )
+        }
+
         try {
           const body = (await request.json().catch(() => ({}))) as Record<
             string,

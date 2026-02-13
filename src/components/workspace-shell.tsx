@@ -22,6 +22,7 @@ import { SIDEBAR_TOGGLE_EVENT } from '@/hooks/use-global-shortcuts'
 import { ChatPanel } from '@/components/chat-panel'
 import { ChatPanelToggle } from '@/components/chat-panel-toggle'
 import { OnboardingWizard } from '@/components/onboarding/onboarding-wizard'
+import { LoginScreen } from '@/components/auth/login-screen'
 // ActivityTicker moved to dashboard-only (too noisy for global header)
 import type { SessionMeta } from '@/screens/chat/types'
 
@@ -45,6 +46,38 @@ export function WorkspaceShell() {
   const setSidebarCollapsed = useWorkspaceStore((s) => s.setSidebarCollapsed)
 
   const [creatingSession, setCreatingSession] = useState(false)
+  const [authState, setAuthState] = useState<{
+    checked: boolean
+    authenticated: boolean
+    authRequired: boolean
+  }>({
+    checked: false,
+    authenticated: false,
+    authRequired: false,
+  })
+
+  // Check authentication on mount
+  useEffect(() => {
+    async function checkAuth() {
+      try {
+        const res = await fetch('/api/auth-check')
+        const data = await res.json()
+        setAuthState({
+          checked: true,
+          authenticated: data.authenticated ?? false,
+          authRequired: data.authRequired ?? false,
+        })
+      } catch {
+        // On error, assume no auth required (fail open for local dev)
+        setAuthState({
+          checked: true,
+          authenticated: true,
+          authRequired: false,
+        })
+      }
+    }
+    checkAuth()
+  }, [])
 
   // Derive active session from URL
   const chatMatch = pathname.match(/^\/chat\/(.+)$/)
@@ -98,6 +131,16 @@ export function WorkspaceShell() {
     window.addEventListener(SIDEBAR_TOGGLE_EVENT, handleToggleEvent)
     return () => window.removeEventListener(SIDEBAR_TOGGLE_EVENT, handleToggleEvent)
   }, [toggleSidebar])
+
+  // Show nothing while checking auth
+  if (!authState.checked) {
+    return null
+  }
+
+  // Show login screen if auth is required and not authenticated
+  if (authState.authRequired && !authState.authenticated) {
+    return <LoginScreen />
+  }
 
   return (
     <div className="relative h-dvh bg-surface text-primary-900">

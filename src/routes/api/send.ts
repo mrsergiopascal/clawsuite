@@ -4,6 +4,7 @@ import { json } from '@tanstack/react-start'
 import { z } from 'zod'
 import { gatewayRpc } from '../../server/gateway'
 import { getClientIp, rateLimit, rateLimitResponse, safeErrorMessage } from '../../server/rate-limit'
+import { isAuthenticated } from '../../server/auth-middleware'
 
 const SendSchema = z.object({
   sessionKey: z.string().trim().max(200).default(''),
@@ -24,6 +25,11 @@ export const Route = createFileRoute('/api/send')({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        // Auth check
+        if (!isAuthenticated(request)) {
+          return json({ ok: false, error: 'Unauthorized' }, { status: 401 })
+        }
+
         // Rate limit: 30 requests per minute per IP
         const ip = getClientIp(request)
         if (!rateLimit(`send:${ip}`, 30, 60_000)) {

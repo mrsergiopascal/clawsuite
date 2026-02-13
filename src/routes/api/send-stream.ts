@@ -2,11 +2,20 @@ import { randomUUID } from 'node:crypto'
 import { createFileRoute } from '@tanstack/react-router'
 import { createGatewayStreamConnection } from '../../server/gateway-stream'
 import { resolveSessionKey } from '../../server/session-utils'
+import { isAuthenticated } from '../../server/auth-middleware'
 
 export const Route = createFileRoute('/api/send-stream')({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        // Auth check
+        if (!isAuthenticated(request)) {
+          return new Response(
+            JSON.stringify({ ok: false, error: 'Unauthorized' }),
+            { status: 401, headers: { 'Content-Type': 'application/json' } },
+          )
+        }
+
         const body = (await request.json().catch(() => ({}))) as Record<
           string,
           unknown

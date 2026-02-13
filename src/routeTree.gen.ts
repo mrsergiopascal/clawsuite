@@ -67,6 +67,8 @@ import { Route as ApiCliAgentsRouteImport } from './routes/api/cli-agents'
 import { Route as ApiChatEventsRouteImport } from './routes/api/chat-events'
 import { Route as ApiChatAbortRouteImport } from './routes/api/chat-abort'
 import { Route as ApiBrowserRouteImport } from './routes/api/browser'
+import { Route as ApiAuthCheckRouteImport } from './routes/api/auth-check'
+import { Route as ApiAuthRouteImport } from './routes/api/auth'
 import { Route as ApiAgentActivityRouteImport } from './routes/api/agent-activity'
 import { Route as ApiTasksIndexRouteImport } from './routes/api/tasks/index'
 import { Route as ApiTasksTaskIdRouteImport } from './routes/api/tasks/$taskId'
@@ -381,6 +383,16 @@ const ApiBrowserRoute = ApiBrowserRouteImport.update({
   path: '/api/browser',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAuthCheckRoute = ApiAuthCheckRouteImport.update({
+  id: '/api/auth-check',
+  path: '/api/auth-check',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthRoute = ApiAuthRouteImport.update({
+  id: '/api/auth',
+  path: '/api/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAgentActivityRoute = ApiAgentActivityRouteImport.update({
   id: '/api/agent-activity',
   path: '/api/agent-activity',
@@ -522,6 +534,8 @@ export interface FileRoutesByFullPath {
   '/terminal': typeof TerminalRoute
   '/usage': typeof UsageRoute
   '/api/agent-activity': typeof ApiAgentActivityRoute
+  '/api/auth': typeof ApiAuthRoute
+  '/api/auth-check': typeof ApiAuthCheckRoute
   '/api/browser': typeof ApiBrowserRouteWithChildren
   '/api/chat-abort': typeof ApiChatAbortRoute
   '/api/chat-events': typeof ApiChatEventsRoute
@@ -604,6 +618,8 @@ export interface FileRoutesByTo {
   '/terminal': typeof TerminalRoute
   '/usage': typeof UsageRoute
   '/api/agent-activity': typeof ApiAgentActivityRoute
+  '/api/auth': typeof ApiAuthRoute
+  '/api/auth-check': typeof ApiAuthCheckRoute
   '/api/browser': typeof ApiBrowserRouteWithChildren
   '/api/chat-abort': typeof ApiChatAbortRoute
   '/api/chat-events': typeof ApiChatEventsRoute
@@ -688,6 +704,8 @@ export interface FileRoutesById {
   '/terminal': typeof TerminalRoute
   '/usage': typeof UsageRoute
   '/api/agent-activity': typeof ApiAgentActivityRoute
+  '/api/auth': typeof ApiAuthRoute
+  '/api/auth-check': typeof ApiAuthCheckRoute
   '/api/browser': typeof ApiBrowserRouteWithChildren
   '/api/chat-abort': typeof ApiChatAbortRoute
   '/api/chat-events': typeof ApiChatEventsRoute
@@ -773,6 +791,8 @@ export interface FileRouteTypes {
     | '/terminal'
     | '/usage'
     | '/api/agent-activity'
+    | '/api/auth'
+    | '/api/auth-check'
     | '/api/browser'
     | '/api/chat-abort'
     | '/api/chat-events'
@@ -855,6 +875,8 @@ export interface FileRouteTypes {
     | '/terminal'
     | '/usage'
     | '/api/agent-activity'
+    | '/api/auth'
+    | '/api/auth-check'
     | '/api/browser'
     | '/api/chat-abort'
     | '/api/chat-events'
@@ -938,6 +960,8 @@ export interface FileRouteTypes {
     | '/terminal'
     | '/usage'
     | '/api/agent-activity'
+    | '/api/auth'
+    | '/api/auth-check'
     | '/api/browser'
     | '/api/chat-abort'
     | '/api/chat-events'
@@ -1022,6 +1046,8 @@ export interface RootRouteChildren {
   TerminalRoute: typeof TerminalRoute
   UsageRoute: typeof UsageRoute
   ApiAgentActivityRoute: typeof ApiAgentActivityRoute
+  ApiAuthRoute: typeof ApiAuthRoute
+  ApiAuthCheckRoute: typeof ApiAuthCheckRoute
   ApiBrowserRoute: typeof ApiBrowserRouteWithChildren
   ApiChatAbortRoute: typeof ApiChatAbortRoute
   ApiChatEventsRoute: typeof ApiChatEventsRoute
@@ -1476,6 +1502,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiBrowserRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/auth-check': {
+      id: '/api/auth-check'
+      path: '/api/auth-check'
+      fullPath: '/api/auth-check'
+      preLoaderRoute: typeof ApiAuthCheckRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth': {
+      id: '/api/auth'
+      path: '/api/auth'
+      fullPath: '/api/auth'
+      preLoaderRoute: typeof ApiAuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/agent-activity': {
       id: '/api/agent-activity'
       path: '/api/agent-activity'
@@ -1741,6 +1781,8 @@ const rootRouteChildren: RootRouteChildren = {
   TerminalRoute: TerminalRoute,
   UsageRoute: UsageRoute,
   ApiAgentActivityRoute: ApiAgentActivityRoute,
+  ApiAuthRoute: ApiAuthRoute,
+  ApiAuthCheckRoute: ApiAuthCheckRoute,
   ApiBrowserRoute: ApiBrowserRouteWithChildren,
   ApiChatAbortRoute: ApiChatAbortRoute,
   ApiChatEventsRoute: ApiChatEventsRoute,

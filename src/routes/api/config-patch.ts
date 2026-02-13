@@ -1,11 +1,17 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { json } from '@tanstack/react-start'
 import { gatewayRpc } from '../../server/gateway'
+import { isAuthenticated } from '../../server/auth-middleware'
 
 export const Route = createFileRoute('/api/config-patch')({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        // Auth check
+        if (!isAuthenticated(request)) {
+          return json({ ok: false, error: 'Unauthorized' }, { status: 401 })
+        }
+
         try {
           const body = (await request.json().catch(() => ({}))) as Record<string, unknown>
           const raw = typeof body.raw === 'string' ? body.raw : ''

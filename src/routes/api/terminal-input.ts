@@ -1,11 +1,20 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { getClientIp, rateLimit, rateLimitResponse } from '../../server/rate-limit'
 import { getTerminalSession } from '../../server/terminal-sessions'
+import { isAuthenticated } from '../../server/auth-middleware'
 
 export const Route = createFileRoute('/api/terminal-input')({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        // Auth check
+        if (!isAuthenticated(request)) {
+          return new Response(
+            JSON.stringify({ ok: false, error: 'Unauthorized' }),
+            { status: 401, headers: { 'Content-Type': 'application/json' } },
+          )
+        }
+
         const ip = getClientIp(request)
         if (!rateLimit(`terminal:${ip}`, 60, 60_000)) {
           return rateLimitResponse()

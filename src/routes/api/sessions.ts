@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto'
 import { createFileRoute } from '@tanstack/react-router'
 import { json } from '@tanstack/react-start'
 import { gatewayRpc } from '../../server/gateway'
+import { isAuthenticated } from '../../server/auth-middleware'
 
 type SessionsListGatewayResponse = {
   sessions?: Array<Record<string, unknown>>
