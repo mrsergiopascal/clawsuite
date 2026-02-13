@@ -75,29 +75,46 @@ function ChatContainerRoot({
     const viewport = scrollRef.current
     if (!viewport || typeof ResizeObserver === 'undefined') return
 
-    const content = viewport.firstElementChild
-    if (!(content instanceof HTMLElement)) return
+    let resizeObserver: ResizeObserver | null = null
 
-    let previousHeight = content.getBoundingClientRect().height
-
-    const resizeObserver = new ResizeObserver((entries) => {
-      const entry = entries[0]
-      const nextHeight = entry.contentRect.height
-      const heightDelta = nextHeight - previousHeight
-      if (heightDelta === 0) return
-
-      // Re-anchor to bottom when content grows and we're in stick-to-bottom mode.
-      // stickToBottomRef tracks actual scroll position (set false when user scrolls up),
-      // so this won't fight user scroll.
-      if (heightDelta > 0 && stickToBottomRef.current) {
-        viewport.scrollTo({ top: viewport.scrollHeight, behavior: 'auto' })
+    const initObserver = () => {
+      const content = viewport.firstElementChild
+      if (!(content instanceof HTMLElement)) {
+        // Content not ready yet, retry after next frame
+        requestAnimationFrame(initObserver)
+        return
       }
 
-      previousHeight = nextHeight
-    })
+      let previousHeight = content.getBoundingClientRect().height
 
-    resizeObserver.observe(content)
-    return () => resizeObserver.disconnect()
+      resizeObserver = new ResizeObserver((entries) => {
+        const entry = entries[0]
+        if (!entry) return
+        const nextHeight = entry.contentRect.height
+        const heightDelta = nextHeight - previousHeight
+        if (heightDelta === 0) return
+
+        // Re-anchor to bottom when content grows and we're in stick-to-bottom mode.
+        // stickToBottomRef tracks actual scroll position (set false when user scrolls up),
+        // so this won't fight user scroll.
+        if (heightDelta > 0 && stickToBottomRef.current) {
+          viewport.scrollTo({ top: viewport.scrollHeight, behavior: 'auto' })
+        }
+
+        previousHeight = nextHeight
+      })
+
+      resizeObserver.observe(content)
+    }
+
+    // Use requestAnimationFrame to ensure content is mounted before observing
+    requestAnimationFrame(initObserver)
+
+    return () => {
+      if (resizeObserver) {
+        resizeObserver.disconnect()
+      }
+    }
   }, [])
 
   return (

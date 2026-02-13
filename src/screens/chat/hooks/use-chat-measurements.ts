@@ -26,6 +26,13 @@ export function useChatMeasurements(): ChatMeasurements {
       const nextHeaderHeight = headerEl?.offsetHeight ?? 0
       const composerHeight = composerEl?.offsetHeight ?? 0
       const mainHeight = mainEl.clientHeight
+      
+      // Safety: If all dimensions are 0, retry after paint to avoid race condition
+      if (nextHeaderHeight === 0 && composerHeight === 0 && mainHeight === 0) {
+        requestAnimationFrame(() => applySizes())
+        return
+      }
+      
       mainEl.style.setProperty(
         '--chat-header-height',
         `${Math.max(0, nextHeaderHeight)}px`,
@@ -40,7 +47,12 @@ export function useChatMeasurements(): ChatMeasurements {
       )
     }
 
-    applySizes()
+    // Double requestAnimationFrame to ensure layout is complete before measuring
+    // First rAF: queue after current script execution
+    // Second rAF: queue after layout/paint
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => applySizes())
+    })
 
     const observer = new ResizeObserver(() => applySizes())
     if (headerEl) observer.observe(headerEl)

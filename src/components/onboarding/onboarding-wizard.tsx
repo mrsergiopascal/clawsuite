@@ -8,6 +8,7 @@ import { useOnboardingStore } from '@/hooks/use-onboarding'
 import { ONBOARDING_STEPS } from './onboarding-steps'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { OpenClawStudioIcon } from '@/components/icons/clawsuite'
 
 export function OnboardingWizard() {
   const { isOpen, currentStep, totalSteps, initialize, nextStep, prevStep, goToStep, complete, skip } =
@@ -90,17 +91,22 @@ export function OnboardingWizard() {
                   transition={{ duration: 0.2 }}
                   className="flex flex-col items-center text-center"
                 >
-                  {/* Icon */}
+                  {/* Icon or Logo */}
                   <motion.div
                     initial={{ scale: 0.8 }}
                     animate={{ scale: 1 }}
                     transition={{ type: 'spring', damping: 15, stiffness: 300 }}
                     className={cn(
-                      'mb-6 flex size-20 items-center justify-center rounded-2xl text-white shadow-lg',
-                      step.iconBg,
+                      'mb-6 flex items-center justify-center shadow-lg',
+                      step.id === 'welcome' ? 'size-16' : 'size-20 rounded-2xl text-white',
+                      step.id !== 'welcome' && step.iconBg,
                     )}
                   >
-                    <HugeiconsIcon icon={step.icon} className="size-10" strokeWidth={1.5} />
+                    {step.id === 'welcome' ? (
+                      <OpenClawStudioIcon className="size-16" />
+                    ) : (
+                      <HugeiconsIcon icon={step.icon} className="size-10" strokeWidth={1.5} />
+                    )}
                   </motion.div>
 
                   {/* Title */}
