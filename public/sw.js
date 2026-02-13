@@ -1,6 +1,6 @@
 // ClawSuite Service Worker
-const CACHE_NAME = 'clawsuite-v1';
-const API_CACHE = 'clawsuite-api-v1';
+const CACHE_NAME = 'clawsuite-v2';
+const API_CACHE = 'clawsuite-api-v2';
 
 // App shell - critical assets cached on install
 const APP_SHELL = [
