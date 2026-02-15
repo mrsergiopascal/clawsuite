@@ -1,7 +1,8 @@
 import { cn } from '@/lib/utils'
 import { Link } from '@tanstack/react-router'
-import { ArrowLeft02Icon } from '@hugeicons/core-free-icons'
+import { ArrowLeft02Icon, RefreshIcon } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
+import { useQuery } from '@tanstack/react-query'
 
 interface Agent {
   id: string
@@ -9,7 +10,6 @@ interface Agent {
   name: string
   role: string
   color: string
-  status: 'online' | 'offline' | 'busy'
   capabilities: string[]
 }
 
@@ -27,13 +27,12 @@ const DEPARTMENTS: Department[] = [
     icon: '🔬',
     agents: [
       {
-        id: 'tech-gems',
-        initials: 'TG',
-        name: 'SCOUT',
-        role: 'Tech Gems Analyst',
+        id: 'gualtiero',
+        initials: 'GU',
+        name: 'GUALTIERO',
+        role: 'Research & Synthesis',
         color: 'bg-violet-500',
-        status: 'online',
-        capabilities: ['TREND DETECTION', 'DEEP RESEARCH'],
+        capabilities: ['DEEP RESEARCH', 'WEB SEARCH', 'COMPETITOR ANALYSIS'],
       },
     ],
   },
@@ -48,7 +47,6 @@ const DEPARTMENTS: Department[] = [
         name: 'DANTE',
         role: 'Content Writer',
         color: 'bg-amber-500',
-        status: 'online',
         capabilities: ['SEO WRITING', 'BLOG POSTS'],
       },
       {
@@ -57,7 +55,6 @@ const DEPARTMENTS: Department[] = [
         name: 'ALFONSO',
         role: 'Content Editor',
         color: 'bg-orange-500',
-        status: 'online',
         capabilities: ['EDITING', 'QUALITY REVIEW'],
       },
     ],
@@ -73,8 +70,30 @@ const DEPARTMENTS: Department[] = [
         name: 'LINUS',
         role: 'Senior Developer',
         color: 'bg-emerald-500',
-        status: 'online',
         capabilities: ['FULL-STACK', 'CODE REVIEW'],
+      },
+      {
+        id: 'ferruccio',
+        initials: 'FE',
+        name: 'FERRUCCIO',
+        role: 'Security Auditor',
+        color: 'bg-red-500',
+        capabilities: ['SECURITY AUDITS', 'PROMPT INJECTION'],
+      },
+    ],
+  },
+  {
+    id: 'design',
+    name: 'DESIGN',
+    icon: '🎨',
+    agents: [
+      {
+        id: 'nico',
+        initials: 'NI',
+        name: 'NICO',
+        role: 'UX Designer',
+        color: 'bg-pink-500',
+        capabilities: ['UI/UX DESIGN', 'USER RESEARCH'],
       },
     ],
   },
@@ -88,47 +107,111 @@ const DEPARTMENTS: Department[] = [
         initials: 'MA',
         name: 'MARCO',
         role: 'Social Media Lead',
-        color: 'bg-pink-500',
-        status: 'offline',
-        capabilities: ['SOCIAL POSTS', 'ENGAGEMENT'],
+        color: 'bg-cyan-500',
+        capabilities: ['SOCIAL POSTS', 'CONTENT DISTRIBUTION'],
       },
     ],
   },
   {
-    id: 'operations',
-    name: 'OPERATIONS',
-    icon: '⚙️',
+    id: 'panels',
+    name: 'EXPERT PANELS',
+    icon: '🧠',
     agents: [
       {
-        id: 'crons',
-        initials: 'CR',
-        name: 'SCHEDULER',
-        role: 'Cron & Automation',
-        color: 'bg-slate-500',
-        status: 'online',
-        capabilities: ['CRON JOBS', 'HEARTBEATS'],
+        id: 'creative-board',
+        initials: 'CB',
+        name: 'CREATIVE BOARD',
+        role: 'Creative Strategy',
+        color: 'bg-fuchsia-500',
+        capabilities: ['BRAINSTORMING', 'IDEATION'],
+      },
+      {
+        id: 'strategy-council',
+        initials: 'SC',
+        name: 'STRATEGY COUNCIL',
+        role: 'Business Strategy',
+        color: 'bg-indigo-500',
+        capabilities: ['STRATEGIC PLANNING', 'DECISIONS'],
+      },
+      {
+        id: 'tech-review',
+        initials: 'TR',
+        name: 'TECH REVIEW',
+        role: 'Technical Review',
+        color: 'bg-teal-500',
+        capabilities: ['CODE REVIEW', 'ARCHITECTURE'],
       },
     ],
   },
 ]
 
-function StatusDot({ status }: { status: 'online' | 'offline' | 'busy' }) {
+// Flatten all agent IDs for matching
+const ALL_AGENT_IDS = DEPARTMENTS.flatMap(d => d.agents.map(a => a.id))
+
+type SessionsResponse = Array<{
+  sessionKey?: string
+  label?: string
+  friendlyId?: string
+  lastActiveAt?: string
+  status?: string
+}>
+
+async function fetchSessions(): Promise<SessionsResponse> {
+  const res = await fetch('/api/sessions')
+  if (!res.ok) return []
+  const data = await res.json()
+  return Array.isArray(data?.sessions) ? data.sessions : Array.isArray(data) ? data : []
+}
+
+function useActiveAgents() {
+  const { data: sessions = [], isLoading, refetch } = useQuery({
+    queryKey: ['agent-org-sessions'],
+    queryFn: fetchSessions,
+    refetchInterval: 10_000,
+  })
+
+  // Extract active agent IDs from sessions
+  // Sessions have patterns like "agent:main:subagent:xxx" or labels matching agent names
+  const activeAgentIds = new Set<string>()
+  
+  const now = Date.now()
+  const ACTIVE_THRESHOLD_MS = 5 * 60 * 1000 // 5 minutes
+  
+  for (const session of sessions) {
+    const key = session.sessionKey || ''
+    const label = (session.label || '').toLowerCase()
+    const lastActive = session.lastActiveAt ? new Date(session.lastActiveAt).getTime() : 0
+    const isRecent = now - lastActive < ACTIVE_THRESHOLD_MS
+    
+    if (!isRecent) continue
+    
+    // Check if session key or label matches any agent
+    for (const agentId of ALL_AGENT_IDS) {
+      if (key.toLowerCase().includes(agentId) || label.includes(agentId)) {
+        activeAgentIds.add(agentId)
+      }
+    }
+    
+    // Main session = Sergio is active
+    if (key === 'agent:main' || key.startsWith('agent:main:')) {
+      activeAgentIds.add('sergio')
+    }
+  }
+  
+  return { activeAgentIds, isLoading, refetch }
+}
+
+function StatusDot({ active }: { active: boolean }) {
+  if (!active) return null
   return (
-    <span
-      className={cn(
-        'absolute -top-1 -right-1 size-3 rounded-full border-2 border-gray-900',
-        status === 'online' && 'bg-emerald-400',
-        status === 'offline' && 'bg-red-400',
-        status === 'busy' && 'bg-amber-400'
-      )}
-    />
+    <span className="absolute -top-1 -right-1 size-3 rounded-full border-2 border-gray-900 bg-emerald-400" />
   )
 }
 
-function AgentCard({ agent }: { agent: Agent }) {
+function AgentCard({ agent, isActive }: { agent: Agent; isActive: boolean }) {
   return (
     <div className="relative flex items-start gap-3 rounded-lg border border-gray-700/50 bg-gray-800/50 p-3 transition-colors hover:border-gray-600">
-      <StatusDot status={agent.status} />
+      <StatusDot active={isActive} />
       <div
         className={cn(
           'flex size-10 shrink-0 items-center justify-center rounded-lg text-sm font-bold text-white',
@@ -155,7 +238,7 @@ function AgentCard({ agent }: { agent: Agent }) {
   )
 }
 
-function DepartmentCard({ department }: { department: Department }) {
+function DepartmentCard({ department, activeAgentIds }: { department: Department; activeAgentIds: Set<string> }) {
   return (
     <div className="rounded-xl border border-gray-700/50 bg-gray-800/30 p-4">
       <h3 className="mb-4 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gray-400">
@@ -164,7 +247,11 @@ function DepartmentCard({ department }: { department: Department }) {
       </h3>
       <div className="space-y-3">
         {department.agents.map((agent) => (
-          <AgentCard key={agent.id} agent={agent} />
+          <AgentCard 
+            key={agent.id} 
+            agent={agent} 
+            isActive={activeAgentIds.has(agent.id)}
+          />
         ))}
       </div>
     </div>
@@ -182,10 +269,10 @@ function OwnerCard() {
   )
 }
 
-function ChiefAgentCard() {
+function ChiefAgentCard({ isActive }: { isActive: boolean }) {
   return (
     <div className="relative inline-flex items-start gap-3 rounded-xl border border-gray-600 bg-gray-800 p-4">
-      <StatusDot status="online" />
+      <StatusDot active={isActive} />
       <div className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-blue-500 text-sm font-bold text-white">
         SE
       </div>
@@ -226,25 +313,30 @@ function HorizontalConnector() {
 }
 
 export function AgentOrgChart() {
+  const { activeAgentIds, isLoading, refetch } = useActiveAgents()
+  
   // Split departments into rows for better layout
   const topRow = DEPARTMENTS.slice(0, 3)
   const bottomRow = DEPARTMENTS.slice(3)
 
   return (
     <div className="min-h-screen bg-gray-900 p-6 md:p-10">
-      {/* Header with back button */}
+      {/* Header */}
       <div className="mx-auto max-w-6xl mb-8">
-        <div className="flex items-center gap-4 mb-2">
-          <Link
-            to="/dashboard"
-            className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+        <div className="flex items-center justify-between mb-2">
+          <h1 className="text-2xl font-bold text-white">Agent Team</h1>
+          <button
+            onClick={() => refetch()}
+            className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm"
+            disabled={isLoading}
           >
-            <HugeiconsIcon icon={ArrowLeft02Icon} size={20} />
-            <span className="text-sm">Back to Dashboard</span>
-          </Link>
+            <HugeiconsIcon icon={RefreshIcon} size={16} className={isLoading ? 'animate-spin' : ''} />
+            Refresh
+          </button>
         </div>
-        <h1 className="text-2xl font-bold text-white">Agent Team</h1>
-        <p className="text-gray-400 text-sm mt-1">Your AI workforce organized by department</p>
+        <p className="text-gray-400 text-sm">
+          Your AI workforce • <span className="text-emerald-400">{activeAgentIds.size} active</span>
+        </p>
       </div>
 
       <div className="mx-auto max-w-6xl">
@@ -257,7 +349,7 @@ export function AgentOrgChart() {
 
         {/* Chief Agent */}
         <div className="flex justify-center">
-          <ChiefAgentCard />
+          <ChiefAgentCard isActive={activeAgentIds.has('sergio')} />
         </div>
 
         <HorizontalConnector />
@@ -265,24 +357,29 @@ export function AgentOrgChart() {
         {/* Top row of departments */}
         <div className="grid gap-4 md:grid-cols-3">
           {topRow.map((dept) => (
-            <DepartmentCard key={dept.id} department={dept} />
+            <DepartmentCard 
+              key={dept.id} 
+              department={dept}
+              activeAgentIds={activeAgentIds}
+            />
           ))}
         </div>
 
         {/* Connector to bottom row */}
         <div className="flex justify-center py-4">
-          <div className="relative flex items-center justify-center w-full max-w-2xl">
-            <div className="absolute top-0 left-1/4 h-4 w-px bg-gray-700" />
-            <div className="absolute top-0 right-1/4 h-4 w-px bg-gray-700" />
-            <div className="h-px w-1/2 bg-gray-700 mt-4" />
-            <div className="absolute top-4 left-1/2 h-4 w-px bg-gray-700 -translate-x-1/2" />
+          <div className="relative flex items-center justify-center w-full max-w-3xl">
+            <div className="h-px w-2/3 bg-gray-700" />
           </div>
         </div>
 
         {/* Bottom row of departments */}
-        <div className="mx-auto grid max-w-4xl gap-4 md:grid-cols-2">
+        <div className="mx-auto grid max-w-5xl gap-4 md:grid-cols-3">
           {bottomRow.map((dept) => (
-            <DepartmentCard key={dept.id} department={dept} />
+            <DepartmentCard 
+              key={dept.id} 
+              department={dept}
+              activeAgentIds={activeAgentIds}
+            />
           ))}
         </div>
       </div>

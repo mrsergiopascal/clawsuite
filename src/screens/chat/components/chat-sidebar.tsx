@@ -669,10 +669,10 @@ function ChatSidebarComponent({
   const suiteItems: NavItemDef[] = [
     {
       kind: 'link',
-      to: '/dashboard',
+      to: '/agents',
       icon: Home01Icon,
       label: 'Dashboard',
-      active: isDashboardActive,
+      active: isAgentsActive,
       dataTour: 'dashboard',
     },
     {
@@ -682,13 +682,6 @@ function ChatSidebarComponent({
       label: 'Agent Hub',
       active: isAgentSwarmActive,
       dataTour: 'agent-hub',
-    },
-    {
-      kind: 'link',
-      to: '/agents',
-      icon: UserGroupIcon,
-      label: 'Agent Team',
-      active: isAgentsActive,
     },
     {
       kind: 'link',
