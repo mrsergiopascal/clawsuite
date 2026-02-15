@@ -18,6 +18,7 @@ import {
   saveLayouts,
 } from './constants/grid-config'
 import { AgentStatusWidget } from './components/agent-status-widget'
+import { AgentGridWidget } from './components/agent-grid-widget'
 import { ActivityLogWidget } from './components/activity-log-widget'
 import { HeroMetricsRow } from './components/hero-metrics-row'
 import { NotificationsWidget } from './components/notifications-widget'
@@ -349,6 +350,14 @@ export function DashboardScreen() {
               compactType="vertical"
               margin={GRID_MARGIN}
             >
+              {visibleIds.includes('agent-grid') ? (
+                <div key="agent-grid" className="h-full">
+                  <AgentGridWidget
+                    draggable
+                    onRemove={() => removeWidget('agent-grid')}
+                  />
+                </div>
+              ) : null}
               {visibleIds.includes('skills') ? (
                 <div key="skills" className="h-full">
                   <SkillsWidget

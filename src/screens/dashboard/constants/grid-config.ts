@@ -56,6 +56,7 @@ export type WidgetId =
   | 'usage-meter'
   | 'tasks'
   | 'agent-status'
+  | 'agent-grid'
   | 'recent-sessions'
   | 'notifications'
   | 'activity-log'
@@ -69,6 +70,7 @@ type WidgetRegistryEntry = {
 
 export const WIDGET_REGISTRY: Array<WidgetRegistryEntry> = [
   // ── Above fold: Operational truth ──
+  { id: 'agent-grid', defaultTier: 'L', allowedTiers: ['M', 'L'] },
   { id: 'usage-meter', defaultTier: 'M', allowedTiers: ['M', 'L'] },
   { id: 'agent-status', defaultTier: 'M', allowedTiers: ['M', 'L'] },
   { id: 'recent-sessions', defaultTier: 'M', allowedTiers: ['M', 'L'] },
@@ -142,14 +144,16 @@ function buildFlowLayout(breakpoint: keyof typeof GRID_COLS): Layout {
 function buildLgLayout(): Layout {
   const c = (_id: WidgetId, tier: WidgetSizeTier) => tierConstraints(tier, 'lg')
   return [
-    // ── Two-column default layout ──
-    { i: 'usage-meter', x: 0, y: 0, ...c('usage-meter', 'M') },
-    { i: 'agent-status', x: 6, y: 0, ...c('agent-status', 'M') },
-    { i: 'recent-sessions', x: 0, y: 5, ...c('recent-sessions', 'M') },
-    { i: 'tasks', x: 6, y: 5, ...c('tasks', 'M') },
-    { i: 'skills', x: 0, y: 10, ...c('skills', 'M') },
-    { i: 'activity-log', x: 6, y: 10, ...c('activity-log', 'M') },
-    { i: 'notifications', x: 0, y: 15, ...c('notifications', 'M') },
+    // ── Agent Grid takes pride of place ──
+    { i: 'agent-grid', x: 0, y: 0, ...c('agent-grid', 'L') },
+    // ── Two-column layout below ──
+    { i: 'usage-meter', x: 0, y: 5, ...c('usage-meter', 'M') },
+    { i: 'agent-status', x: 6, y: 5, ...c('agent-status', 'M') },
+    { i: 'recent-sessions', x: 0, y: 10, ...c('recent-sessions', 'M') },
+    { i: 'tasks', x: 6, y: 10, ...c('tasks', 'M') },
+    { i: 'skills', x: 0, y: 15, ...c('skills', 'M') },
+    { i: 'activity-log', x: 6, y: 15, ...c('activity-log', 'M') },
+    { i: 'notifications', x: 0, y: 20, ...c('notifications', 'M') },
   ] as Layout
 }
 
