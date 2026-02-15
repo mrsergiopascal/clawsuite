@@ -1,8 +1,8 @@
 import { cn } from '@/lib/utils'
-import { Link } from '@tanstack/react-router'
-import { ArrowLeft02Icon, RefreshIcon } from '@hugeicons/core-free-icons'
+import { RefreshIcon } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { useQuery } from '@tanstack/react-query'
+import { useState } from 'react'
 
 interface Agent {
   id: string
@@ -11,21 +11,36 @@ interface Agent {
   role: string
   color: string
   capabilities: string[]
+  skills: string[]
   model: 'opus' | 'sonnet' | 'haiku'
+  avatar?: string // path to pixel art
 }
 
 interface Department {
   id: string
   name: string
-  icon: string
   agents: Agent[]
+}
+
+// Avatar mapping for agents with pixel art
+const AVATARS: Record<string, string> = {
+  sergio: '/agents/sergio-pixel-v2.png',
+  gualtiero: '/agents/gualtiero-research.png',
+  dante: '/agents/dante-modern.png',
+  alfonso: '/agents/alfonso-editor.png',
+  ferruccio: '/agents/ferruccio-pipeline.png',
+  linus: '/agents/linus-coder.png',
+  galileo: '/agents/galileo-codereview.png',
+  nico: '/agents/nico-ux.png',
+  marco: '/agents/marco-social.png',
+  enzo: '/agents/enzo-heartbeats.png',
+  vitruvio: '/agents/vitruvio-bulkops.png',
 }
 
 const DEPARTMENTS: Department[] = [
   {
     id: 'research',
     name: 'RESEARCH',
-    icon: '',
     agents: [
       {
         id: 'gualtiero',
@@ -34,14 +49,15 @@ const DEPARTMENTS: Department[] = [
         role: 'Research & Synthesis',
         color: 'bg-violet-500',
         capabilities: ['DEEP RESEARCH', 'WEB SEARCH', 'COMPETITOR ANALYSIS'],
+        skills: ['keyword-research', 'seo-competitor-analysis', 'summarize'],
         model: 'sonnet',
+        avatar: AVATARS.gualtiero,
       },
     ],
   },
   {
     id: 'content',
     name: 'CONTENT',
-    icon: '',
     agents: [
       {
         id: 'dante',
@@ -50,7 +66,9 @@ const DEPARTMENTS: Department[] = [
         role: 'Content Writer',
         color: 'bg-amber-500',
         capabilities: ['SEO WRITING', 'BLOG POSTS'],
+        skills: ['seo-content-writer', 'humanize-ai-text', 'geo-optimization'],
         model: 'sonnet',
+        avatar: AVATARS.dante,
       },
       {
         id: 'alfonso',
@@ -59,7 +77,9 @@ const DEPARTMENTS: Department[] = [
         role: 'Content Editor',
         color: 'bg-orange-500',
         capabilities: ['EDITING', 'QUALITY REVIEW'],
+        skills: ['humanize-ai-text'],
         model: 'sonnet',
+        avatar: AVATARS.alfonso,
       },
       {
         id: 'ferruccio',
@@ -68,14 +88,15 @@ const DEPARTMENTS: Department[] = [
         role: 'Pipeline Manager',
         color: 'bg-rose-500',
         capabilities: ['PIPELINE HEALTH', 'BOTTLENECK DETECTION'],
+        skills: [],
         model: 'sonnet',
+        avatar: AVATARS.ferruccio,
       },
     ],
   },
   {
     id: 'development',
     name: 'DEVELOPMENT',
-    icon: '',
     agents: [
       {
         id: 'linus',
@@ -84,7 +105,9 @@ const DEPARTMENTS: Department[] = [
         role: 'Senior Developer',
         color: 'bg-emerald-500',
         capabilities: ['FULL-STACK', 'IMPLEMENTATION'],
+        skills: ['github'],
         model: 'sonnet',
+        avatar: AVATARS.linus,
       },
       {
         id: 'galileo',
@@ -93,14 +116,15 @@ const DEPARTMENTS: Department[] = [
         role: 'Code Reviewer',
         color: 'bg-lime-500',
         capabilities: ['CODE REVIEW', 'BUG HUNTING'],
+        skills: ['github'],
         model: 'sonnet',
+        avatar: AVATARS.galileo,
       },
     ],
   },
   {
     id: 'design',
     name: 'DESIGN',
-    icon: '',
     agents: [
       {
         id: 'nico',
@@ -109,14 +133,15 @@ const DEPARTMENTS: Department[] = [
         role: 'UX Designer',
         color: 'bg-pink-500',
         capabilities: ['UI/UX DESIGN', 'USER RESEARCH'],
+        skills: ['ui-ux-pro-max', 'ux-researcher-designer', 'jtbd-analyzer'],
         model: 'sonnet',
+        avatar: AVATARS.nico,
       },
     ],
   },
   {
     id: 'marketing',
     name: 'MARKETING',
-    icon: '',
     agents: [
       {
         id: 'marco',
@@ -125,14 +150,15 @@ const DEPARTMENTS: Department[] = [
         role: 'Social Media Lead',
         color: 'bg-cyan-500',
         capabilities: ['SOCIAL POSTS', 'CONTENT DISTRIBUTION'],
+        skills: ['postiz', 'xpoz-social-search', 'social-sentiment'],
         model: 'sonnet',
+        avatar: AVATARS.marco,
       },
     ],
   },
   {
     id: 'operations',
     name: 'OPERATIONS',
-    icon: '',
     agents: [
       {
         id: 'enzo',
@@ -141,7 +167,9 @@ const DEPARTMENTS: Department[] = [
         role: 'Status Specialist',
         color: 'bg-slate-500',
         capabilities: ['HEARTBEATS', 'STATUS CHECKS'],
+        skills: [],
         model: 'haiku',
+        avatar: AVATARS.enzo,
       },
       {
         id: 'vitruvio',
@@ -150,14 +178,15 @@ const DEPARTMENTS: Department[] = [
         role: 'Bulk Operations',
         color: 'bg-stone-500',
         capabilities: ['SCRAPING', 'BULK PROCESSING'],
+        skills: ['summarize'],
         model: 'haiku',
+        avatar: AVATARS.vitruvio,
       },
     ],
   },
   {
     id: 'panels',
     name: 'EXPERT PANELS',
-    icon: '',
     agents: [
       {
         id: 'creative-board',
@@ -166,6 +195,7 @@ const DEPARTMENTS: Department[] = [
         role: 'Creative Strategy',
         color: 'bg-fuchsia-500',
         capabilities: ['BRAINSTORMING', 'IDEATION'],
+        skills: ['marketing-mode'],
         model: 'sonnet',
       },
       {
@@ -175,6 +205,7 @@ const DEPARTMENTS: Department[] = [
         role: 'Business Strategy',
         color: 'bg-indigo-500',
         capabilities: ['STRATEGIC PLANNING', 'DECISIONS'],
+        skills: ['marketing-mode', 'jtbd-analyzer'],
         model: 'sonnet',
       },
       {
@@ -184,6 +215,7 @@ const DEPARTMENTS: Department[] = [
         role: 'Technical Review',
         color: 'bg-teal-500',
         capabilities: ['CODE REVIEW', 'ARCHITECTURE'],
+        skills: ['github'],
         model: 'sonnet',
       },
     ],
@@ -193,19 +225,31 @@ const DEPARTMENTS: Department[] = [
 // Flatten all agent IDs for matching
 const ALL_AGENT_IDS = DEPARTMENTS.flatMap(d => d.agents.map(a => a.id))
 
-type SessionsResponse = Array<{
+type SessionInfo = {
   sessionKey?: string
   label?: string
   friendlyId?: string
   lastActiveAt?: string
   status?: string
-}>
+}
+
+type SessionsResponse = SessionInfo[]
 
 async function fetchSessions(): Promise<SessionsResponse> {
   const res = await fetch('/api/sessions')
   if (!res.ok) return []
   const data = await res.json()
   return Array.isArray(data?.sessions) ? data.sessions : Array.isArray(data) ? data : []
+}
+
+function formatTimeAgo(timestamp: number): string {
+  const now = Date.now()
+  const diff = now - timestamp
+  
+  if (diff < 60_000) return 'just now'
+  if (diff < 3600_000) return `${Math.floor(diff / 60_000)}m ago`
+  if (diff < 86400_000) return `${Math.floor(diff / 3600_000)}h ago`
+  return `${Math.floor(diff / 86400_000)}d ago`
 }
 
 function useActiveAgents() {
@@ -215,12 +259,12 @@ function useActiveAgents() {
     refetchInterval: 10_000,
   })
 
-  // Extract active agent IDs from sessions
-  // Sessions have patterns like "agent:main:subagent:xxx" or labels matching agent names
-  const activeAgentIds = new Set<string>()
-  
   const now = Date.now()
   const ACTIVE_THRESHOLD_MS = 5 * 60 * 1000 // 5 minutes
+  
+  // Track active agents and their last active times
+  const activeAgentIds = new Set<string>()
+  const lastActiveMap = new Map<string, number>()
   
   for (const session of sessions) {
     const key = session.sessionKey || ''
@@ -228,22 +272,33 @@ function useActiveAgents() {
     const lastActive = session.lastActiveAt ? new Date(session.lastActiveAt).getTime() : 0
     const isRecent = now - lastActive < ACTIVE_THRESHOLD_MS
     
-    if (!isRecent) continue
-    
     // Check if session key or label matches any agent
     for (const agentId of ALL_AGENT_IDS) {
       if (key.toLowerCase().includes(agentId) || label.includes(agentId)) {
-        activeAgentIds.add(agentId)
+        // Track last active time (keep most recent)
+        const existing = lastActiveMap.get(agentId) || 0
+        if (lastActive > existing) {
+          lastActiveMap.set(agentId, lastActive)
+        }
+        if (isRecent) {
+          activeAgentIds.add(agentId)
+        }
       }
     }
     
     // Main session = Sergio is active
     if (key === 'agent:main' || key.startsWith('agent:main:')) {
-      activeAgentIds.add('sergio')
+      const existing = lastActiveMap.get('sergio') || 0
+      if (lastActive > existing) {
+        lastActiveMap.set('sergio', lastActive)
+      }
+      if (isRecent) {
+        activeAgentIds.add('sergio')
+      }
     }
   }
   
-  return { activeAgentIds, isLoading, refetch }
+  return { activeAgentIds, lastActiveMap, isLoading, refetch }
 }
 
 function StatusDot({ active }: { active: boolean }) {
@@ -276,40 +331,118 @@ function ModelBadge({ model }: { model: 'opus' | 'sonnet' | 'haiku' }) {
   )
 }
 
-function AgentCard({ agent, isActive }: { agent: Agent; isActive: boolean }) {
+function SkillsTooltip({ skills, children }: { skills: string[]; children: React.ReactNode }) {
+  const [show, setShow] = useState(false)
+  
+  if (skills.length === 0) {
+    return <>{children}</>
+  }
+  
   return (
-    <div className="relative flex items-start gap-3 rounded-lg border border-gray-700/50 bg-gray-800/50 p-3 transition-colors hover:border-gray-600">
-      <StatusDot active={isActive} />
-      <div
-        className={cn(
-          'flex size-10 shrink-0 items-center justify-center rounded-lg text-sm font-bold text-white',
-          agent.color
-        )}
-      >
-        {agent.initials}
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-0.5">
-          <h4 className="font-semibold text-white text-sm">{agent.name}</h4>
-          <ModelBadge model={agent.model} />
+    <div 
+      className="relative"
+      onMouseEnter={() => setShow(true)}
+      onMouseLeave={() => setShow(false)}
+    >
+      {children}
+      {show && (
+        <div className="absolute left-full top-0 z-50 ml-2 w-48 rounded-lg border border-gray-700 bg-gray-800 p-3 shadow-xl">
+          <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-400">
+            Installed Skills
+          </p>
+          <div className="flex flex-wrap gap-1">
+            {skills.map((skill) => (
+              <span
+                key={skill}
+                className="inline-flex items-center rounded bg-gray-700 px-2 py-0.5 text-[10px] font-medium text-gray-200"
+              >
+                {skill}
+              </span>
+            ))}
+          </div>
         </div>
-        <p className="text-xs text-gray-400 mb-2">{agent.role}</p>
-        <div className="flex flex-wrap gap-1">
-          {agent.capabilities.map((cap) => (
-            <span
-              key={cap}
-              className="inline-flex items-center rounded-full bg-gray-700/70 px-2 py-0.5 text-[10px] font-medium text-gray-300"
-            >
-              {cap}
-            </span>
-          ))}
-        </div>
-      </div>
+      )}
     </div>
   )
 }
 
-function DepartmentCard({ department, activeAgentIds }: { department: Department; activeAgentIds: Set<string> }) {
+function AgentAvatar({ agent }: { agent: Agent }) {
+  if (agent.avatar) {
+    return (
+      <img
+        src={agent.avatar}
+        alt={agent.name}
+        className="size-10 shrink-0 rounded-lg object-cover"
+      />
+    )
+  }
+  
+  // Fallback to initials (for panels)
+  return (
+    <div
+      className={cn(
+        'flex size-10 shrink-0 items-center justify-center rounded-lg text-sm font-bold text-white',
+        agent.color
+      )}
+    >
+      {agent.initials}
+    </div>
+  )
+}
+
+function AgentCard({ 
+  agent, 
+  isActive, 
+  lastActive 
+}: { 
+  agent: Agent
+  isActive: boolean
+  lastActive?: number 
+}) {
+  return (
+    <SkillsTooltip skills={agent.skills}>
+      <div className="relative flex items-start gap-3 rounded-lg border border-gray-700/50 bg-gray-800/50 p-3 transition-colors hover:border-gray-600 cursor-default">
+        <StatusDot active={isActive} />
+        <AgentAvatar agent={agent} />
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-0.5">
+            <h4 className="font-semibold text-white text-sm">{agent.name}</h4>
+            <ModelBadge model={agent.model} />
+          </div>
+          <p className="text-xs text-gray-400">{agent.role}</p>
+          {lastActive && (
+            <p className={cn(
+              'text-[10px] mt-1',
+              isActive ? 'text-emerald-400' : 'text-gray-500'
+            )}>
+              {isActive ? 'Active now' : formatTimeAgo(lastActive)}
+            </p>
+          )}
+          <div className="flex flex-wrap gap-1 mt-2">
+            {agent.capabilities.map((cap) => (
+              <span
+                key={cap}
+                className="inline-flex items-center rounded-full bg-gray-700/70 px-2 py-0.5 text-[10px] font-medium text-gray-300"
+              >
+                {cap}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+    </SkillsTooltip>
+  )
+}
+
+function DepartmentCard({ 
+  department, 
+  activeAgentIds,
+  lastActiveMap 
+}: { 
+  department: Department
+  activeAgentIds: Set<string>
+  lastActiveMap: Map<string, number>
+}) {
   return (
     <div className="rounded-xl border border-gray-700/50 bg-gray-800/30 p-4">
       <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-gray-400">
@@ -321,6 +454,7 @@ function DepartmentCard({ department, activeAgentIds }: { department: Department
             key={agent.id} 
             agent={agent} 
             isActive={activeAgentIds.has(agent.id)}
+            lastActive={lastActiveMap.get(agent.id)}
           />
         ))}
       </div>
@@ -333,35 +467,49 @@ function OwnerCard() {
     <div className="inline-flex items-center gap-3 rounded-xl border border-gray-600 bg-gray-800 px-5 py-3">
       <div className="text-center">
         <h2 className="font-semibold text-white">Simone Pomposi</h2>
-        <p className="text-xs text-gray-400">CEO · Founder</p>
+        <p className="text-xs text-gray-400">CEO</p>
       </div>
     </div>
   )
 }
 
-function ChiefAgentCard({ isActive }: { isActive: boolean }) {
+function ChiefAgentCard({ isActive, lastActive }: { isActive: boolean; lastActive?: number }) {
+  const sergioSkills = ['all-skills', 'task-orchestration', 'strategic-planning']
+  
   return (
-    <div className="relative inline-flex items-start gap-3 rounded-xl border border-gray-600 bg-gray-800 p-4">
-      <StatusDot active={isActive} />
-      <div className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-blue-500 text-sm font-bold text-white">
-        SE
-      </div>
-      <div>
-        <div className="flex items-center gap-2 mb-0.5">
-          <h3 className="font-semibold text-white">SERGIO</h3>
-          <ModelBadge model="opus" />
+    <SkillsTooltip skills={sergioSkills}>
+      <div className="relative inline-flex items-start gap-3 rounded-xl border border-gray-600 bg-gray-800 p-4 cursor-default">
+        <StatusDot active={isActive} />
+        <img
+          src={AVATARS.sergio}
+          alt="Sergio"
+          className="size-11 shrink-0 rounded-lg object-cover"
+        />
+        <div>
+          <div className="flex items-center gap-2 mb-0.5">
+            <h3 className="font-semibold text-white">SERGIO</h3>
+            <ModelBadge model="opus" />
+          </div>
+          <p className="text-xs text-gray-400">Chief of Staff</p>
+          {lastActive && (
+            <p className={cn(
+              'text-[10px] mt-1',
+              isActive ? 'text-emerald-400' : 'text-gray-500'
+            )}>
+              {isActive ? 'Active now' : formatTimeAgo(lastActive)}
+            </p>
+          )}
+          <div className="flex flex-wrap gap-1 mt-2">
+            <span className="inline-flex items-center rounded-full bg-gray-700/70 px-2 py-0.5 text-[10px] font-medium text-gray-300">
+              TASK ORCHESTRATION
+            </span>
+            <span className="inline-flex items-center rounded-full bg-gray-700/70 px-2 py-0.5 text-[10px] font-medium text-gray-300">
+              STRATEGIC PLANNING
+            </span>
+          </div>
         </div>
-        <p className="text-xs text-gray-400 mb-2">Chief of Staff</p>
-        <div className="flex flex-wrap gap-1">
-          <span className="inline-flex items-center rounded-full bg-gray-700/70 px-2 py-0.5 text-[10px] font-medium text-gray-300">
-            TASK ORCHESTRATION
-          </span>
-          <span className="inline-flex items-center rounded-full bg-gray-700/70 px-2 py-0.5 text-[10px] font-medium text-gray-300">
-            STRATEGIC PLANNING
-          </span>
-        </div>
       </div>
-    </div>
+    </SkillsTooltip>
   )
 }
 
@@ -386,7 +534,7 @@ function HorizontalConnector() {
 }
 
 export function AgentOrgChart() {
-  const { activeAgentIds, isLoading, refetch } = useActiveAgents()
+  const { activeAgentIds, lastActiveMap, isLoading, refetch } = useActiveAgents()
   
   // Split departments into rows for better layout (4 + 3)
   const topRow = DEPARTMENTS.slice(0, 4)
@@ -408,7 +556,7 @@ export function AgentOrgChart() {
           </button>
         </div>
         <p className="text-gray-400 text-sm">
-          Your AI workforce • <span className="text-emerald-400">{activeAgentIds.size} active</span>
+          Your AI workforce · <span className="text-emerald-400">{activeAgentIds.size} active</span>
         </p>
       </div>
 
@@ -422,7 +570,10 @@ export function AgentOrgChart() {
 
         {/* Chief Agent */}
         <div className="flex justify-center">
-          <ChiefAgentCard isActive={activeAgentIds.has('sergio')} />
+          <ChiefAgentCard 
+            isActive={activeAgentIds.has('sergio')} 
+            lastActive={lastActiveMap.get('sergio')}
+          />
         </div>
 
         <HorizontalConnector />
@@ -434,6 +585,7 @@ export function AgentOrgChart() {
               key={dept.id} 
               department={dept}
               activeAgentIds={activeAgentIds}
+              lastActiveMap={lastActiveMap}
             />
           ))}
         </div>
@@ -452,6 +604,7 @@ export function AgentOrgChart() {
               key={dept.id} 
               department={dept}
               activeAgentIds={activeAgentIds}
+              lastActiveMap={lastActiveMap}
             />
           ))}
         </div>
