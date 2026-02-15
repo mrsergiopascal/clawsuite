@@ -128,6 +128,16 @@ export function WorkspaceShell() {
     return <LoginScreen />
   }
 
+  // Fullscreen mode for /agents (no sidebar, no chat panel)
+  const isAgentsRoute = pathname === '/agents' || pathname === '/'
+  if (isAgentsRoute) {
+    return (
+      <div className="h-dvh bg-surface text-primary-900 overflow-y-auto">
+        <Outlet />
+      </div>
+    )
+  }
+
   return (
     <div className="relative h-dvh bg-surface text-primary-900">
       <div className="h-full overflow-hidden grid grid-cols-[auto_1fr] grid-rows-[minmax(0,1fr)]">
