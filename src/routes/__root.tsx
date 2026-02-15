@@ -162,6 +162,27 @@ function TaskReminderRunner() {
 }
 
 function RootLayout() {
+  // Re-apply theme from store after hydration (fixes theme reset on hydration errors)
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const stored = localStorage.getItem('chat-settings')
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored)
+        const theme = parsed?.state?.settings?.theme
+        if (theme === 'dark' || theme === 'light' || theme === 'system') {
+          const root = document.documentElement
+          const media = window.matchMedia('(prefers-color-scheme: dark)')
+          root.classList.remove('light', 'dark', 'system')
+          root.classList.add(theme)
+          if (theme === 'system' && media.matches) {
+            root.classList.add('dark')
+          }
+        }
+      } catch {}
+    }
+  }, [])
+
   // Unregister any existing service workers — they cause stale asset issues
   // after Docker image updates and behind reverse proxies (Pangolin, Cloudflare, etc.)
   useEffect(() => {
