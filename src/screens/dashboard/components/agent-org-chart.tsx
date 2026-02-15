@@ -48,7 +48,7 @@ const DEPARTMENTS: Department[] = [
         name: 'GUALTIERO',
         role: 'Research & Synthesis',
         color: 'bg-violet-500',
-        capabilities: ['DEEP RESEARCH', 'WEB SEARCH', 'COMPETITOR ANALYSIS'],
+        capabilities: ['DEEP RESEARCH', 'WEB SEARCH', 'COMPETITORS'],
         skills: ['keyword-research', 'seo-competitor-analysis', 'summarize'],
         model: 'sonnet',
         avatar: AVATARS.gualtiero,
@@ -87,7 +87,7 @@ const DEPARTMENTS: Department[] = [
         name: 'FERRUCCIO',
         role: 'Pipeline Manager',
         color: 'bg-rose-500',
-        capabilities: ['PIPELINE HEALTH', 'BOTTLENECK DETECTION'],
+        capabilities: ['PIPELINE', 'BOTTLENECKS'],
         skills: [],
         model: 'sonnet',
         avatar: AVATARS.ferruccio,
@@ -227,9 +227,11 @@ const ALL_AGENT_IDS = DEPARTMENTS.flatMap(d => d.agents.map(a => a.id))
 
 type SessionInfo = {
   sessionKey?: string
+  key?: string
   label?: string
   friendlyId?: string
   lastActiveAt?: string
+  updatedAt?: number | string
   status?: string
 }
 
@@ -267,9 +269,17 @@ function useActiveAgents() {
   const lastActiveMap = new Map<string, number>()
   
   for (const session of sessions) {
-    const key = session.sessionKey || ''
+    const key = session.sessionKey || session.key || ''
     const label = (session.label || '').toLowerCase()
-    const lastActive = session.lastActiveAt ? new Date(session.lastActiveAt).getTime() : 0
+    // Support both lastActiveAt (string) and updatedAt (number or string)
+    let lastActive = 0
+    if (session.updatedAt) {
+      lastActive = typeof session.updatedAt === 'number' 
+        ? session.updatedAt 
+        : new Date(session.updatedAt).getTime()
+    } else if (session.lastActiveAt) {
+      lastActive = new Date(session.lastActiveAt).getTime()
+    }
     const isRecent = now - lastActive < ACTIVE_THRESHOLD_MS
     
     // Check if session key or label matches any agent
@@ -370,13 +380,13 @@ function AgentAvatar({ agent, size = 'md' }: { agent: Agent; size?: 'md' | 'lg' 
   const sizeClasses = size === 'lg' ? 'size-14' : 'size-12'
   
   if (agent.avatar) {
-    // Crop to headshot - show only top 60% of image
+    // Crop to headshot only - scale up and show just the top (head)
     return (
       <div className={cn('shrink-0 overflow-hidden rounded-lg', sizeClasses)}>
         <img
           src={agent.avatar}
           alt={agent.name}
-          className="w-full scale-150 object-cover object-top"
+          className="w-full scale-[2.5] origin-top object-cover"
         />
       </div>
     )
@@ -500,7 +510,7 @@ function ChiefAgentCard({ isActive, lastActive }: { isActive: boolean; lastActiv
           <img
             src={AVATARS.sergio}
             alt="Sergio"
-            className="w-full scale-150 object-cover object-top"
+            className="w-full scale-[2.5] origin-top object-cover"
           />
         </div>
         <div>
