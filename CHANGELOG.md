@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.1.0 (unreleased)
+
+### Bug Fixes
+
+- **SSR/Tailscale Compatibility**: Fixed hydration mismatch when accessing ClawSuite via Tailscale or non-localhost URLs. The `BASE_URL` constant in `gateway-api.ts` was causing server-rendered HTML to differ from client-side expectations, breaking the app when accessed via Tailscale IP addresses. Changed to dynamic `getBaseURL()` function that returns empty string on server-side (allowing relative URLs) and `window.location.origin` on client-side, ensuring consistent rendering across all access methods.
+
 ## v2.0.0
 
 ### Features

@@ -1,7 +1,20 @@
-export const BASE_URL =
-  typeof window !== 'undefined'
-    ? window.location.origin
-    : 'http://localhost:4444'
+/**
+ * Get the base URL for API requests.
+ * On client: use window.location.origin
+ * On server: falls back to relative URLs (works with any host)
+ * 
+ * @export This is now a function to prevent SSR hydration mismatches
+ */
+export function getBaseURL(): string {
+  if (typeof window !== 'undefined') {
+    return window.location.origin
+  }
+  
+  // Server-side: use empty string to make relative URLs
+  // This works because server-side fetch() will resolve relative URLs
+  // against the incoming request's origin
+  return ''
+}
 
 export type GatewaySessionUsage = {
   promptTokens?: number
@@ -104,7 +117,13 @@ async function readError(response: Response): Promise<string> {
 }
 
 function makeEndpoint(pathname: string): string {
-  return new URL(pathname, BASE_URL).toString()
+  const baseURL = getBaseURL()
+  // If baseURL is empty (server-side), just return the pathname as-is
+  // The server-side fetch will resolve it against the request origin
+  if (!baseURL) {
+    return pathname
+  }
+  return new URL(pathname, baseURL).toString()
 }
 
 function isAbortError(error: unknown): boolean {

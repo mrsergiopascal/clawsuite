@@ -3,7 +3,7 @@
  * Connects to /api/gateway/sessions and tracks live agent sessions.
  */
 import { create } from 'zustand'
-import { BASE_URL, type GatewaySession } from '@/lib/gateway-api'
+import { getBaseURL, type GatewaySession } from '@/lib/gateway-api'
 
 export type SwarmSession = GatewaySession & {
   /** Derived status for UI rendering */
@@ -105,7 +105,9 @@ export const useSwarmStore = create<SwarmState>((set, get) => ({
 
   fetchSessions: async () => {
     try {
-      const res = await fetch(`${BASE_URL}/api/gateway/sessions`)
+      const baseURL = getBaseURL()
+      const endpoint = baseURL ? `${baseURL}/api/gateway/sessions` : '/api/gateway/sessions'
+      const res = await fetch(endpoint)
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const json = await res.json()
 
