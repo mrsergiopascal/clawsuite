@@ -22,9 +22,9 @@ interface Department {
   agents: Agent[]
 }
 
-// Avatar mapping for agents - using cropped headshots
+// Avatar mapping for agents - using generated pixel art headshots
 const AVATARS: Record<string, string> = {
-  sergio: '/agents/headshots/sergio-pixel-headshot.png',
+  sergio: '/agents/headshots/sergio-headshot.png',
   gualtiero: '/agents/headshots/gualtiero-headshot.png',
   dante: '/agents/headshots/dante-headshot.png',
   alfonso: '/agents/headshots/alfonso-headshot.png',
