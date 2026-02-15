@@ -11,6 +11,7 @@ interface Agent {
   role: string
   color: string
   capabilities: string[]
+  model: 'opus' | 'sonnet' | 'haiku'
 }
 
 interface Department {
@@ -33,6 +34,7 @@ const DEPARTMENTS: Department[] = [
         role: 'Research & Synthesis',
         color: 'bg-violet-500',
         capabilities: ['DEEP RESEARCH', 'WEB SEARCH', 'COMPETITOR ANALYSIS'],
+        model: 'sonnet',
       },
     ],
   },
@@ -48,6 +50,7 @@ const DEPARTMENTS: Department[] = [
         role: 'Content Writer',
         color: 'bg-amber-500',
         capabilities: ['SEO WRITING', 'BLOG POSTS'],
+        model: 'sonnet',
       },
       {
         id: 'alfonso',
@@ -56,6 +59,7 @@ const DEPARTMENTS: Department[] = [
         role: 'Content Editor',
         color: 'bg-orange-500',
         capabilities: ['EDITING', 'QUALITY REVIEW'],
+        model: 'sonnet',
       },
     ],
   },
@@ -71,6 +75,7 @@ const DEPARTMENTS: Department[] = [
         role: 'Senior Developer',
         color: 'bg-emerald-500',
         capabilities: ['FULL-STACK', 'CODE REVIEW'],
+        model: 'sonnet',
       },
       {
         id: 'ferruccio',
@@ -79,6 +84,7 @@ const DEPARTMENTS: Department[] = [
         role: 'Security Auditor',
         color: 'bg-red-500',
         capabilities: ['SECURITY AUDITS', 'PROMPT INJECTION'],
+        model: 'sonnet',
       },
     ],
   },
@@ -94,6 +100,7 @@ const DEPARTMENTS: Department[] = [
         role: 'UX Designer',
         color: 'bg-pink-500',
         capabilities: ['UI/UX DESIGN', 'USER RESEARCH'],
+        model: 'sonnet',
       },
     ],
   },
@@ -109,6 +116,7 @@ const DEPARTMENTS: Department[] = [
         role: 'Social Media Lead',
         color: 'bg-cyan-500',
         capabilities: ['SOCIAL POSTS', 'CONTENT DISTRIBUTION'],
+        model: 'sonnet',
       },
     ],
   },
@@ -124,6 +132,7 @@ const DEPARTMENTS: Department[] = [
         role: 'Creative Strategy',
         color: 'bg-fuchsia-500',
         capabilities: ['BRAINSTORMING', 'IDEATION'],
+        model: 'sonnet',
       },
       {
         id: 'strategy-council',
@@ -132,6 +141,7 @@ const DEPARTMENTS: Department[] = [
         role: 'Business Strategy',
         color: 'bg-indigo-500',
         capabilities: ['STRATEGIC PLANNING', 'DECISIONS'],
+        model: 'sonnet',
       },
       {
         id: 'tech-review',
@@ -140,6 +150,7 @@ const DEPARTMENTS: Department[] = [
         role: 'Technical Review',
         color: 'bg-teal-500',
         capabilities: ['CODE REVIEW', 'ARCHITECTURE'],
+        model: 'sonnet',
       },
     ],
   },
@@ -208,6 +219,27 @@ function StatusDot({ active }: { active: boolean }) {
   )
 }
 
+function ModelBadge({ model }: { model: 'opus' | 'sonnet' | 'haiku' }) {
+  const styles = {
+    opus: 'bg-purple-500/20 text-purple-300 border-purple-500/30',
+    sonnet: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
+    haiku: 'bg-green-500/20 text-green-300 border-green-500/30',
+  }
+  const labels = {
+    opus: 'Opus',
+    sonnet: 'Sonnet',
+    haiku: 'Haiku',
+  }
+  return (
+    <span className={cn(
+      'inline-flex items-center rounded px-1.5 py-0.5 text-[9px] font-medium border',
+      styles[model]
+    )}>
+      {labels[model]}
+    </span>
+  )
+}
+
 function AgentCard({ agent, isActive }: { agent: Agent; isActive: boolean }) {
   return (
     <div className="relative flex items-start gap-3 rounded-lg border border-gray-700/50 bg-gray-800/50 p-3 transition-colors hover:border-gray-600">
@@ -221,7 +253,10 @@ function AgentCard({ agent, isActive }: { agent: Agent; isActive: boolean }) {
         {agent.initials}
       </div>
       <div className="flex-1 min-w-0">
-        <h4 className="font-semibold text-white text-sm">{agent.name}</h4>
+        <div className="flex items-center gap-2 mb-0.5">
+          <h4 className="font-semibold text-white text-sm">{agent.name}</h4>
+          <ModelBadge model={agent.model} />
+        </div>
         <p className="text-xs text-gray-400 mb-2">{agent.role}</p>
         <div className="flex flex-wrap gap-1">
           {agent.capabilities.map((cap) => (
@@ -277,7 +312,10 @@ function ChiefAgentCard({ isActive }: { isActive: boolean }) {
         SE
       </div>
       <div>
-        <h3 className="font-semibold text-white">SERGIO</h3>
+        <div className="flex items-center gap-2 mb-0.5">
+          <h3 className="font-semibold text-white">SERGIO</h3>
+          <ModelBadge model="opus" />
+        </div>
         <p className="text-xs text-gray-400 mb-2">Chief of Staff</p>
         <div className="flex flex-wrap gap-1">
           <span className="inline-flex items-center rounded-full bg-gray-700/70 px-2 py-0.5 text-[10px] font-medium text-gray-300">
