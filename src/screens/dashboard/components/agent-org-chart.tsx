@@ -422,12 +422,12 @@ function AgentCard({
     <SkillsTooltip skills={agent.skills}>
       <div className="relative overflow-visible flex items-start gap-4 rounded-xl border border-gray-700/50 bg-gray-800/50 p-4 transition-colors hover:border-gray-600 cursor-default">
         <StatusDot active={isActive} />
-        <AgentAvatar agent={agent} />
+        <div className="flex flex-col items-center gap-1.5">
+          <AgentAvatar agent={agent} />
+          <ModelBadge model={agent.model} />
+        </div>
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            <h4 className="font-semibold text-white">{agent.name}</h4>
-            <ModelBadge model={agent.model} />
-          </div>
+          <h4 className="font-semibold text-white mb-1">{agent.name}</h4>
           <p className="text-sm text-gray-400 mb-1">{agent.role}</p>
           <p className={cn(
             'text-xs',
@@ -502,16 +502,16 @@ function ChiefAgentCard({ isActive, lastActive }: { isActive: boolean; lastActiv
     <SkillsTooltip skills={sergioSkills}>
       <div className="relative overflow-visible inline-flex items-start gap-4 rounded-xl border border-gray-600 bg-gray-800 p-5 cursor-default">
         <StatusDot active={isActive} />
-        <img
-          src={AVATARS.sergio}
-          alt="Sergio"
-          className="size-14 shrink-0 rounded-lg object-cover"
-        />
+        <div className="flex flex-col items-center gap-1.5">
+          <img
+            src={AVATARS.sergio}
+            alt="Sergio"
+            className="size-14 shrink-0 rounded-lg object-cover"
+          />
+          <ModelBadge model="opus" />
+        </div>
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <h3 className="font-semibold text-white text-lg">SERGIO</h3>
-            <ModelBadge model="opus" />
-          </div>
+          <h3 className="font-semibold text-white text-lg mb-1">SERGIO</h3>
           <p className="text-sm text-gray-400 mb-1">Chief of Staff</p>
           <p className={cn(
             'text-xs',
