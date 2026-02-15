@@ -685,6 +685,13 @@ function ChatSidebarComponent({
     },
     {
       kind: 'link',
+      to: '/agents',
+      icon: UserGroupIcon,
+      label: 'Agent Team',
+      active: isAgentsActive,
+    },
+    {
+      kind: 'link',
       to: '/browser',
       icon: GlobeIcon,
       label: 'Browser',
