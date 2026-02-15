@@ -1,3 +1,4 @@
+import { generateUUID } from '@/lib/uuid'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
@@ -400,7 +401,7 @@ function mapSessionToActiveAgent(
 ): ActiveAgent {
   const tokenCount = readTokenCount(session, status)
   return {
-    id: readSessionKey(session) || crypto.randomUUID(),
+    id: readSessionKey(session) || generateUUID(),
     name: readSessionName(session),
     task: readTaskText(session),
     model: readModel(session, status),
@@ -415,7 +416,7 @@ function mapSessionToActiveAgent(
 
 function mapSessionToQueuedTask(session: GatewaySession): QueuedAgentTask {
   return {
-    id: readSessionKey(session) || `queued-${crypto.randomUUID()}`,
+    id: readSessionKey(session) || `queued-${generateUUID()}`,
     name: readSessionName(session),
     description: readTaskText(session),
     priority: 'normal',
@@ -432,7 +433,7 @@ function mapSessionToHistoryItem(
   const statusText = readStatus(session, status)
 
   return {
-    id: readSessionKey(session) || `history-${crypto.randomUUID()}`,
+    id: readSessionKey(session) || `history-${generateUUID()}`,
     name: readSessionName(session),
     description: readTaskText(session),
     model: readModel(session, status),
@@ -654,7 +655,7 @@ export function useAgentView(): AgentViewResult {
         Math.floor((Date.now() - killedAgent.startedAtMs) / 1000),
       )
       const historyEntry: AgentHistoryItem = {
-        id: `history-${crypto.randomUUID()}`,
+        id: `history-${generateUUID()}`,
         name: killedAgent.name,
         description: killedAgent.task,
         model: killedAgent.model,

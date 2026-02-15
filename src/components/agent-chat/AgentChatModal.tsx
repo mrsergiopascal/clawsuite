@@ -1,3 +1,4 @@
+import { generateUUID } from '@/lib/uuid'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { AgentChatHeader } from './AgentChatHeader'
@@ -216,7 +217,7 @@ export function AgentChatModal({
         return [
           ...previous,
           {
-            id: `demo-reply-${crypto.randomUUID()}`,
+            id: `demo-reply-${generateUUID()}`,
             role: 'agent',
             text: buildDemoReply(agentName, text),
             timestamp: Date.now(),
@@ -232,7 +233,7 @@ export function AgentChatModal({
   async function handleSend(message: string) {
     const sentAt = Date.now()
 
-    const optimisticId = `local-user-${crypto.randomUUID()}`
+    const optimisticId = `local-user-${generateUUID()}`
     setMessages(function appendOptimisticUser(previous) {
       return [
         ...previous,

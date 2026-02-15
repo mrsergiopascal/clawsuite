@@ -1,3 +1,4 @@
+import { generateUUID } from '@/lib/uuid'
 import type { GatewayAttachment, GatewayMessage } from './types'
 
 type OptimisticMessagePayload = {
@@ -10,7 +11,7 @@ export function createOptimisticMessage(
   body: string,
   attachments: Array<GatewayAttachment> = [],
 ): OptimisticMessagePayload {
-  const clientId = crypto.randomUUID()
+  const clientId = generateUUID()
   const optimisticId = `opt-${clientId}`
   const timestamp = Date.now()
   const textContent =

@@ -64,6 +64,11 @@ const config = defineConfig(({ mode, isSsrBuild }) => {
       // Force IPv4 — 'localhost' resolves to ::1 (IPv6) on Windows, breaking gateway connectivity
       host: allowedHosts.length > 0 ? '0.0.0.0' : '127.0.0.1',
       allowedHosts: allowedHosts.length > 0 ? [...allowedHosts, '127.0.0.1', 'localhost'] : ['127.0.0.1', 'localhost'],
+      // HMR must use the same host the browser connects to (for Tailscale/LAN access)
+      hmr: allowedHosts.length > 0 ? {
+        host: allowedHosts[0], // Use primary allowed host for HMR WebSocket
+        clientPort: 3001,
+      } : undefined,
       proxy: {
         '/gateway-ui': {
           target: proxyTarget,

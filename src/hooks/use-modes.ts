@@ -1,3 +1,4 @@
+import { generateUUID } from '@/lib/uuid'
 import { useState, useCallback, useEffect } from 'react'
 import { useSettings } from './use-settings'
 
@@ -79,7 +80,7 @@ export function useModes() {
       }
 
       const newMode: Mode = {
-        id: crypto.randomUUID(),
+        id: generateUUID(),
         name,
         preferredModel: includeCurrentModel ? currentModel : undefined,
         smartSuggestionsEnabled: settings.smartSuggestionsEnabled ?? false,

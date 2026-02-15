@@ -4,13 +4,13 @@ import { DashboardGlassCard } from './dashboard-glass-card'
 import { cn } from '@/lib/utils'
 import { UserGroupIcon } from '@hugeicons/core-free-icons'
 
-// Agent roster with RPG classes and modern roles
+// Agent roster with functional roles and model tiers
 const AGENTS = [
   {
     id: 'sergio',
     name: 'Sergio',
-    role: 'Main',
-    class: 'Commander',
+    role: 'Main Agent',
+    tier: 'Opus',
     color: '#6366f1', // indigo
     image: '/agents/sergio-pixel-v2.png',
     sessionPattern: /^main$/i,
@@ -18,8 +18,8 @@ const AGENTS = [
   {
     id: 'alfonso',
     name: 'Alfonso',
-    role: 'Editor',
-    class: 'Oracle',
+    role: 'Content Editor',
+    tier: 'Sonnet',
     color: '#a855f7', // purple
     image: '/agents/alfonso-editor.png',
     sessionPattern: /alfonso/i,
@@ -27,8 +27,8 @@ const AGENTS = [
   {
     id: 'dante',
     name: 'Dante',
-    role: 'Writer',
-    class: 'Artisan',
+    role: 'Content Writer',
+    tier: 'Sonnet',
     color: '#f59e0b', // amber
     image: '/agents/dante-modern.png',
     sessionPattern: /dante/i,
@@ -36,8 +36,8 @@ const AGENTS = [
   {
     id: 'gualtiero',
     name: 'Gualtiero',
-    role: 'Research',
-    class: 'Sage',
+    role: 'Deep Research',
+    tier: 'Opus',
     color: '#3b82f6', // blue
     image: '/agents/gualtiero-research.png',
     sessionPattern: /gualtiero/i,
@@ -45,8 +45,8 @@ const AGENTS = [
   {
     id: 'linus',
     name: 'Linus',
-    role: 'Coder',
-    class: 'Engineer',
+    role: 'Developer',
+    tier: 'Sonnet',
     color: '#22c55e', // green
     image: '/agents/linus-coder.png',
     sessionPattern: /linus/i,
@@ -54,8 +54,8 @@ const AGENTS = [
   {
     id: 'nico',
     name: 'Nico',
-    role: 'UX',
-    class: 'Artisan',
+    role: 'UX Designer',
+    tier: 'Sonnet',
     color: '#f59e0b', // amber
     image: '/agents/nico-ux.png',
     sessionPattern: /nico/i,
@@ -63,8 +63,8 @@ const AGENTS = [
   {
     id: 'ferruccio',
     name: 'Ferruccio',
-    role: 'Pipeline',
-    class: 'Ranger',
+    role: 'Pipeline Ops',
+    tier: 'Haiku',
     color: '#14b8a6', // teal
     image: '/agents/ferruccio-pipeline.png',
     sessionPattern: /ferruccio/i,
@@ -72,8 +72,8 @@ const AGENTS = [
   {
     id: 'galileo',
     name: 'Galileo',
-    role: 'Code Review',
-    class: 'Observer',
+    role: 'Code Reviewer',
+    tier: 'Sonnet',
     color: '#22c55e', // green
     image: '/agents/galileo-codereview.png',
     sessionPattern: /galileo/i,
@@ -81,8 +81,8 @@ const AGENTS = [
   {
     id: 'vitruvio',
     name: 'Vitruvio',
-    role: 'Bulk Ops',
-    class: 'Ranger',
+    role: 'Batch Processor',
+    tier: 'Haiku',
     color: '#14b8a6', // teal
     image: '/agents/vitruvio-bulkops.png',
     sessionPattern: /vitruvio/i,
@@ -90,8 +90,8 @@ const AGENTS = [
   {
     id: 'enzo',
     name: 'Enzo',
-    role: 'Heartbeats',
-    class: 'Scout',
+    role: 'Health Monitor',
+    tier: 'Haiku',
     color: '#14b8a6', // teal
     image: '/agents/enzo-heartbeats.png',
     sessionPattern: /enzo/i,
@@ -99,8 +99,8 @@ const AGENTS = [
   {
     id: 'marco',
     name: 'Marco',
-    role: 'Social',
-    class: 'Bard',
+    role: 'Social Media',
+    tier: 'Sonnet',
     color: '#ec4899', // pink
     image: '/agents/marco-social.png',
     sessionPattern: /marco/i,
@@ -270,7 +270,7 @@ export function AgentGridWidget({
                 borderWidth: 1,
               }}
             >
-              {agent.class}
+              {agent.tier}
             </span>
 
             {/* Expanded details */}

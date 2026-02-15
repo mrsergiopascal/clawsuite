@@ -1,3 +1,4 @@
+import { generateUUID } from '@/lib/uuid'
 import 'xterm/css/xterm.css'
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -50,15 +51,15 @@ export function TerminalPanel({ isMobile }: TerminalPanelProps) {
   const [tabs, setTabs] = useState<Array<TerminalTabState>>(() => {
     const stored = window.localStorage.getItem(TABS_KEY)
     if (!stored) {
-      return [{ id: crypto.randomUUID(), title: 'Terminal 1' }]
+      return [{ id: generateUUID(), title: 'Terminal 1' }]
     }
     try {
       const parsed = JSON.parse(stored) as Array<TerminalTabState>
       return parsed.length
         ? parsed
-        : [{ id: crypto.randomUUID(), title: 'Terminal 1' }]
+        : [{ id: generateUUID(), title: 'Terminal 1' }]
     } catch {
-      return [{ id: crypto.randomUUID(), title: 'Terminal 1' }]
+      return [{ id: generateUUID(), title: 'Terminal 1' }]
     }
   })
   const [activeTabId, setActiveTabId] = useState(() => {
@@ -100,7 +101,7 @@ export function TerminalPanel({ isMobile }: TerminalPanelProps) {
 
   const handleAddTab = useCallback(() => {
     const newTab: TerminalTabState = {
-      id: crypto.randomUUID(),
+      id: generateUUID(),
       title: `Terminal ${tabs.length + 1}`,
     }
     setTabs((prev) => [...prev, newTab])

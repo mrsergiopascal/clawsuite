@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { generateUUID } from '@/lib/uuid'
 
 const DEFAULT_PANEL_HEIGHT = 280
 const MIN_PANEL_HEIGHT = 100
@@ -34,7 +35,7 @@ type TerminalPanelState = {
 
 function createDefaultTab(counter: number, cwd = '~'): TerminalTab {
   return {
-    id: crypto.randomUUID(),
+    id: generateUUID(),
     title: `Terminal ${counter}`,
     cwd,
     sessionId: null,

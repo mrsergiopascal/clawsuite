@@ -1,3 +1,4 @@
+import { generateUUID } from '@/lib/uuid'
 import {
   useCallback,
   useEffect,
@@ -595,7 +596,7 @@ export function ChatScreen({
     setLocalActivity('reading')
     const normalizedAttachments = attachments.map((attachment) => ({
       ...attachment,
-      id: attachment.id ?? crypto.randomUUID(),
+      id: attachment.id ?? generateUUID(),
     }))
 
     let optimisticClientId = existingClientId
@@ -651,7 +652,7 @@ export function ChatScreen({
         attachments:
           payloadAttachments.length > 0 ? payloadAttachments : undefined,
         thinking: 'low',
-        idempotencyKey: optimisticClientId || crypto.randomUUID(),
+        idempotencyKey: optimisticClientId || generateUUID(),
         clientId: optimisticClientId || undefined,
       }),
     })
@@ -752,7 +753,7 @@ export function ChatScreen({
         (attachment) => ({
           ...attachment,
           // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- runtime safety
-          id: attachment.id ?? crypto.randomUUID(),
+          id: attachment.id ?? generateUUID(),
         }),
       )
 

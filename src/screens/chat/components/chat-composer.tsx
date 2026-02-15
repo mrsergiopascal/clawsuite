@@ -1,3 +1,4 @@
+import { generateUUID } from '@/lib/uuid'
 import {
   Add01Icon,
   ArrowDown01Icon,
@@ -667,7 +668,7 @@ function ChatComposerComponent({
                 ? file.name.trim()
                 : `pasted-image-${timestamp}-${index + 1}.png`
             return {
-              id: crypto.randomUUID(),
+              id: generateUUID(),
               name,
               contentType: file.type || 'image/png',
               size: file.size,
@@ -841,7 +842,7 @@ function ChatComposerComponent({
           setAttachments((prev) => [
             ...prev,
             {
-              id: crypto.randomUUID(),
+              id: generateUUID(),
               name,
               contentType: blob.type || 'audio/webm',
               size: blob.size,

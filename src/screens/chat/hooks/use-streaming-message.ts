@@ -1,3 +1,4 @@
+import { generateUUID } from '@/lib/uuid'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { GatewayAttachment, GatewayMessage } from '../types'
 
@@ -275,7 +276,7 @@ export function useStreamingMessage(options: UseStreamingMessageOptions = {}) {
             message: params.message,
             thinking: params.thinking,
             attachments: params.attachments,
-            idempotencyKey: crypto.randomUUID(),
+            idempotencyKey: generateUUID(),
           }),
           signal: abortController.signal,
         })

@@ -1,3 +1,4 @@
+import { generateUUID } from '@/lib/uuid'
 'use client'
 
 import { useCallback, useRef } from 'react'
@@ -199,7 +200,7 @@ export function AttachmentButton({
       // Reset input to allow selecting the same file again
       event.target.value = ''
 
-      const id = crypto.randomUUID()
+      const id = generateUUID()
 
       // Validate file type
       if (!isAcceptedImage(file)) {
