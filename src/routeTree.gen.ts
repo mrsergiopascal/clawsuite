@@ -22,7 +22,6 @@ import { Route as LogsRouteImport } from './routes/logs'
 import { Route as InstancesRouteImport } from './routes/instances'
 import { Route as FilesRouteImport } from './routes/files'
 import { Route as DebugRouteImport } from './routes/debug'
-import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CronRouteImport } from './routes/cron'
 import { Route as ConnectRouteImport } from './routes/connect'
 import { Route as ChannelsRouteImport } from './routes/channels'
@@ -161,11 +160,6 @@ const FilesRoute = FilesRouteImport.update({
 const DebugRoute = DebugRouteImport.update({
   id: '/debug',
   path: '/debug',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DashboardRoute = DashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CronRoute = CronRouteImport.update({
@@ -550,7 +544,6 @@ export interface FileRoutesByFullPath {
   '/channels': typeof ChannelsRoute
   '/connect': typeof ConnectRoute
   '/cron': typeof CronRoute
-  '/dashboard': typeof DashboardRoute
   '/debug': typeof DebugRoute
   '/files': typeof FilesRoute
   '/instances': typeof InstancesRoute
@@ -640,7 +633,6 @@ export interface FileRoutesByTo {
   '/channels': typeof ChannelsRoute
   '/connect': typeof ConnectRoute
   '/cron': typeof CronRoute
-  '/dashboard': typeof DashboardRoute
   '/debug': typeof DebugRoute
   '/files': typeof FilesRoute
   '/instances': typeof InstancesRoute
@@ -730,7 +722,6 @@ export interface FileRoutesById {
   '/channels': typeof ChannelsRoute
   '/connect': typeof ConnectRoute
   '/cron': typeof CronRoute
-  '/dashboard': typeof DashboardRoute
   '/debug': typeof DebugRoute
   '/files': typeof FilesRoute
   '/instances': typeof InstancesRoute
@@ -822,7 +813,6 @@ export interface FileRouteTypes {
     | '/channels'
     | '/connect'
     | '/cron'
-    | '/dashboard'
     | '/debug'
     | '/files'
     | '/instances'
@@ -912,7 +902,6 @@ export interface FileRouteTypes {
     | '/channels'
     | '/connect'
     | '/cron'
-    | '/dashboard'
     | '/debug'
     | '/files'
     | '/instances'
@@ -1001,7 +990,6 @@ export interface FileRouteTypes {
     | '/channels'
     | '/connect'
     | '/cron'
-    | '/dashboard'
     | '/debug'
     | '/files'
     | '/instances'
@@ -1092,7 +1080,6 @@ export interface RootRouteChildren {
   ChannelsRoute: typeof ChannelsRoute
   ConnectRoute: typeof ConnectRoute
   CronRoute: typeof CronRoute
-  DashboardRoute: typeof DashboardRoute
   DebugRoute: typeof DebugRoute
   FilesRoute: typeof FilesRoute
   InstancesRoute: typeof InstancesRoute
@@ -1250,13 +1237,6 @@ declare module '@tanstack/react-router' {
       path: '/debug'
       fullPath: '/debug'
       preLoaderRoute: typeof DebugRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/dashboard': {
-      id: '/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cron': {
@@ -1867,7 +1847,6 @@ const rootRouteChildren: RootRouteChildren = {
   ChannelsRoute: ChannelsRoute,
   ConnectRoute: ConnectRoute,
   CronRoute: CronRoute,
-  DashboardRoute: DashboardRoute,
   DebugRoute: DebugRoute,
   FilesRoute: FilesRoute,
   InstancesRoute: InstancesRoute,
