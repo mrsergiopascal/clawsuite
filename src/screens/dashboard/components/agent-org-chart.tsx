@@ -304,7 +304,7 @@ function useActiveAgents() {
 function StatusDot({ active }: { active: boolean }) {
   return (
     <span className={cn(
-      'absolute -top-1 -right-1 size-3 rounded-full border-2 border-gray-900',
+      'absolute -top-1.5 -right-1.5 z-10 size-3.5 rounded-full border-2 border-gray-900',
       active ? 'bg-emerald-400' : 'bg-gray-600'
     )} />
   )
@@ -366,14 +366,19 @@ function SkillsTooltip({ skills, children }: { skills: string[]; children: React
   )
 }
 
-function AgentAvatar({ agent }: { agent: Agent }) {
+function AgentAvatar({ agent, size = 'md' }: { agent: Agent; size?: 'md' | 'lg' }) {
+  const sizeClasses = size === 'lg' ? 'size-14' : 'size-12'
+  
   if (agent.avatar) {
+    // Crop to headshot - show only top 60% of image
     return (
-      <img
-        src={agent.avatar}
-        alt={agent.name}
-        className="size-10 shrink-0 rounded-lg object-cover"
-      />
+      <div className={cn('shrink-0 overflow-hidden rounded-lg', sizeClasses)}>
+        <img
+          src={agent.avatar}
+          alt={agent.name}
+          className="w-full scale-150 object-cover object-top"
+        />
+      </div>
     )
   }
   
@@ -381,7 +386,8 @@ function AgentAvatar({ agent }: { agent: Agent }) {
   return (
     <div
       className={cn(
-        'flex size-10 shrink-0 items-center justify-center rounded-lg text-sm font-bold text-white',
+        'flex shrink-0 items-center justify-center rounded-lg text-sm font-bold text-white',
+        sizeClasses,
         agent.color
       )}
     >
@@ -399,30 +405,34 @@ function AgentCard({
   isActive: boolean
   lastActive?: number 
 }) {
+  const timeDisplay = isActive 
+    ? 'Active now' 
+    : lastActive 
+      ? formatTimeAgo(lastActive) 
+      : 'Idle'
+
   return (
     <SkillsTooltip skills={agent.skills}>
-      <div className="relative flex items-start gap-3 rounded-lg border border-gray-700/50 bg-gray-800/50 p-3 transition-colors hover:border-gray-600 cursor-default">
+      <div className="relative overflow-visible flex items-start gap-4 rounded-xl border border-gray-700/50 bg-gray-800/50 p-4 transition-colors hover:border-gray-600 cursor-default">
         <StatusDot active={isActive} />
         <AgentAvatar agent={agent} />
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-0.5">
-            <h4 className="font-semibold text-white text-sm">{agent.name}</h4>
+          <div className="flex items-center gap-2 mb-1">
+            <h4 className="font-semibold text-white">{agent.name}</h4>
             <ModelBadge model={agent.model} />
           </div>
-          <p className="text-xs text-gray-400">{agent.role}</p>
-          {lastActive && (
-            <p className={cn(
-              'text-[10px] mt-1',
-              isActive ? 'text-emerald-400' : 'text-gray-500'
-            )}>
-              {isActive ? 'Active now' : formatTimeAgo(lastActive)}
-            </p>
-          )}
-          <div className="flex flex-wrap gap-1 mt-2">
+          <p className="text-sm text-gray-400 mb-1">{agent.role}</p>
+          <p className={cn(
+            'text-xs',
+            isActive ? 'text-emerald-400' : 'text-gray-500'
+          )}>
+            {timeDisplay}
+          </p>
+          <div className="flex flex-wrap gap-1.5 mt-3">
             {agent.capabilities.map((cap) => (
               <span
                 key={cap}
-                className="inline-flex items-center rounded-full bg-gray-700/70 px-2 py-0.5 text-[10px] font-medium text-gray-300"
+                className="inline-flex items-center rounded-full bg-gray-700/70 px-2.5 py-1 text-[10px] font-medium text-gray-300"
               >
                 {cap}
               </span>
@@ -444,11 +454,11 @@ function DepartmentCard({
   lastActiveMap: Map<string, number>
 }) {
   return (
-    <div className="rounded-xl border border-gray-700/50 bg-gray-800/30 p-4">
-      <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-gray-400">
+    <div className="rounded-xl border border-gray-700/50 bg-gray-800/30 p-5">
+      <h3 className="mb-5 text-xs font-semibold uppercase tracking-wider text-gray-400">
         {department.name}
       </h3>
-      <div className="space-y-3">
+      <div className="space-y-4">
         {department.agents.map((agent) => (
           <AgentCard 
             key={agent.id} 
@@ -475,35 +485,41 @@ function OwnerCard() {
 
 function ChiefAgentCard({ isActive, lastActive }: { isActive: boolean; lastActive?: number }) {
   const sergioSkills = ['all-skills', 'task-orchestration', 'strategic-planning']
+  const timeDisplay = isActive 
+    ? 'Active now' 
+    : lastActive 
+      ? formatTimeAgo(lastActive) 
+      : 'Idle'
   
   return (
     <SkillsTooltip skills={sergioSkills}>
-      <div className="relative inline-flex items-start gap-3 rounded-xl border border-gray-600 bg-gray-800 p-4 cursor-default">
+      <div className="relative overflow-visible inline-flex items-start gap-4 rounded-xl border border-gray-600 bg-gray-800 p-5 cursor-default">
         <StatusDot active={isActive} />
-        <img
-          src={AVATARS.sergio}
-          alt="Sergio"
-          className="size-11 shrink-0 rounded-lg object-cover"
-        />
+        {/* Headshot crop for Sergio */}
+        <div className="size-14 shrink-0 overflow-hidden rounded-lg">
+          <img
+            src={AVATARS.sergio}
+            alt="Sergio"
+            className="w-full scale-150 object-cover object-top"
+          />
+        </div>
         <div>
-          <div className="flex items-center gap-2 mb-0.5">
-            <h3 className="font-semibold text-white">SERGIO</h3>
+          <div className="flex items-center gap-2 mb-1">
+            <h3 className="font-semibold text-white text-lg">SERGIO</h3>
             <ModelBadge model="opus" />
           </div>
-          <p className="text-xs text-gray-400">Chief of Staff</p>
-          {lastActive && (
-            <p className={cn(
-              'text-[10px] mt-1',
-              isActive ? 'text-emerald-400' : 'text-gray-500'
-            )}>
-              {isActive ? 'Active now' : formatTimeAgo(lastActive)}
-            </p>
-          )}
-          <div className="flex flex-wrap gap-1 mt-2">
-            <span className="inline-flex items-center rounded-full bg-gray-700/70 px-2 py-0.5 text-[10px] font-medium text-gray-300">
+          <p className="text-sm text-gray-400 mb-1">Chief of Staff</p>
+          <p className={cn(
+            'text-xs',
+            isActive ? 'text-emerald-400' : 'text-gray-500'
+          )}>
+            {timeDisplay}
+          </p>
+          <div className="flex flex-wrap gap-1.5 mt-3">
+            <span className="inline-flex items-center rounded-full bg-gray-700/70 px-2.5 py-1 text-[10px] font-medium text-gray-300">
               TASK ORCHESTRATION
             </span>
-            <span className="inline-flex items-center rounded-full bg-gray-700/70 px-2 py-0.5 text-[10px] font-medium text-gray-300">
+            <span className="inline-flex items-center rounded-full bg-gray-700/70 px-2.5 py-1 text-[10px] font-medium text-gray-300">
               STRATEGIC PLANNING
             </span>
           </div>
