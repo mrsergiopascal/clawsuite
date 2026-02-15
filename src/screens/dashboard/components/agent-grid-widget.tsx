@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { DashboardGlassCard } from './dashboard-glass-card'
 import { cn } from '@/lib/utils'
 import { UserGroupIcon } from '@hugeicons/core-free-icons'
@@ -172,9 +172,19 @@ export function AgentGridWidget({
     refetchInterval: 15_000,
   })
 
+  // Use state for "now" to avoid hydration mismatch (Date.now() differs server vs client)
+  // Initialize to 0 on server, then update on client
+  const [now, setNow] = useState(0)
+  
+  // Update "now" on mount and periodically for live status updates
+  useEffect(() => {
+    setNow(Date.now())
+    const interval = setInterval(() => setNow(Date.now()), 30_000) // every 30s
+    return () => clearInterval(interval)
+  }, [])
+
   const agentsWithStatus = useMemo((): AgentWithStatus[] => {
     const sessions = sessionsQuery.data ?? []
-    const now = Date.now()
     const ACTIVE_THRESHOLD_MS = 5 * 60 * 1000 // 5 minutes = "active"
     const RECENT_THRESHOLD_MS = 60 * 60 * 1000 // 1 hour = "recent"
 
@@ -190,13 +200,14 @@ export function AgentGridWidget({
       const mostRecent = matchingSessions[0]
 
       // Determine activity based on recency
+      // When now === 0 (SSR or before mount), show idle to avoid hydration mismatch
       const lastUpdate = mostRecent?.updatedAt ?? 0
-      const timeSinceUpdate = now - lastUpdate
+      const timeSinceUpdate = now > 0 ? now - lastUpdate : Infinity
       
       let status: 'active' | 'recent' | 'idle' = 'idle'
-      if (timeSinceUpdate < ACTIVE_THRESHOLD_MS) {
+      if (now > 0 && timeSinceUpdate < ACTIVE_THRESHOLD_MS) {
         status = 'active'
-      } else if (timeSinceUpdate < RECENT_THRESHOLD_MS) {
+      } else if (now > 0 && timeSinceUpdate < RECENT_THRESHOLD_MS) {
         status = 'recent'
       }
 
@@ -225,7 +236,7 @@ export function AgentGridWidget({
         currentTask,
       }
     })
-  }, [sessionsQuery.data])
+  }, [sessionsQuery.data, now])
 
   const activeCount = agentsWithStatus.filter((a) => a.status === 'active').length
   const recentCount = agentsWithStatus.filter((a) => a.status === 'recent').length
