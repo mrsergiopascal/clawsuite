@@ -25,7 +25,7 @@ const DEPARTMENTS: Department[] = [
   {
     id: 'research',
     name: 'RESEARCH',
-    icon: '🔬',
+    icon: '',
     agents: [
       {
         id: 'gualtiero',
@@ -41,7 +41,7 @@ const DEPARTMENTS: Department[] = [
   {
     id: 'content',
     name: 'CONTENT',
-    icon: '✍️',
+    icon: '',
     agents: [
       {
         id: 'dante',
@@ -61,12 +61,21 @@ const DEPARTMENTS: Department[] = [
         capabilities: ['EDITING', 'QUALITY REVIEW'],
         model: 'sonnet',
       },
+      {
+        id: 'ferruccio',
+        initials: 'FE',
+        name: 'FERRUCCIO',
+        role: 'Pipeline Manager',
+        color: 'bg-rose-500',
+        capabilities: ['PIPELINE HEALTH', 'BOTTLENECK DETECTION'],
+        model: 'sonnet',
+      },
     ],
   },
   {
     id: 'development',
     name: 'DEVELOPMENT',
-    icon: '💻',
+    icon: '',
     agents: [
       {
         id: 'linus',
@@ -74,16 +83,16 @@ const DEPARTMENTS: Department[] = [
         name: 'LINUS',
         role: 'Senior Developer',
         color: 'bg-emerald-500',
-        capabilities: ['FULL-STACK', 'CODE REVIEW'],
+        capabilities: ['FULL-STACK', 'IMPLEMENTATION'],
         model: 'sonnet',
       },
       {
-        id: 'ferruccio',
-        initials: 'FE',
-        name: 'FERRUCCIO',
-        role: 'Security Auditor',
-        color: 'bg-red-500',
-        capabilities: ['SECURITY AUDITS', 'PROMPT INJECTION'],
+        id: 'galileo',
+        initials: 'GA',
+        name: 'GALILEO',
+        role: 'Code Reviewer',
+        color: 'bg-lime-500',
+        capabilities: ['CODE REVIEW', 'BUG HUNTING'],
         model: 'sonnet',
       },
     ],
@@ -91,7 +100,7 @@ const DEPARTMENTS: Department[] = [
   {
     id: 'design',
     name: 'DESIGN',
-    icon: '🎨',
+    icon: '',
     agents: [
       {
         id: 'nico',
@@ -107,7 +116,7 @@ const DEPARTMENTS: Department[] = [
   {
     id: 'marketing',
     name: 'MARKETING',
-    icon: '📣',
+    icon: '',
     agents: [
       {
         id: 'marco',
@@ -121,9 +130,34 @@ const DEPARTMENTS: Department[] = [
     ],
   },
   {
+    id: 'operations',
+    name: 'OPERATIONS',
+    icon: '',
+    agents: [
+      {
+        id: 'enzo',
+        initials: 'EN',
+        name: 'ENZO',
+        role: 'Status Specialist',
+        color: 'bg-slate-500',
+        capabilities: ['HEARTBEATS', 'STATUS CHECKS'],
+        model: 'haiku',
+      },
+      {
+        id: 'vitruvio',
+        initials: 'VI',
+        name: 'VITRUVIO',
+        role: 'Bulk Operations',
+        color: 'bg-stone-500',
+        capabilities: ['SCRAPING', 'BULK PROCESSING'],
+        model: 'haiku',
+      },
+    ],
+  },
+  {
     id: 'panels',
     name: 'EXPERT PANELS',
-    icon: '🧠',
+    icon: '',
     agents: [
       {
         id: 'creative-board',
@@ -213,9 +247,11 @@ function useActiveAgents() {
 }
 
 function StatusDot({ active }: { active: boolean }) {
-  if (!active) return null
   return (
-    <span className="absolute -top-1 -right-1 size-3 rounded-full border-2 border-gray-900 bg-emerald-400" />
+    <span className={cn(
+      'absolute -top-1 -right-1 size-3 rounded-full border-2 border-gray-900',
+      active ? 'bg-emerald-400' : 'bg-gray-600'
+    )} />
   )
 }
 
@@ -276,8 +312,7 @@ function AgentCard({ agent, isActive }: { agent: Agent; isActive: boolean }) {
 function DepartmentCard({ department, activeAgentIds }: { department: Department; activeAgentIds: Set<string> }) {
   return (
     <div className="rounded-xl border border-gray-700/50 bg-gray-800/30 p-4">
-      <h3 className="mb-4 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gray-400">
-        <span>{department.icon}</span>
+      <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-gray-400">
         {department.name}
       </h3>
       <div className="space-y-3">
@@ -353,9 +388,9 @@ function HorizontalConnector() {
 export function AgentOrgChart() {
   const { activeAgentIds, isLoading, refetch } = useActiveAgents()
   
-  // Split departments into rows for better layout
-  const topRow = DEPARTMENTS.slice(0, 3)
-  const bottomRow = DEPARTMENTS.slice(3)
+  // Split departments into rows for better layout (4 + 3)
+  const topRow = DEPARTMENTS.slice(0, 4)
+  const bottomRow = DEPARTMENTS.slice(4)
 
   return (
     <div className="min-h-screen bg-gray-900 p-6 md:p-10">
@@ -393,7 +428,7 @@ export function AgentOrgChart() {
         <HorizontalConnector />
 
         {/* Top row of departments */}
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {topRow.map((dept) => (
             <DepartmentCard 
               key={dept.id} 
