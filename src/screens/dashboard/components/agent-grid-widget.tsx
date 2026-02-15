@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils'
 import { UserGroupIcon } from '@hugeicons/core-free-icons'
 
 // Agent roster with functional roles and model tiers
+// sessionPattern matches against session keys like "agent:main:whatsapp:direct:..."
 const AGENTS = [
   {
     id: 'sergio',
@@ -13,7 +14,7 @@ const AGENTS = [
     tier: 'Opus',
     color: '#6366f1', // indigo
     image: '/agents/sergio-pixel-v2.png',
-    sessionPattern: /^main$/i,
+    sessionPattern: /^agent:main:/i, // matches agent:main:* sessions
   },
   {
     id: 'alfonso',
@@ -22,7 +23,7 @@ const AGENTS = [
     tier: 'Sonnet',
     color: '#a855f7', // purple
     image: '/agents/alfonso-editor.png',
-    sessionPattern: /alfonso/i,
+    sessionPattern: /agent:alfonso:/i,
   },
   {
     id: 'dante',
@@ -31,7 +32,7 @@ const AGENTS = [
     tier: 'Sonnet',
     color: '#f59e0b', // amber
     image: '/agents/dante-modern.png',
-    sessionPattern: /dante/i,
+    sessionPattern: /agent:dante:/i,
   },
   {
     id: 'gualtiero',
@@ -40,7 +41,7 @@ const AGENTS = [
     tier: 'Opus',
     color: '#3b82f6', // blue
     image: '/agents/gualtiero-research.png',
-    sessionPattern: /gualtiero/i,
+    sessionPattern: /agent:gualtiero:/i,
   },
   {
     id: 'linus',
@@ -49,7 +50,7 @@ const AGENTS = [
     tier: 'Sonnet',
     color: '#22c55e', // green
     image: '/agents/linus-coder.png',
-    sessionPattern: /linus/i,
+    sessionPattern: /agent:linus:/i,
   },
   {
     id: 'nico',
@@ -58,7 +59,7 @@ const AGENTS = [
     tier: 'Sonnet',
     color: '#f59e0b', // amber
     image: '/agents/nico-ux.png',
-    sessionPattern: /nico/i,
+    sessionPattern: /agent:nico:/i,
   },
   {
     id: 'ferruccio',
@@ -67,7 +68,7 @@ const AGENTS = [
     tier: 'Haiku',
     color: '#14b8a6', // teal
     image: '/agents/ferruccio-pipeline.png',
-    sessionPattern: /ferruccio/i,
+    sessionPattern: /agent:ferruccio:/i,
   },
   {
     id: 'galileo',
@@ -76,7 +77,7 @@ const AGENTS = [
     tier: 'Sonnet',
     color: '#22c55e', // green
     image: '/agents/galileo-codereview.png',
-    sessionPattern: /galileo/i,
+    sessionPattern: /agent:galileo:/i,
   },
   {
     id: 'vitruvio',
@@ -85,7 +86,7 @@ const AGENTS = [
     tier: 'Haiku',
     color: '#14b8a6', // teal
     image: '/agents/vitruvio-bulkops.png',
-    sessionPattern: /vitruvio/i,
+    sessionPattern: /agent:vitruvio:/i,
   },
   {
     id: 'enzo',
@@ -94,7 +95,7 @@ const AGENTS = [
     tier: 'Haiku',
     color: '#14b8a6', // teal
     image: '/agents/enzo-heartbeats.png',
-    sessionPattern: /enzo/i,
+    sessionPattern: /agent:enzo:/i,
   },
   {
     id: 'marco',
@@ -103,7 +104,7 @@ const AGENTS = [
     tier: 'Sonnet',
     color: '#ec4899', // pink
     image: '/agents/marco-social.png',
-    sessionPattern: /marco/i,
+    sessionPattern: /agent:marco:/i,
   },
 ] as const
 
@@ -119,9 +120,11 @@ type SessionData = {
 }
 
 type AgentWithStatus = AgentDef & {
-  status: 'active' | 'idle'
+  status: 'active' | 'recent' | 'idle'
   lastActive?: string
   model?: string
+  sessionCount?: number
+  currentTask?: string
 }
 
 async function fetchSessions(): Promise<SessionData[]> {
@@ -171,35 +174,62 @@ export function AgentGridWidget({
 
   const agentsWithStatus = useMemo((): AgentWithStatus[] => {
     const sessions = sessionsQuery.data ?? []
+    const now = Date.now()
+    const ACTIVE_THRESHOLD_MS = 5 * 60 * 1000 // 5 minutes = "active"
+    const RECENT_THRESHOLD_MS = 60 * 60 * 1000 // 1 hour = "recent"
 
     return AGENTS.map((agent) => {
-      // Find matching session
-      const matchingSession = sessions.find((s) => {
+      // Find ALL matching sessions for this agent
+      const matchingSessions = sessions.filter((s) => {
         const key = s.key ?? ''
-        const label = s.label ?? ''
-        const friendlyId = s.friendlyId ?? ''
-        return (
-          agent.sessionPattern.test(key) ||
-          agent.sessionPattern.test(label) ||
-          agent.sessionPattern.test(friendlyId)
-        )
+        return agent.sessionPattern.test(key)
       })
 
-      const isActive =
-        matchingSession?.status === 'running' ||
-        matchingSession?.status === 'in_progress' ||
-        matchingSession?.status === 'streaming'
+      // Sort by most recent first
+      matchingSessions.sort((a, b) => (b.updatedAt ?? 0) - (a.updatedAt ?? 0))
+      const mostRecent = matchingSessions[0]
+
+      // Determine activity based on recency
+      const lastUpdate = mostRecent?.updatedAt ?? 0
+      const timeSinceUpdate = now - lastUpdate
+      
+      let status: 'active' | 'recent' | 'idle' = 'idle'
+      if (timeSinceUpdate < ACTIVE_THRESHOLD_MS) {
+        status = 'active'
+      } else if (timeSinceUpdate < RECENT_THRESHOLD_MS) {
+        status = 'recent'
+      }
+
+      // Extract what they're working on from the session key
+      // e.g. "agent:main:whatsapp:direct:+123" → "whatsapp"
+      // e.g. "agent:dante:cron:abc123" → "cron job"
+      let currentTask = ''
+      if (mostRecent?.key) {
+        const parts = mostRecent.key.split(':')
+        if (parts.length >= 3) {
+          const taskType = parts[2]
+          if (taskType === 'whatsapp') currentTask = 'WhatsApp chat'
+          else if (taskType === 'telegram') currentTask = 'Telegram chat'
+          else if (taskType === 'cron') currentTask = 'Scheduled task'
+          else if (taskType === 'main') currentTask = 'Main session'
+          else currentTask = taskType
+        }
+      }
 
       return {
         ...agent,
-        status: isActive ? 'active' : 'idle',
-        lastActive: formatTimeAgo(matchingSession?.updatedAt),
-        model: formatModel(matchingSession?.model),
+        status,
+        lastActive: formatTimeAgo(mostRecent?.updatedAt),
+        model: formatModel(mostRecent?.model),
+        sessionCount: matchingSessions.length,
+        currentTask,
       }
     })
   }, [sessionsQuery.data])
 
   const activeCount = agentsWithStatus.filter((a) => a.status === 'active').length
+  const recentCount = agentsWithStatus.filter((a) => a.status === 'recent').length
+  const withSessionsCount = agentsWithStatus.filter((a) => (a.sessionCount ?? 0) > 0).length
 
   return (
     <DashboardGlassCard
@@ -208,9 +238,23 @@ export function AgentGridWidget({
       description=""
       icon={UserGroupIcon}
       titleAccessory={
-        <span className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-100/70 px-2 py-0.5 text-[11px] font-medium text-emerald-600 tabular-nums">
-          {activeCount} active
-        </span>
+        <div className="flex items-center gap-1.5">
+          {activeCount > 0 && (
+            <span className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-100/70 px-2 py-0.5 text-[11px] font-medium text-emerald-600 tabular-nums">
+              {activeCount} active
+            </span>
+          )}
+          {recentCount > 0 && (
+            <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-100/70 px-2 py-0.5 text-[11px] font-medium text-amber-600 tabular-nums">
+              {recentCount} recent
+            </span>
+          )}
+          {activeCount === 0 && recentCount === 0 && (
+            <span className="inline-flex items-center rounded-full border border-gray-200 bg-gray-100/70 px-2 py-0.5 text-[11px] font-medium text-gray-600 tabular-nums">
+              {withSessionsCount} with history
+            </span>
+          )}
+        </div>
       }
       draggable={draggable}
       onRemove={onRemove}
@@ -233,11 +277,12 @@ export function AgentGridWidget({
             {/* Status indicator */}
             <div
               className={cn(
-                'absolute top-2 right-2 size-2 rounded-full',
-                agent.status === 'active'
-                  ? 'bg-emerald-500 animate-pulse'
-                  : 'bg-gray-400 dark:bg-gray-500',
+                'absolute top-2 right-2 size-2.5 rounded-full',
+                agent.status === 'active' && 'bg-emerald-500 animate-pulse',
+                agent.status === 'recent' && 'bg-amber-400',
+                agent.status === 'idle' && 'bg-gray-400 dark:bg-gray-500',
               )}
+              title={agent.status === 'active' ? 'Active now' : agent.status === 'recent' ? 'Active recently' : 'Idle'}
             />
 
             {/* Character image */}
@@ -276,6 +321,12 @@ export function AgentGridWidget({
             {/* Expanded details */}
             {selectedAgent === agent.id && (
               <div className="mt-2 pt-2 border-t border-primary-200 dark:border-gray-600 w-full space-y-1">
+                {agent.currentTask && (
+                  <div className="flex items-center justify-between text-[10px]">
+                    <span className="text-primary-500">Working on</span>
+                    <span className="font-medium text-ink">{agent.currentTask}</span>
+                  </div>
+                )}
                 {agent.model && (
                   <div className="flex items-center justify-between text-[10px]">
                     <span className="text-primary-500">Model</span>
@@ -287,6 +338,14 @@ export function AgentGridWidget({
                     <span className="text-primary-500">Last active</span>
                     <span className="font-mono text-primary-600 dark:text-primary-400">
                       {agent.lastActive}
+                    </span>
+                  </div>
+                )}
+                {agent.sessionCount !== undefined && agent.sessionCount > 0 && (
+                  <div className="flex items-center justify-between text-[10px]">
+                    <span className="text-primary-500">Sessions</span>
+                    <span className="font-mono text-primary-600 dark:text-primary-400">
+                      {agent.sessionCount}
                     </span>
                   </div>
                 )}
