@@ -22,19 +22,19 @@ interface Department {
   agents: Agent[]
 }
 
-// Avatar mapping for agents with pixel art
+// Avatar mapping for agents - using cropped headshots
 const AVATARS: Record<string, string> = {
-  sergio: '/agents/sergio-pixel-v2.png',
-  gualtiero: '/agents/gualtiero-research.png',
-  dante: '/agents/dante-modern.png',
-  alfonso: '/agents/alfonso-editor.png',
-  ferruccio: '/agents/ferruccio-pipeline.png',
-  linus: '/agents/linus-coder.png',
-  galileo: '/agents/galileo-codereview.png',
-  nico: '/agents/nico-ux.png',
-  marco: '/agents/marco-social.png',
-  enzo: '/agents/enzo-heartbeats.png',
-  vitruvio: '/agents/vitruvio-bulkops.png',
+  sergio: '/agents/headshots/sergio-pixel-headshot.png',
+  gualtiero: '/agents/headshots/gualtiero-headshot.png',
+  dante: '/agents/headshots/dante-headshot.png',
+  alfonso: '/agents/headshots/alfonso-headshot.png',
+  ferruccio: '/agents/headshots/ferruccio-headshot.png',
+  linus: '/agents/headshots/linus-headshot.png',
+  galileo: '/agents/headshots/galileo-headshot.png',
+  nico: '/agents/headshots/nico-headshot.png',
+  marco: '/agents/headshots/marco-headshot.png',
+  enzo: '/agents/headshots/enzo-headshot.png',
+  vitruvio: '/agents/headshots/vitruvio-headshot.png',
 }
 
 const DEPARTMENTS: Department[] = [
@@ -380,15 +380,12 @@ function AgentAvatar({ agent, size = 'md' }: { agent: Agent; size?: 'md' | 'lg' 
   const sizeClasses = size === 'lg' ? 'size-14' : 'size-12'
   
   if (agent.avatar) {
-    // Crop to headshot only - scale up and show just the top (head)
     return (
-      <div className={cn('shrink-0 overflow-hidden rounded-lg', sizeClasses)}>
-        <img
-          src={agent.avatar}
-          alt={agent.name}
-          className="w-full scale-[2.5] origin-top object-cover"
-        />
-      </div>
+      <img
+        src={agent.avatar}
+        alt={agent.name}
+        className={cn('shrink-0 rounded-lg object-cover', sizeClasses)}
+      />
     )
   }
   
@@ -505,14 +502,11 @@ function ChiefAgentCard({ isActive, lastActive }: { isActive: boolean; lastActiv
     <SkillsTooltip skills={sergioSkills}>
       <div className="relative overflow-visible inline-flex items-start gap-4 rounded-xl border border-gray-600 bg-gray-800 p-5 cursor-default">
         <StatusDot active={isActive} />
-        {/* Headshot crop for Sergio */}
-        <div className="size-14 shrink-0 overflow-hidden rounded-lg">
-          <img
-            src={AVATARS.sergio}
-            alt="Sergio"
-            className="w-full scale-[2.5] origin-top object-cover"
-          />
-        </div>
+        <img
+          src={AVATARS.sergio}
+          alt="Sergio"
+          className="size-14 shrink-0 rounded-lg object-cover"
+        />
         <div>
           <div className="flex items-center gap-2 mb-1">
             <h3 className="font-semibold text-white text-lg">SERGIO</h3>
